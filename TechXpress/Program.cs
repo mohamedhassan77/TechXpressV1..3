@@ -1,9 +1,22 @@
+using Microsoft.EntityFrameworkCore;
+using TechXpress_infrastructure.Data;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddDbContext<TechXpress_context>(option => option.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
 
 var app = builder.Build();
+
+//hack for quick edit remember to remove
+var scope = app.Services.CreateScope();
+var context = scope.ServiceProvider.GetRequiredService<TechXpress_context>();
+context.Database.EnsureDeleted();
+context.Database.EnsureCreated();
+//****************************************//
+
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
