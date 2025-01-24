@@ -1,0 +1,74 @@
+﻿@model TechXpress_domain.Entities.UserProfile
+
+@{
+    ViewData["Title"] = "Create User Profile";
+}
+
+<h2>Create User Profile</h2>
+
+<form asp-action="Create">
+    <div class="form-group">
+        <label asp-for="FirstName"></label>
+        <input asp-for="FirstName" class="form-control" />
+        <span asp-validation-for="FirstName" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="LastName"></label>
+        <input asp-for="LastName" class="form-control" />
+        <span asp-validation-for="LastName" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Email"></label>
+        <input asp-for="Email" class="form-control" />
+        <span asp-validation-for="Email" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="PhoneNumber"></label>
+        <input asp-for="PhoneNumber" class="form-control" />
+        <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="DateOfBirth"></label>
+        <input asp-for="DateOfBirth" class="form-control" type="date" />
+        <span asp-validation-for="DateOfBirth" class="text-danger"></span>
+    </div>
+
+    <h4>Address Information</h4>
+
+    <div class="form-group">
+        <label asp-for="Addresses.First().AddressLine">Address</label>
+        <input name="Addresses[0].AddressLine" class="form-control" />
+        <span asp-validation-for="Addresses.First().AddressLine" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Addresses.First().City">City</label>
+        <input name="Addresses[0].City" class="form-control" />
+        <span asp-validation-for="Addresses.First().City" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Addresses.First().State">State</label>
+        <input name="Addresses[0].State" class="form-control" />
+        <span asp-validation-for="Addresses.First().State" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Addresses.First().ZipCode">Zip Code</label>
+        <input name="Addresses[0].ZipCode" class="form-control" />
+        <span asp-validation-for="Addresses.First().ZipCode" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Addresses.First().Country">Country</label>
+        <input name="Addresses[0].Country" class="form-control" />
+        <span asp-validation-for="Addresses.First().Country" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Create</button>
+    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+</form>

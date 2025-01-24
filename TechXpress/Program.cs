@@ -1,22 +1,19 @@
-using Microsoft.EntityFrameworkCore;
 using TechXpress_infrastructure.Data;
+using TechXpress_infrastructure.Repositories;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
-builder.Services.AddDbContext<TechXpress_context>(option => option.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+builder.Services.AddDbContext<TechXpress_context>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// Register the ProductRepository with DI
+builder.Services.AddScoped<ProductRepository>();
 
 var app = builder.Build();
-
-//hack for quick edit remember to remove
-var scope = app.Services.CreateScope();
-var context = scope.ServiceProvider.GetRequiredService<TechXpress_context>();
-context.Database.EnsureDeleted();
-context.Database.EnsureCreated();
-//****************************************//
-
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
@@ -31,12 +28,8 @@ app.UseRouting();
 
 app.UseAuthorization();
 
-app.MapStaticAssets();
-
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}")
-    .WithStaticAssets();
-
+    pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.Run();

@@ -1,19 +1,34 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using TechXpress_domain.Entities;
 
 namespace TechXpress_infrastructure.Data
 {
-    public class TechXpress_context:DbContext
+    public class TechXpress_context : DbContext
     {
-        public TechXpress_context(DbContextOptions<TechXpress_context> options):base(options) 
+        public TechXpress_context(DbContextOptions<TechXpress_context> options)
+            : base(options)
         {
         }
-        
-         public DbSet<product> products {  get; set; }
+
+        // Define your DbSets here
+        public DbSet<Product> Products { get; set; }
+        public DbSet<UserProfile> UserProfiles { get; set; }
+        public DbSet<Address> Addresses { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder builder)
+        {
+            base.OnModelCreating(builder);
+        builder.Entity<Product>()
+        .Property(p => p.Price)
+        .HasColumnType("decimal(18,2)");
+
+            // Configure one-to-many relationship between UserProfile and Address
+            builder.Entity<UserProfile>()
+                .HasMany(u => u.Addresses)
+                .WithOne(a => a.UserProfile)
+                .HasForeignKey(a => a.UserProfileId)
+                .OnDelete(DeleteBehavior.Cascade);
+        }
     }
 }
