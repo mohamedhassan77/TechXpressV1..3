@@ -1,21 +1,12 @@
-﻿
-@model IEnumerable<TechXpress_domain.Entities.Product>
-
-@{
-    ViewData["Title"] = "Home Page";
-}
-
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TechXpress - Innovation Unleashed</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-
-
-        /* Home page */
+        /* Reset and Base Styles */
         * {
             margin: 0;
             padding: 0;
@@ -47,6 +38,7 @@
             backdrop-filter: blur(10px);
             padding: 1rem 0;
             z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
 
         .nav-container {
@@ -64,6 +56,9 @@
             font-weight: 800;
             text-decoration: none;
             letter-spacing: -1px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
 
         .nav-menu {
@@ -100,7 +95,9 @@
             color: white;
             padding: 0.8rem 1.5rem;
             border-radius: 30px;
+            text-decoration: none;
             transition: all 0.3s ease;
+            display: inline-block;
         }
 
             .nav-button:hover {
@@ -111,22 +108,36 @@
         /* Hero Section */
         .hero {
             min-height: 100vh;
-            background: var(--dark);
+            background: linear-gradient(135deg, var(--dark) 0%, #1a1a1a 100%);
             display: flex;
             align-items: center;
             position: relative;
             overflow: hidden;
         }
 
-            .hero::before {
+            .hero::after {
                 content: '';
                 position: absolute;
-                width: 100%;
-                height: 100%;
-                background: linear-gradient(45deg, var(--primary) 0%, var(--secondary) 100%);
-                opacity: 0.1;
-                z-index: 1;
+                width: 150%;
+                height: 150%;
+                background: repeating-linear-gradient( 45deg, var(--primary) 0%, var(--secondary) 10%, var(--accent) 20% );
+                opacity: 0.05;
+                animation: backgroundMove 20s linear infinite;
+                transform: translateZ(0);
             }
+
+        @@keyframes backgroundMove {
+            0%
+
+        {
+            transform: translate(-50%, -50%) rotate(0deg);
+        }
+
+        100% {
+            transform: translate(-50%, -50%) rotate(360deg);
+        }
+
+        }
 
         .hero-content {
             max-width: 1400px;
@@ -149,9 +160,10 @@
             line-height: 1.1;
             font-weight: 800;
             margin-bottom: 2rem;
-            background: linear-gradient(to right, var(--primary), var(--accent));
+            background: linear-gradient(45deg, var(--primary), var(--accent));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            animation: titleGlow 3s ease-in-out infinite alternate;
         }
 
         .hero-text p {
@@ -160,16 +172,116 @@
             color: rgba(255, 255, 255, 0.8);
         }
 
-        .hero-image {
-            position: relative;
+        @@keyframes titleGlow {
+            0%
+
+        {
+            text-shadow: 0 0 20px rgba(255, 51, 102, 0.1);
         }
 
-            .hero-image img {
+        100% {
+            text-shadow: 0 0 40px rgba(255, 51, 102, 0.3);
+        }
+
+        }
+
+        .floating-elements {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .floating-element {
+            position: absolute;
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            border-radius: 50%;
+            opacity: 0.1;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @@keyframes float {
+            0%, 100%
+
+        {
+            transform: translateY(0);
+        }
+
+        50% {
+            transform: translateY(-20px);
+        }
+
+        }
+
+        .device-mockup {
+            width: 100%;
+            max-width: 600px;
+            height: 400px;
+            background: linear-gradient(45deg, #2a2a2a, #3a3a3a);
+            border-radius: 20px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            padding: 20px; 
+        }
+
+        .device-screen {
+            position: absolute;
+            top: 5%;
+            left: 5%;
+            width: 90%;
+            height: 90%;
+            border-radius: 10px;
+            overflow: hidden;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+        }
+
+            .device-screen::after {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
                 width: 100%;
-                height: auto;
-                border-radius: 20px;
-                box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+                height: 100%;
+                background: linear-gradient( 45deg, transparent 0%, rgba(255, 255, 255, 0.1) 50%, transparent 100% );
+                animation: scanline 2s linear infinite;
+                z-index: 2;
             }
+
+            .device-screen img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                opacity: 0.9; /* Slightly reduce opacity for effect */
+                transition: transform 0.5s ease;
+            }
+
+            .device-screen:hover img {
+                transform: scale(1.05);
+            }
+
+            .device-screen::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: linear-gradient( 45deg, rgba(var(--primary-rgb), 0.1), rgba(var(--secondary-rgb), 0.1) );
+                z-index: 1;
+            }
+        @@keyframes scanline {
+            0%
+
+        {
+            transform: translateY(-100%);
+        }
+
+        100% {
+            transform: translateY(100%);
+        }
+
+        }
 
         /* Features Section */
         .features {
@@ -250,7 +362,13 @@
             border-radius: 30px;
             overflow: hidden;
             position: relative;
+            transition: all 0.3s ease;
         }
+
+            .product-card:hover {
+                transform: translateY(-10px);
+                box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            }
 
         .product-image-container {
             position: relative;
@@ -415,7 +533,8 @@
             font-size: 2.5rem;
         }
 
-        .features-grid, .products-grid {
+        .features-grid,
+        .products-grid {
             grid-template-columns: 1fr;
         }
 
@@ -438,18 +557,28 @@
     </nav>
 
     <section class="hero">
-        <div class="hero-content">
-            <div class="hero-grid">
-                <div class="hero-text">
-                    <h1>Innovation for Tomorrow</h1>
-                    <p>Experience cutting-edge technology that transforms your everyday life. Discover products that combine style, functionality, and innovation.</p>
-                    <a href="#products" class="nav-button">Explore Products</a>
+        <div class="floating-elements">
+            <div class="floating-element" style="width: 50px; height: 50px; top: 20%; left: 10%;"></div>
+            <div class="floating-element" style="width: 30px; height: 30px; top: 60%; left: 80%;"></div>
+            <div class="floating-element" style="width: 40px; height: 40px;
+           <div class="floating-element" style="width: 40px; height: 40px; top: 80%; left: 30%;"></div>
+        </div>
+            <div class="hero-content">
+                <div class="hero-grid">
+                    <div class="hero-text">
+                        <h1>Innovation for Tomorrow</h1>
+                        <p>Experience cutting-edge technology that transforms your everyday life. Discover products that combine style, functionality, and innovation.</p>
+                        <a href="#products" class="nav-button">Explore Products</a>
+                    </div>
+                    <div class="hero-image">
+                    <div class="device-mockup">
+                        <div class="device-screen">
+                            <img src="~/IMG/CP.jpg" alt="TechXpress">
+                        </div>
+                    </div>
                 </div>
-                <div class="hero-image">
-                    <img src="/api/placeholder/600/400" alt="Latest Technology">
                 </div>
             </div>
-        </div>
     </section>
 
     <section id="features" class="features">
@@ -458,17 +587,17 @@
             <div class="feature-card">
                 <i class="fas fa-rocket feature-icon"></i>
                 <h3>Lightning Fast Delivery</h3>
-                <p>Get your tech delivered to your doorstep within 24 hours.</p>
+                <p>Get your tech delivered to your doorstep within 24 hours. We prioritize speed without compromising on the safety of your products.</p>
             </div>
             <div class="feature-card">
                 <i class="fas fa-shield-alt feature-icon"></i>
                 <h3>Secure Shopping</h3>
-                <p>Shop with confidence using our encrypted payment system.</p>
+                <p>Shop with confidence using our encrypted payment system. Your security is our top priority, with industry-leading protection measures.</p>
             </div>
             <div class="feature-card">
                 <i class="fas fa-headset feature-icon"></i>
                 <h3>24/7 Expert Support</h3>
-                <p>Our tech experts are always ready to assist you.</p>
+                <p>Our tech experts are always ready to assist you with any questions or concerns. Get professional help anytime, anywhere.</p>
             </div>
         </div>
     </section>
@@ -482,8 +611,8 @@
                     <div class="product-image-container">
                         <img src="@product.ImageUrl" alt="@product.Name" class="product-image">
                     </div>
-                    <span class="product-tag">@product.Tag</span>
                     <div class="product-content">
+                        <span class="product-tag">@product.Tag</span>
                         <h3 class="product-title">@product.Name</h3>
                         <p>@product.Description</p>
                         <div class="product-price">@product.Price.ToString("C")</div>
@@ -498,7 +627,7 @@
         <div class="footer-grid">
             <div>
                 <h3 class="footer-title">About TechXpress</h3>
-                <p>TechXpress is your one-stop shop for the latest and greatest in technology. Experience innovation like never before.</p>
+                <p>TechXpress is your one-stop shop for the latest and greatest in technology. We're committed to bringing innovation to your doorstep with unmatched service and expertise.</p>
             </div>
             <div>
                 <h3 class="footer-title">Quick Links</h3>
@@ -510,7 +639,8 @@
                 </ul>
             </div>
             <div>
-                <h3 class="footer-title">Follow Us</h3>
+                <h3 class="footer-title">Connect With Us</h3>
+                <p>Stay updated with our latest products and innovations</p>
                 <div class="social-icons">
                     <a href="#"><i class="fab fa-facebook"></i></a>
                     <a href="#"><i class="fab fa-twitter"></i></a>
@@ -520,7 +650,7 @@
             </div>
         </div>
         <div class="footer-bottom">
-            © 2025 TechXpress. All rights reserved.
+            <p>© 2025 TechXpress. All rights reserved.</p>
         </div>
     </footer>
 </body>
