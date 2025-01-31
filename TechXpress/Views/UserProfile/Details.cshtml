@@ -4,29 +4,33 @@
     ViewData["Title"] = "User Profile Details";
 }
 
-<h2>User Profile Details</h2>
+<div class="container mt-5">
+    <h2>User Profile Details</h2>
 
-<div>
-    <p><strong>First Name:</strong> @Model.FirstName</p>
-    <p><strong>Last Name:</strong> @Model.LastName</p>
-    <p><strong>Email:</strong> @Model.Email</p>
-    <p><strong>Phone Number:</strong> @Model.PhoneNumber</p>
-    @if (Model.Addresses != null && Model.Addresses.Any())
-    {
-        <p><strong>Addresses:</strong></p>
-        <ul>
-            @foreach (var address in Model.Addresses)
+    <div class="card mt-4">
+        <div class="card-body">
+            <p><strong>First Name:</strong> @Model.FirstName</p>
+            <p><strong>Last Name:</strong> @Model.LastName</p>
+            <p><strong>Email:</strong> @Model.Email</p>
+            <p><strong>Phone Number:</strong> @Model.PhoneNumber</p>
+            <p><strong>Date of Birth:</strong> @Model.DateOfBirth.ToShortDateString()</p>
+
+            @if (Model.Addresses != null && Model.Addresses.Any())
             {
-                <li>@address.AddressLine, @address.City, @address.State, @address.ZipCode, @address.Country</li>
+                <p><strong>Addresses:</strong></p>
+                <ul>
+                    @foreach (var address in Model.Addresses)
+                    {
+                        <li>@address.AddressLine, @address.City, @address.State, @address.ZipCode, @address.Country</li>
+                    }
+                </ul>
             }
-        </ul>
-    }
-    else
-    {
-        <p><strong>Address:</strong> No address available</p>
-    }
-    <p><strong>Date of Birth:</strong> @Model.DateOfBirth.ToShortDateString()</p>
-   
-</div>
+            else
+            {
+                <p><strong>Address:</strong> No address available</p>
+            }
+        </div>
+    </div>
 
-<a asp-action="Index" class="btn btn-secondary">Back to List</a>
+    <a asp-action="Index" class="nav-button btn-secondary">Back to List</a>
+</div>

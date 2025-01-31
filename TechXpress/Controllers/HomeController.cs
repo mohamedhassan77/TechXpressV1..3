@@ -2,7 +2,8 @@ using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using TechXpress.Models;
 using TechXpress.Data;
-using TechXpress_infrastructure.Repositories; // Assuming you have a Data folder for the DbContext or repository
+using TechXpress_infrastructure.Repositories;
+using Microsoft.Extensions.Logging; // Assuming you have a Data folder for the DbContext or repository
 
 namespace TechXpress.Controllers
 {

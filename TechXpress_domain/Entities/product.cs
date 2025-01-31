@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 namespace TechXpress_domain.Entities
 {
     public class Product
@@ -27,5 +28,9 @@ namespace TechXpress_domain.Entities
 
         [StringLength(50, ErrorMessage = "The tag must be less than 50 characters.")]
         public string Tag { get; set; } // e.g., "New Release", "Best Seller"
+
+        [ForeignKey(nameof(Category))]
+        public int CategoryId { get; set; }
+        public Category Category { get; set; }
     }
 }

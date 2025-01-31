@@ -4,36 +4,34 @@
     ViewData["Title"] = "Delete User Profile";
 }
 
-<h2>Delete User Profile</h2>
+<div class="container mt-5">
+    <h2>Delete User Profile</h2>
 
-<div class="card mt-4">
-    <div class="card-body">
-        <p>Are you sure you want to delete this user profile?</p>
+    <div class="card mt-4">
+        <div class="card-body">
+            <p>Are you sure you want to delete this user profile?</p>
 
-        <div class="mb-3">
-            <p><strong>First Name:</strong> @Model.FirstName</p>
-            <p><strong>Last Name:</strong> @Model.LastName</p>
-            <p><strong>Email:</strong> @Model.Email</p>
-            <p><strong>Phone Number:</strong> @Model.PhoneNumber</p>
-            @if (Model.Addresses != null && Model.Addresses.Any())
-            {
-                foreach (var address in Model.Addresses)
+            <div class="mb-3">
+                <p><strong>First Name:</strong> @Model.FirstName</p>
+                <p><strong>Last Name:</strong> @Model.LastName</p>
+                <p><strong>Email:</strong> @Model.Email</p>
+                <p><strong>Phone Number:</strong> @Model.PhoneNumber</p>
+                <p><strong>Date of Birth:</strong> @Model.DateOfBirth.ToShortDateString()</p>
+
+                @if (Model.Addresses != null && Model.Addresses.Any())
                 {
-                    <p><strong>Address:</strong> @address.AddressLine, @address.City, @address.State, @address.ZipCode, @address.Country</p>
+                    foreach (var address in Model.Addresses)
+                    {
+                        <p><strong>Address:</strong> @address.AddressLine, @address.City, @address.State, @address.ZipCode, @address.Country</p>
+                    }
                 }
-            }
-            else
-            {
-                <p><strong>Address:</strong> No address available</p>
-            }    
-            <p><strong>Date of Birth:</strong> @Model.DateOfBirth.ToShortDateString()</p>
-        
-        </div>
+            </div>
 
-        <form asp-action="DeleteConfirmed" method="post">
-            <input type="hidden" asp-for="Id" />
-            <button type="submit" class="btn btn-danger">Delete</button>
-            <a asp-action="Index" class="btn btn-secondary">Cancel</a>
-        </form>
+            <form asp-action="DeleteConfirmed" method="post">
+                <input type="hidden" asp-for="Id" />
+                <button type="submit" class="nav-button btn-danger">Delete</button>
+                <a asp-action="Index" class="nav-button">Cancel</a>
+            </form>
+        </div>
     </div>
 </div>

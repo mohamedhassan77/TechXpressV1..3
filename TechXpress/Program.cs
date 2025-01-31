@@ -1,6 +1,11 @@
 using TechXpress_infrastructure.Data;
 using TechXpress_infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
+using TechXpress.Data.Repositories;
+using TechXpress.Repositories;
+using Microsoft.AspNetCore.Identity;
+using TechXpress_domain.Entities;
+using TechXpress.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,11 +15,30 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<TechXpress_context>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Register the ProductRepository with DI
+// Register Identity with roles
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
+    .AddEntityFrameworkStores<TechXpress_context>()
+    .AddDefaultTokenProviders();
+
+// Register the Repository with DI
+builder.Services.AddScoped<IUserProfileRepository, UserProfileRepository>();
 builder.Services.AddScoped<ProductRepository>();
+
 
 var app = builder.Build();
 
+
+using (var scope = app.Services.CreateScope())
+{
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+    var roles = new[] { "Admin", "User" };
+
+    foreach (var role in roles)
+    {
+        if (!await roleManager.RoleExistsAsync(role))
+            await roleManager.CreateAsync(new IdentityRole(role));
+    }
+}
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
