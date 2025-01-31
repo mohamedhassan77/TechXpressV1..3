@@ -4,33 +4,29 @@
     ViewData["Title"] = "User Profile Details";
 }
 
-<div class="container mt-5">
-    <h2>User Profile Details</h2>
-
-    <div class="card mt-4">
-        <div class="card-body">
-            <p><strong>First Name:</strong> @Model.FirstName</p>
-            <p><strong>Last Name:</strong> @Model.LastName</p>
-            <p><strong>Email:</strong> @Model.Email</p>
-            <p><strong>Phone Number:</strong> @Model.PhoneNumber</p>
-            <p><strong>Date of Birth:</strong> @Model.DateOfBirth.ToShortDateString()</p>
-
-            @if (Model.Addresses != null && Model.Addresses.Any())
-            {
-                <p><strong>Addresses:</strong></p>
-                <ul>
-                    @foreach (var address in Model.Addresses)
-                    {
-                        <li>@address.AddressLine, @address.City, @address.State, @address.ZipCode, @address.Country</li>
-                    }
-                </ul>
-            }
-            else
-            {
-                <p><strong>Address:</strong> No address available</p>
-            }
+<section class="hero">
+    <div class="hero-content">
+        <div class="hero-text">
+            <h1>User Profile Details</h1>
+            <p>View the details of your user profile.</p>
         </div>
     </div>
+</section>
 
-    <a asp-action="Index" class="nav-button btn-secondary">Back to List</a>
-</div>
+<section class="features">
+    <div class="features-grid">
+        <div class="feature-card">
+            <dl class="row">
+                <dt class="col-sm-2">Name</dt>
+                <dd class="col-sm-10">@Model.FirstName</dd>
+                <dd class="col-sm-10">@Model.LastName</dd>
+                <dt class="col-sm-2">Email</dt>
+                <dd class="col-sm-10">@Model.Email</dd>
+                <dt class="col-sm-2">Phone Number</dt>
+                <dd class="col-sm-10">@Model.PhoneNumber</dd>
+            </dl>
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="nav-button">Edit</a>
+            <a asp-action="Index" class="nav-button">Back to List</a>
+        </div>
+    </div>
+</section>

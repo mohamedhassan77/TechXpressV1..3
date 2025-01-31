@@ -34,7 +34,39 @@ namespace TechXpress.Controllers
             }
             return View(product);
         }
+        public ActionResult GetProductDetails(int productId)
+        {
+            var product =_productRepository.GetById(productId);
 
+            // Assume these are retrieved from another service or predefined data
+            var specifications = new List<string>
+    {
+        "Color: Red",
+        "Size: Medium",
+        "Weight: 1.5 kg"
+    };
+
+            var reviews = new List<string>
+    {
+        "Great product!",
+        "Highly recommend it.",
+        "Would buy again."
+    };
+
+            var rating = 4.5f; // Example rating
+
+            // Convert specs and reviews into a format that can be passed to the modal
+            var specificationsString = string.Join("; ", specifications);
+            var reviewsString = string.Join(" | ", reviews);
+
+            return View(new
+            {
+                Product = product,
+                Specifications = specificationsString,
+                Rating = rating,
+                Reviews = reviewsString
+            });
+        }
         // GET: Product/Create
         public IActionResult Create()
         {

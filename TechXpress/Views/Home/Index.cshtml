@@ -540,7 +540,80 @@
         }
 
         }
+
+       .modal {
+    display: flex; /* Default: Hidden */
+    position: fixed; /* Stay in place */
+    z-index: 1000; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgba(0,0,0,0.5); /* Black w/ opacity */
+}
+
+.modal-content {
+    background-color: white;
+    margin: 8% auto; /* 8% from the top and centered */
+    padding: 20px;
+    border: 1px solid #888;
+    width: 90%; /* Could be more or less, depending on screen size */
+    border-radius: 10px; /* Rounded corners */
+}
+
+.modal-product-image {
+    max-width: 100%;
+    height: auto;
+    border-radius: 10px; /* Rounded corners for the image */
+    margin-bottom: 20px;
+}
+
+.modal-product-specs,
+.modal-product-rating,
+.modal-product-reviews {
+    margin: 20px 0;
+}
+
+.modal-product-specs h4,
+.modal-product-rating h4,
+.modal-product-reviews h4 {
+    font-weight: 600;
+}
+
+.modal-product-specs li,
+.modal-product-rating li {
+    margin-bottom: 10px;
+}
+
+.close-button {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close-button:hover,
+.close-button:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
     </style>
+    <script>
+        function openModal(name, description, price, imageUrl) {
+            document.getElementById('modal-product-name').innerText = name;
+            document.getElementById('modal-product-description').innerText = description;
+            document.getElementById('modal-product-price').innerText = price.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+            document.getElementById('modal-product-image').src = imageUrl;
+
+            document.getElementById('productModal').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('productModal').style.display = 'none';
+        }
+    </script>
 </head>
 <body>
     <nav class="navbar">
@@ -617,42 +690,34 @@
                         <h3 class="product-title">@product.Name</h3>
                         <p>@product.Description</p>
                         <div class="product-price">@product.Price.ToString("C")</div>
-                        <button class="product-button">Learn More</button>
+                        <button class="product-button" onclick="openModal('@product.Name', '@product.Description', @product.Price, '@product.ImageUrl')">Learn More</button>
+                    </div>
+                </div>
+                <div id="productModal" class="modal" style="display:none;">
+                    <div class="modal-content">
+                        <span class="close-button" onclick="closeModal()">&times;</span>
+
+                        <h2 id="modal-product-name"></h2>
+                        <img id="modal-product-image" src="" alt="" class="modal-product-image">
+
+                        <p id="modal-product-description"></p>
+                        <h3 id="modal-product-price"></h3>
+
+                        <div id="modal-product-specs" class="modal-product-specs"></div>
+
+                        <div id="modal-product-rating" class="modal-product-rating"></div>
+
+                        <h4>Reviews</h4>
+                        <div id="modal-product-reviews" class="modal-product-reviews"></div>
                     </div>
                 </div>
             }
         </div>
+           
+
+            
     </section>
 
-    <footer class="footer">
-        <div class="footer-grid">
-            <div>
-                <h3 class="footer-title">About TechXpress</h3>
-                <p>TechXpress is your one-stop shop for the latest and greatest in technology. We're committed to bringing innovation to your doorstep with unmatched service and expertise.</p>
-            </div>
-            <div>
-                <h3 class="footer-title">Quick Links</h3>
-                <ul class="footer-links">
-                    <li><a href="#features">Features</a></li>
-                    <li><a href="#products">Products</a></li>
-                    <li><a href="#contact">Contact</a></li>
-                    <li><a href="/UserProfile">My Profile</a></li>
-                </ul>
-            </div>
-            <div>
-                <h3 class="footer-title">Connect With Us</h3>
-                <p>Stay updated with our latest products and innovations</p>
-                <div class="social-icons">
-                    <a href="#"><i class="fab fa-facebook"></i></a>
-                    <a href="#"><i class="fab fa-twitter"></i></a>
-                    <a href="#"><i class="fab fa-instagram"></i></a>
-                    <a href="#"><i class="fab fa-linkedin"></i></a>
-                </div>
-            </div>
-        </div>
-        <div class="footer-bottom">
-            <p>© 2025 TechXpress. All rights reserved.</p>
-        </div>
-    </footer>
+    
 </body>
 </html>

@@ -2,9 +2,12 @@
 using System.Threading.Tasks;
 using TechXpress_domain.Entities;
 using TechXpress.Repositories;
+using Microsoft.AspNetCore.Authorization;
 
 namespace TechXpress.Controllers
 {
+    [Authorize(Roles = "User")]
+
     public class UserProfileController : Controller
     {
         private readonly IUserProfileRepository _repository;
