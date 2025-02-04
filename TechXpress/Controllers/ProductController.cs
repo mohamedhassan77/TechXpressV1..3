@@ -1,72 +1,81 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using TechXpress_domain.Entities;
 using TechXpress_infrastructure.Repositories;
-using System.Linq;
-
+ using TechXpress_application.Interfaces;
 namespace TechXpress.Controllers
 {
     public class ProductController : Controller
     {
         private readonly ILogger<ProductController> _logger;
-        private readonly ProductRepository _productRepository;
+        private readonly TechXpress_application.Interfaces.IProductRepository _productRepository;
 
-        public ProductController(ILogger<ProductController> logger, ProductRepository productRepository)
+        public ProductController(ILogger<ProductController> logger, TechXpress_application.Interfaces.IProductRepository productRepository)
         {
             _logger = logger;
             _productRepository = productRepository;
         }
 
         // GET: Product/Index
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            var products = _productRepository.GetFeaturedProductsAsync();
+            var products = await _productRepository.GetFeaturedProductsAsync();
             return View(products);
         }
 
         // GET: Product/Details/5
-        public IActionResult Details(int id)
+        public async Task<IActionResult> Details(int id)
         {
-            var product = _productRepository.GetById(id);
+            var product = await _productRepository.GetByIdAsync(id);
             if (product == null)
             {
                 return NotFound();
             }
             return View(product);
         }
-        public ActionResult GetProductDetails(int productId)
-        {
-            var product =_productRepository.GetById(productId);
 
-            // Assume these are retrieved from another service or predefined data
+        // GET: Product/GetProductDetails/5
+        // This action is used to show detailed info (e.g., specifications and reviews) for a product.
+        public async Task<IActionResult> GetProductDetails(int productId)
+        {
+            var product = await _productRepository.GetByIdAsync(productId);
+            if (product == null)
+            {
+                return NotFound();
+            }
+
+            // Example additional data; replace with actual service calls if needed.
             var specifications = new List<string>
-    {
-        "Color: Red",
-        "Size: Medium",
-        "Weight: 1.5 kg"
-    };
+            {
+                "Color: Red",
+                "Size: Medium",
+                "Weight: 1.5 kg"
+            };
 
             var reviews = new List<string>
-    {
-        "Great product!",
-        "Highly recommend it.",
-        "Would buy again."
-    };
+            {
+                "Great product!",
+                "Highly recommend it.",
+                "Would buy again."
+            };
 
             var rating = 4.5f; // Example rating
 
-            // Convert specs and reviews into a format that can be passed to the modal
-            var specificationsString = string.Join("; ", specifications);
-            var reviewsString = string.Join(" | ", reviews);
-
-            return View(new
+            // Combine data into a view model (create a ProductDetailsViewModel if not already created)
+            var viewModel = new ProductDetailsViewModel
             {
                 Product = product,
-                Specifications = specificationsString,
+                Specifications = string.Join("; ", specifications),
                 Rating = rating,
-                Reviews = reviewsString
-            });
+                Reviews = string.Join(" | ", reviews)
+            };
+
+            return View(viewModel);
         }
+
         // GET: Product/Create
         public IActionResult Create()
         {
@@ -76,20 +85,20 @@ namespace TechXpress.Controllers
         // POST: Product/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Create([Bind("Name,Description,Price")] Product product)
+        public async Task<IActionResult> Create([Bind("Name,Description,Price")] Product product)
         {
             if (ModelState.IsValid)
             {
-                _productRepository.Add(product);
+                await _productRepository.AddAsync(product);
                 return RedirectToAction(nameof(Index));
             }
             return View(product);
         }
 
         // GET: Product/Edit/5
-        public IActionResult Edit(int id)
+        public async Task<IActionResult> Edit(int id)
         {
-            var product = _productRepository.GetById(id);
+            var product = await _productRepository.GetByIdAsync(id);
             if (product == null)
             {
                 return NotFound();
@@ -100,7 +109,7 @@ namespace TechXpress.Controllers
         // POST: Product/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Edit(int id, [Bind("Id,Name,Description,Price")] Product product)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Description,Price")] Product product)
         {
             if (id != product.Id)
             {
@@ -111,12 +120,12 @@ namespace TechXpress.Controllers
             {
                 try
                 {
-                    _productRepository.Update(product);
+                    await _productRepository.UpdateAsync(product);
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // Handle any errors here, like when the product is not found
-                    _logger.LogError($"Error updating product with ID {id}");
+                    _logger.LogError(ex, $"Error updating product with ID {id}");
+                    // Optionally, you could add a ModelState error here and return the view.
                     return View(product);
                 }
                 return RedirectToAction(nameof(Index));
@@ -125,9 +134,9 @@ namespace TechXpress.Controllers
         }
 
         // GET: Product/Delete/5
-        public IActionResult Delete(int id)
+        public async Task<IActionResult> Delete(int id)
         {
-            var product = _productRepository.GetById(id);
+            var product = await _productRepository.GetByIdAsync(id);
             if (product == null)
             {
                 return NotFound();
@@ -138,12 +147,12 @@ namespace TechXpress.Controllers
         // POST: Product/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public IActionResult DeleteConfirmed(int id)
+        public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var product = _productRepository.GetById(id);
+            var product = await _productRepository.GetByIdAsync(id);
             if (product != null)
             {
-                _productRepository.Delete(product);
+                await _productRepository.DeleteAsync(product);
             }
             return RedirectToAction(nameof(Index));
         }

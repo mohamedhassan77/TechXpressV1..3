@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using TechXpress_domain.ValueObjects;
 
 namespace TechXpress_domain.Entities
 {

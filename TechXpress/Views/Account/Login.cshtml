@@ -2,6 +2,7 @@
 
 @{
     ViewData["Title"] = "Login";
+    Layout = "_Layout"; // Ensure consistent layout
 }
 
 @section Styles {
@@ -15,113 +16,127 @@
             --text: #333333;
         }
 
-        body {
-            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, var(--dark), var(--secondary));
-            color: white;
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin: 0; /* Ensure no default margin */
-        }
-
         .login-container {
             background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(15px);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             padding: 3rem;
             border-radius: 15px;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-            width: 400px;
+            width: 100%;
+            max-width: 400px;
+            margin: 2rem auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .login-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            background: linear-gradient(to right, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
             text-align: center;
         }
 
-            .login-container h1 {
-                font-size: 2rem;
-                font-weight: 700;
-                margin-bottom: 1rem;
-                background: linear-gradient(to right, var(--primary), var(--accent));
-                -webkit-background-clip: text;
-                -webkit-text-fill-color: transparent;
+        .form-control {
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            padding: 1rem;
+            transition: all 0.3s ease;
+        }
+
+            .form-control:focus {
+                background: white;
+                box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.1);
             }
 
-        /* Other styles for form elements */
-        .form-label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: bold;
-        }
-
-        .form-control {
-            width: 100%;
-            padding: 0.5rem;
-            margin-bottom: 1rem;
-            border: 1px solid var(--light);
-            border-radius: 5px;
-            background: var(--light);
-            color: var(--text);
-        }
-
         .nav-button {
-            background-color: var(--primary);
+            background: var(--primary);
             color: white;
-            padding: 0.5rem 1rem;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            width: 100%;
         }
 
             .nav-button:hover {
-                background-color: var(--accent);
+                transform: translateY(-2px);
+                box-shadow: 0 5px 15px rgba(var(--primary-rgb), 0.3);
             }
 
-        .extra-links {
-            margin-top: 1rem;
-            font-size: 0.9rem;
+        .extra-links a {
+            color: rgba(255, 255, 255, 0.8);
+            transition: color 0.3s ease;
         }
 
-        .text-danger {
-            color: red;
+            .extra-links a:hover {
+                color: var(--accent);
+            }
+
+        .validation-summary {
+            color: #ff4d4d;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
         }
     </style>
 }
 
 <div class="login-container">
-    <h1>Welcome Back</h1>
-    <p>Log in to continue exploring TechXpress</p>
+    <h1 class="login-title">Welcome Back</h1>
 
-    <form asp-action="Login" method="post" aria-labelledby="login-form-header">
-        <h2 id="login-form-header" class="visually-hidden">Login Form</h2>
+    <div asp-validation-summary="ModelOnly" class="validation-summary"></div>
 
-        <div class="form-group">
-            <label asp-for="Email" class="form-label"></label>
-            <input asp-for="Email" class="form-control" placeholder="Enter your email" required aria-required="true" />
+    <form asp-action="Login" method="post">
+        <div class="form-group mb-4">
+            <label asp-for="Email" class="form-label">Email Address</label>
+            <input asp-for="Email" class="form-control" placeholder="hello@techxpress.com" />
             <span asp-validation-for="Email" class="text-danger"></span>
         </div>
 
-        <div class="form-group">
-            <label asp-for="Password" class="form-label"></label>
-            <input asp-for="Password" type="password" class="form-control" placeholder="Enter your password" required aria-required="true" />
+        <div class="form-group mb-4">
+            <label asp-for="Password" class="form-label">Password</label>
+            <div class="password-input-group">
+                <input asp-for="Password" class="form-control" placeholder="••••••••" />
+                <button type="button" class="password-toggle" aria-label="Show password">
+                    <i class="fas fa-eye"></i>
+                </button>
+            </div>
             <span asp-validation-for="Password" class="text-danger"></span>
         </div>
 
-        <div class="form-group">
-            <div class="checkbox">
-                <label asp-for="RememberMe">
-                    <input asp-for="RememberMe" />
-                    @Html.DisplayNameFor(m => m.RememberMe)
-                </label>
+        <div class="form-group mb-4">
+            <div class="form-check">
+                <input asp-for="RememberMe" class="form-check-input" />
+                <label asp-for="RememberMe" class="form-check-label">Remember Me</label>
             </div>
         </div>
 
-        <div class="form-group">
-            <button type="submit" class="nav-button">Log In</button>
+        <button type="submit" class="nav-button mb-4">Sign In</button>
+
+        <div class="extra-links d-flex flex-column gap-2">
+            <a asp-action="Register" asp-controller="Account">Create new account</a>
+            <a asp-action="ForgotPassword" asp-controller="Account">Forgot password?</a>
         </div>
     </form>
+</div>
 
-    <div class="extra-links">
-        <p><a asp-action="Register" asp-controller="Account">Create a new account</a></p>
-        <p><a asp-action="ForgotPassword" asp-controller="Account">Forgot your password?</a></p>
-    </div>
-</div> 
+@section Scripts {
+    <script>
+        // Password visibility toggle
+        document.querySelectorAll('.password-toggle').forEach(button => {
+            button.addEventListener('click', (e) => {
+                const input = button.previousElementSibling;
+                const isPassword = input.type === 'password';
+                input.type = isPassword ? 'text' : 'password';
+                button.querySelector('i').classList.toggle('fa-eye-slash', isPassword);
+                button.querySelector('i').classList.toggle('fa-eye', !isPassword);
+            });
+        });
+    </script>
+}

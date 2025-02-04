@@ -6,6 +6,7 @@ using TechXpress.Repositories;
 using Microsoft.AspNetCore.Identity;
 using TechXpress_domain.Entities;
 using TechXpress.Data;
+using TechXpress_application.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,7 +23,7 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
 
 // Register the Repository with DI
 builder.Services.AddScoped<IUserProfileRepository, UserProfileRepository>();
-builder.Services.AddScoped<ProductRepository>();
+builder.Services.AddScoped<IProductRepository, ProductRepository>();
 
 
 var app = builder.Build();

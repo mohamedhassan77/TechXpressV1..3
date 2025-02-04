@@ -2,7 +2,7 @@ using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using TechXpress.Models;
 using TechXpress.Data;
-using TechXpress_infrastructure.Repositories;
+using TechXpress_application.Interfaces ;
 using Microsoft.Extensions.Logging; // Assuming you have a Data folder for the DbContext or repository
 
 namespace TechXpress.Controllers
@@ -10,9 +10,9 @@ namespace TechXpress.Controllers
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
-        private readonly ProductRepository _productRepository; 
+        private readonly IProductRepository _productRepository; 
 
-        public HomeController(ILogger<HomeController> logger, ProductRepository productRepository)
+        public HomeController(ILogger<HomeController> logger, IProductRepository productRepository)
         {
             _logger = logger;
             _productRepository = productRepository;

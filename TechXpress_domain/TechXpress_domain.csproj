@@ -14,8 +14,4 @@
 		<PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.1" />
 	</ItemGroup>
 
-	<ItemGroup>
-		<ProjectReference Include="..\TechXpress_application\TechXpress_application.csproj" />
-	</ItemGroup>
-
 </Project>

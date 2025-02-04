@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using TechXpress_domain.Entities;
+using TechXpress_domain.ValueObjects;
 
 namespace TechXpress_infrastructure.Data
 {

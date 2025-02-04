@@ -1,7 +1,8 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using TechXpress_domain.Entities;
 
-namespace TechXpress_domain.Entities
+namespace TechXpress_domain.ValueObjects
 {
     public class Address
     {

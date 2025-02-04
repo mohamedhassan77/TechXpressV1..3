@@ -1,12 +1,14 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using TechXpress_domain.Entities;
+using TechXpress_application.Interfaces; // Reference the interface from Application layer
 using TechXpress_infrastructure.Data;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace TechXpress_infrastructure.Repositories
 {
-    public class ProductRepository
+    public class ProductRepository : IProductRepository
     {
         private readonly TechXpress_context _context;
 
@@ -15,42 +17,39 @@ namespace TechXpress_infrastructure.Repositories
             _context = context;
         }
 
-        // Get all products
-        public IEnumerable<Product> GetAll()
+        public async Task<IEnumerable<Product>> GetAllAsync()
         {
-            return _context.Products.ToList();
+            return await _context.Products.ToListAsync();
         }
+
         public async Task<IEnumerable<Product>> GetFeaturedProductsAsync()
         {
             return await _context.Products
                 .Where(p => p.IsFeatured)
                 .ToListAsync();
         }
-        // Get a product by its ID
-        public Product GetById(int id)
+
+        public async Task<Product> GetByIdAsync(int id)
         {
-            return _context.Products.FirstOrDefault(p => p.Id == id);
+            return await _context.Products.FirstOrDefaultAsync(p => p.Id == id);
         }
 
-        // Add a new product
-        public void Add(Product product)
+        public async Task AddAsync(Product product)
         {
-            _context.Products.Add(product);
-            _context.SaveChanges();
+            await _context.Products.AddAsync(product);
+            await _context.SaveChangesAsync();
         }
 
-        // Update an existing product
-        public void Update(Product product)
+        public async Task UpdateAsync(Product product)
         {
             _context.Products.Update(product);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
         }
 
-        // Delete a product
-        public void Delete(Product product)
+        public async Task DeleteAsync(Product product)
         {
             _context.Products.Remove(product);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
         }
     }
 }
