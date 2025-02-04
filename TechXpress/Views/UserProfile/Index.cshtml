@@ -1,38 +1,32 @@
 ﻿@model IEnumerable<TechXpress_domain.Entities.UserProfile>
-
 @{
     ViewData["Title"] = "User Profiles";
 }
 
-
-<nav class="navbar" aria-label="Main navigation">
-    <div class="nav-container">
-        <a href="/" class="logo" aria-label="TechXpress Home">
+<nav class="navbar" style="background: var(--dark); color: white; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center;">
+    <div class="nav-container" style="display: flex; align-items: center; width: 100%;">
+        <a href="/" class="logo" aria-label="TechXpress Home" style="color: white; text-decoration: none; display: flex; align-items: center; gap: 0.5rem; font-size: 1.5rem; font-weight: 700;">
             <i class="fas fa-bolt" aria-hidden="true"></i> TechXpress
         </a>
-
-        <button class="mobile-menu-toggle" aria-expanded="false" aria-label="Toggle navigation">
+        <button class="mobile-menu-toggle" aria-expanded="false" aria-label="Toggle navigation" style="display: none; background: none; border: none; color: white; font-size: 1.5rem;">
             <i class="fas fa-bars"></i>
         </button>
-
-        <ul class="nav-menu">
-            <li><a href="#features" class="nav-link">Features</a></li>
-            <li><a href="#products" class="nav-link">Products</a></li>
-            <li><a href="/Category" class="nav-link nav-button">Categories</a></li>
-            <li><a href="#contact" class="nav-link">Contact</a></li>
-            <li><a href="/UserProfile" class="nav-link nav-button">My Profile</a></li>
-            <li><a href="/Account/Login" class="nav-link nav-button">Login</a></li>
-
+        <ul class="nav-menu" style="display: flex; list-style: none; gap: 1rem; margin-left: auto; align-items: center;">
+            <li><a href="#features" class="nav-link" style="color: white; text-decoration: none;">Features</a></li>
+            <li><a href="#products" class="nav-link" style="color: white; text-decoration: none;">Products</a></li>
+            <li><a href="/Category" class="nav-link nav-button" style="background: var(--primary); color: white; padding: 0.5rem 1rem; border-radius: 20px; text-decoration: none;">Categories</a></li>
+            <li><a href="#contact" class="nav-link" style="color: white; text-decoration: none;">Contact</a></li>
+            <li><a href="/UserProfile" class="nav-link nav-button" style="color: white; text-decoration: none;">My Profile</a></li>
+            <li><a href="/Account/Login" class="nav-link nav-button" style="color: white; text-decoration: none;">Login</a></li>
             @if (User.IsInRole("Admin"))
             {
-                <li><a href="/Admin" class="nav-link nav-button">Admin Panel</a></li>
+                <li><a href="/Admin" class="nav-link nav-button" style="background: var(--secondary); color: white; padding: 0.5rem 1rem; border-radius: 20px; text-decoration: none;">Admin Panel</a></li>
             }
-
             @if (User.Identity.IsAuthenticated)
             {
                 <li>
                     <form asp-controller="Account" asp-action="Logout" method="post">
-                        <button type="submit" class="nav-link nav-button">Logout</button>
+                        <button type="submit" class="nav-link nav-button" style="background: none; border: none; color: white; cursor: pointer;">Logout</button>
                     </form>
                 </li>
             }
@@ -41,52 +35,106 @@
 </nav>
 
 <section class="hero">
+    <div class="floating-elements">
+        <div class="floating-element" style="width: 50px; height: 50px; top: 20%; left: 10%;"></div>
+        <div class="floating-element" style="width: 30px; height: 30px; top: 60%; left: 80%;"></div>
+        <div class="floating-element" style="width: 40px; height: 40px; top: 80%; left: 30%;"></div>
+    </div>
     <div class="hero-content">
         <div class="hero-text">
             <h1>User Profiles</h1>
-            <p>Manage your user profiles here.</p>
+            <p>Manage and view all user profiles in the system.</p>
         </div>
     </div>
 </section>
 
-<section class="features">
-    <div class="features-grid">
-        <div class="feature-card">
-            <a asp-action="Create" class="nav-button">Create New</a>
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>First Name</th>
-                        <th>Email</th>
-                        <th>Phone Number</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @if (Model.Any())
-                    {
-                        foreach (var item in Model)
+<section class="products" style="background: white; padding: 4rem 2rem;">
+    <div class="container" style="max-width: 1400px; margin: 0 auto;">
+        <div class="product-card" style="background: var(--light); border-radius: 20px; padding: 2rem; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);">
+            <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                <h2 style="color: var(--dark); font-size: 2rem; font-weight: 800;">User Profiles</h2>
+                <a asp-action="Create" class="buy-now-button" style="text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem;">
+                    <i class="fas fa-plus"></i> Create New Profile
+                </a>
+            </div>
+
+            <div class="table-responsive" style="overflow-x: auto;">
+                <table style="width: 100%; border-collapse: separate; border-spacing: 0 1rem;">
+                    <thead>
+                        <tr style="background: var(--primary); color: white;">
+                            <th style="padding: 1rem; text-align: left; first-child: { border-top-left-radius: 10px; } last-child: { border-top-right-radius: 10px; }">First Name</th>
+                            <th style="padding: 1rem; text-align: left;">Email</th>
+                            <th style="padding: 1rem; text-align: left;">Phone Number</th>
+                            <th style="padding: 1rem; text-align: right;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.Any())
+                        {
+                            foreach (var item in Model)
+                            {
+                                <tr style="background: white; box-shadow: 0 5px 15px rgba(0,0,0,0.05); margin-bottom: 1rem;">
+                                    <td style="padding: 1rem; color: var(--dark);">@item.FirstName</td>
+                                    <td style="padding: 1rem; color: var(--dark);">@item.Email</td>
+                                    <td style="padding: 1rem; color: var(--dark);">@item.PhoneNumber</td>
+                                    <td style="padding: 1rem; text-align: right;">
+                                        <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
+                                            <a asp-action="Edit" asp-route-id="@item.Id" class="action-button" style="background: #28a745; color: white; padding: 0.5rem; border-radius: 50%; width: 40px; height: 40px; display: inline-flex; align-items: center; justify-content: center; text-decoration: none;">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <a asp-action="Details" asp-route-id="@item.Id" class="action-button" style="background: var(--secondary); color: white; padding: 0.5rem; border-radius: 50%; width: 40px; height: 40px; display: inline-flex; align-items: center; justify-content: center; text-decoration: none;">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <a asp-action="Delete" asp-route-id="@item.Id" class="action-button" style="background: #dc3545; color: white; padding: 0.5rem; border-radius: 50%; width: 40px; height: 40px; display: inline-flex; align-items: center; justify-content: center; text-decoration: none;">
+                                                <i class="fas fa-trash"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
                         {
                             <tr>
-                                <td>@item.FirstName</td>
-                                <td>@item.Email</td>
-                                <td>@item.PhoneNumber</td>
-                                <td>
-                                    <a asp-action="Edit" asp-route-id="@item.Id" class="nav-button">Edit</a>
-                                    <a asp-action="Details" asp-route-id="@item.Id" class="nav-button">Details</a>
-                                    <a asp-action="Delete" asp-route-id="@item.Id" class="nav-button">Delete</a>
+                                <td colspan="4" style="text-align: center; padding: 2rem; color: #666;">
+                                    No user profiles available.
                                 </td>
                             </tr>
                         }
-                    }
-                    else
-                    {
-                        <tr>
-                            <td colspan="4">No user profiles available.</td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </section>
+
+@section Styles {
+    <style>
+        :root {
+            --dark: #1a1a1a;
+            --primary: #ff3366;
+            --secondary: #6a11cb;
+            --light: #f8f9fa;
+        }
+
+        .action-button:hover {
+            opacity: 0.8;
+        }
+    </style>
+}
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const actionButtons = document.querySelectorAll('.action-button');
+            actionButtons.forEach(button => {
+                button.addEventListener('mouseenter', function() {
+                    this.style.transform = 'scale(1.1)';
+                });
+                button.addEventListener('mouseleave', function() {
+                    this.style.transform = 'scale(1)';
+                });
+            });
+        });
+    </script>
+}

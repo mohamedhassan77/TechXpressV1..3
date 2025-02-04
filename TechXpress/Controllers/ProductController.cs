@@ -6,19 +6,31 @@ using System.Threading.Tasks;
 using TechXpress_domain.Entities;
 using TechXpress_infrastructure.Repositories;
  using TechXpress_application.Interfaces;
+using Microsoft.AspNetCore.Identity;
+using TechXpress.Repositories;
 namespace TechXpress.Controllers
 {
     public class ProductController : Controller
     {
         private readonly ILogger<ProductController> _logger;
-        private readonly TechXpress_application.Interfaces.IProductRepository _productRepository;
+        private readonly IProductRepository _productRepository;
+        private readonly IWishlistRepository _wishlistRepository;
+        private readonly ICartRepository _cartRepository;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public ProductController(ILogger<ProductController> logger, TechXpress_application.Interfaces.IProductRepository productRepository)
+
+        public ProductController(ILogger<ProductController> logger, IProductRepository productRepository,
+                                 IWishlistRepository wishlistRepository, ICartRepository cartRepository,
+                                 UserManager<ApplicationUser> userManager)
         {
             _logger = logger;
             _productRepository = productRepository;
+            _wishlistRepository = wishlistRepository;
+            _cartRepository = cartRepository;
+            _userManager = userManager;
         }
 
+        
         // GET: Product/Index
         public async Task<IActionResult> Index()
         {
@@ -156,5 +168,61 @@ namespace TechXpress.Controllers
             }
             return RedirectToAction(nameof(Index));
         }
+        public async Task<IActionResult> Wishlist()
+        {
+            var userId = _userManager.GetUserId(User);
+            var wishlist = await _wishlistRepository.GetByUserIdAsync(userId);
+            return View(wishlist?.Products ?? new List<Product>());
+        }
+
+        public async Task<IActionResult> Cart()
+        {
+            var userId = _userManager.GetUserId(User);
+            var cart = await _cartRepository.GetByUserIdAsync(userId);
+            return View(cart?.CartItems ?? new List<CartItem>());
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> AddToWishlist(int productId)
+        {
+            var userId = _userManager.GetUserId(User);
+            await _wishlistRepository.AddProductToWishlistAsync(userId, productId);
+            return RedirectToAction("Index");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> RemoveFromWishlist(int productId)
+        {
+            var userId = _userManager.GetUserId(User);
+            await _wishlistRepository.RemoveProductFromWishlistAsync(userId, productId);
+            return RedirectToAction("Index");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> AddToCart(int productId, int quantity = 1)
+        {
+            var userId = _userManager.GetUserId(User);
+            await _cartRepository.AddProductToCartAsync(userId, productId, quantity);
+            return RedirectToAction("Index");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> RemoveFromCart(int productId)
+        {
+            var userId = _userManager.GetUserId(User);
+            await _cartRepository.RemoveProductFromCartAsync(userId, productId);
+            return RedirectToAction("Index");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> UpdateCartItemQuantity(int productId, int quantity)
+        {
+            var userId = _userManager.GetUserId(User);
+            await _cartRepository.UpdateCartItemQuantityAsync(userId, productId, quantity);
+            return RedirectToAction("Index");
+        }
+
     }
 }
+       
+     

@@ -1,33 +1,95 @@
 ﻿@model TechXpress_domain.Entities.UserProfile
-
 @{
     ViewData["Title"] = "User Profile Details";
 }
+@section Styles {
+    <style>
+        :root {
+            --dark: #1a1a1a;
+            --primary: #ff3366;
+            --secondary: #6a11cb;
+            --light: #f8f9fa;
+        }
+    </style>
+}
 
 <section class="hero">
+    <div class="floating-elements">
+        <div class="floating-element" style="width: 50px; height: 50px; top: 20%; left: 10%;"></div>
+        <div class="floating-element" style="width: 30px; height: 30px; top: 60%; left: 80%;"></div>
+        <div class="floating-element" style="width: 40px; height: 40px; top: 80%; left: 30%;"></div>
+    </div>
     <div class="hero-content">
         <div class="hero-text">
             <h1>User Profile Details</h1>
-            <p>View the details of your user profile.</p>
+            <p>Manage and view the details of your personal profile.</p>
         </div>
     </div>
 </section>
 
-<section class="features">
-    <div class="features-grid">
-        <div class="feature-card">
-            <dl class="row">
-                <dt class="col-sm-2">First Name</dt>
-                <dd class="col-sm-10">@Model.FirstName</dd>
-                <dt class="col-sm-2">Last Name</dt>
-                <dd class="col-sm-10">@Model.LastName</dd>
-                <dt class="col-sm-2">Email</dt>
-                <dd class="col-sm-10">@Model.Email</dd>
-                <dt class="col-sm-2">Phone Number</dt>
-                <dd class="col-sm-10">@Model.PhoneNumber</dd>
-            </dl>
-            <a asp-action="Edit" asp-route-id="@Model.Id" class="nav-button">Edit</a>
-            <a asp-action="Index" class="nav-button">Back to List</a>
+<section class="products" style="background: white;">
+    <div class="container" style="max-width: 1000px; margin: 0 auto;">
+        <div class="product-card" style="background: var(--light); border-radius: 20px; padding: 2rem; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);">
+            <div class="profile-details">
+                <h2 style="color: var(--dark); margin-bottom: 2rem; text-align: center; font-size: 2rem;">Profile Information</h2>
+
+                <div class="profile-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                    <div>
+                        <div class="profile-item" style="margin-bottom: 1.5rem;">
+                            <h3 style="color: #666; margin-bottom: 0.5rem;">First Name</h3>
+                            <p style="color: var(--dark); font-size: 1.1rem; font-weight: 600;">@Model.FirstName</p>
+                        </div>
+                        <div class="profile-item" style="margin-bottom: 1.5rem;">
+                            <h3 style="color: #666; margin-bottom: 0.5rem;">Last Name</h3>
+                            <p style="color: var(--dark); font-size: 1.1rem; font-weight: 600;">@Model.LastName</p>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="profile-item" style="margin-bottom: 1.5rem;">
+                            <h3 style="color: #666; margin-bottom: 0.5rem;">Email Address</h3>
+                            <p style="color: var(--dark); font-size: 1.1rem; font-weight: 600;">@Model.Email</p>
+                        </div>
+                        <div class="profile-item" style="margin-bottom: 1.5rem;">
+                            <h3 style="color: #666; margin-bottom: 0.5rem;">Phone Number</h3>
+                            <p style="color: var(--dark); font-size: 1.1rem; font-weight: 600;">@Model.PhoneNumber</p>
+                        </div>
+                    </div>
+                </div>
+
+                @if (Model.Addresses != null && Model.Addresses.Any())
+                {
+                    <div class="addresses-section" style="margin-top: 2rem; border-top: 1px solid #eee; padding-top: 2rem;">
+                        <h3 style="color: var(--dark); margin-bottom: 1.5rem;">Addresses</h3>
+                        @foreach (var address in Model.Addresses)
+                        {
+                            <div class="address-card" style="background: white; border-radius: 10px; padding: 1.5rem; margin-bottom: 1rem; box-shadow: 0 5px 15px rgba(0,0,0,0.05);">
+                                <p style="color: var(--dark); font-weight: 600; margin-bottom: 0.5rem;">
+                                    @address.AddressLine
+                                </p>
+                                <p style="color: #666;">
+                                    @address.City, @address.State @address.ZipCode, @address.Country
+                                </p>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="no-addresses" style="margin-top: 2rem; text-align: center; color: #666;">
+                        <p>No addresses added to your profile</p>
+                    </div>
+                }
+
+                <div class="profile-actions" style="display: flex; justify-content: center; gap: 1rem; margin-top: 2rem;">
+                    <a asp-action="Edit" asp-route-id="@Model.Id" class="buy-now-button" style="text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem;">
+                        <i class="fas fa-edit"></i> Edit Profile
+                    </a>
+                    <a asp-action="Index" class="add-to-cart-button" style="text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem;">
+                        <i class="fas fa-arrow-left"></i> Back to List
+                    </a>
+                </div>
+            </div>
         </div>
     </div>
 </section>
+

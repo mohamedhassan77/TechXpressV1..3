@@ -1,44 +1,84 @@
-﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using System.Reflection.Emit;
 using TechXpress_domain.Entities;
 using TechXpress_domain.ValueObjects;
 
-namespace TechXpress_infrastructure.Data
+public class TechXpress_context : IdentityDbContext<ApplicationUser>
 {
-    public class TechXpress_context : IdentityDbContext<ApplicationUser>
+    public TechXpress_context(DbContextOptions<TechXpress_context> options)
+        : base(options)
     {
-        public TechXpress_context(DbContextOptions<TechXpress_context> options)
-            : base(options)
-        {
-        }
+    }
 
-        // Define your DbSets here
-        public DbSet<Product> Products { get; set; }
-        public DbSet<UserProfile> UserProfiles { get; set; }
-        public DbSet<Address> Addresses { get; set; }
-        public DbSet<IdentityRole> Roles { get; set; }
+    public DbSet<Product> Products { get; set; }
+    public DbSet<Category> Categories { get; set; }
+    public DbSet<UserProfile> UserProfiles { get; set; }
+    public DbSet<Address> Addresses { get; set; }
+    public DbSet<Wishlist> Wishlists { get; set; }
+    public DbSet<Cart> Carts { get; set; }
+    public DbSet<CartItem> CartItems { get; set; }
 
-        protected override void OnModelCreating(ModelBuilder builder)
-        {
-            base.OnModelCreating(builder);
+    protected override void OnModelCreating(ModelBuilder builder)
+    {
+        base.OnModelCreating(builder);
+
+        // Product configuration
         builder.Entity<Product>()
-        .Property(p => p.Price)
-        .HasColumnType("decimal(18,2)");
+            .Property(p => p.Price)
+            .HasColumnType("decimal(18,2)");
 
-            // Configure one-to-many relationship between UserProfile and Address
-            builder.Entity<UserProfile>()
-                .HasMany(u => u.Addresses)
-                .WithOne(a => a.UserProfile)
-                .HasForeignKey(a => a.UserProfileId)
-                .OnDelete(DeleteBehavior.Cascade);
-            // Configure Category-Product relationship
-            builder.Entity<Category>()
-                .HasMany(c => c.Products)
-                .WithOne(p => p.Category)
-                .HasForeignKey(p => p.CategoryId)
-                .OnDelete(DeleteBehavior.Cascade);
-        }
+        // UserProfile configuration
+        builder.Entity<UserProfile>()
+            .HasMany(u => u.Addresses)
+            .WithOne(a => a.UserProfile)
+            .HasForeignKey(a => a.UserProfileId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // ApplicationUser - UserProfile relationship
+        builder.Entity<ApplicationUser>()
+            .HasOne(u => u.UserProfile)
+            .WithOne()
+            .HasForeignKey<ApplicationUser>(u => u.Id)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Category configuration
+        builder.Entity<Category>()
+            .HasMany(c => c.Products)
+            .WithOne(p => p.Category)
+            .HasForeignKey(p => p.CategoryId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Cart configuration
+        builder.Entity<Cart>()
+            .HasOne(c => c.User)
+            .WithMany(u => u.Carts)
+            .HasForeignKey(c => c.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Wishlist configuration
+        builder.Entity<Wishlist>()
+            .HasOne(w => w.User)
+            .WithMany(u => u.Wishlists)
+            .HasForeignKey(w => w.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+
+        builder.Entity<CartItem>()
+    .HasOne(c => c.Cart)
+    .WithMany()
+    .HasForeignKey(c => c.CartId)
+    .OnDelete(deleteBehavior: DeleteBehavior.NoAction);
+
+
+
+        // Add this to configure the ApplicationUser relationship
+        builder.Entity<CartItem>()
+            .HasOne(ci => ci.applicationUser)
+            .WithMany()
+            .HasForeignKey(ci => ci.UserId)
+    .OnDelete(deleteBehavior: DeleteBehavior.NoAction);
+        builder.Entity<CartItem>()
+     .HasKey(ci => new { ci.ProductId, ci.CartId });
     }
 }

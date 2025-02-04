@@ -15,6 +15,6 @@ namespace TechXpress_domain.Entities
         public string Description { get; set; }
 
         // Navigation property for products
-        public ICollection<Product> Products { get; set; }
+        public ICollection<Product> Products { get; set; } = new List<Product>();
     }
 }

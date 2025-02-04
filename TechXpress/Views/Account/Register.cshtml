@@ -1,0 +1,103 @@
+﻿@model RegisterViewModel
+
+@{
+    ViewData["Title"] = "Create Account";
+    Layout = "_Layout";
+}
+
+@section Styles {
+    <style>
+        .register-container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 3rem;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 400px;
+            margin: 2rem auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .register-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            background: linear-gradient(to right, #FF3366, #00F5A0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-align: center;
+        }
+
+        .error-message {
+            color: #ff4d4d;
+            margin-bottom: 1rem;
+            text-align: center;
+            background: rgba(255, 77, 77, 0.1);
+            padding: 0.75rem;
+            border-radius: 8px;
+        }
+    </style>
+}
+
+<div class="register-container">
+    <h1 class="register-title">Create Account</h1>
+
+    <form asp-action="Register" method="post">
+        @if (!ViewData.ModelState.IsValid)
+        {
+            <div asp-validation-summary="ModelOnly" class="error-message"></div>
+        }
+
+        <div class="form-group mb-4">
+            <label asp-for="Email" class="form-label">Email Address</label>
+            <input asp-for="Email" class="form-control" placeholder="hello@techxpress.com" />
+            <span asp-validation-for="Email" class="text-danger"></span>
+        </div>
+
+        <div class="form-group mb-4">
+            <label asp-for="Password" class="form-label">Password</label>
+            <div class="password-input-group">
+                <input asp-for="Password" type="password" class="form-control" placeholder="••••••••" />
+                <button type="button" class="password-toggle" aria-label="Show password">
+                    <i class="fas fa-eye"></i>
+                </button>
+            </div>
+            <span asp-validation-for="Password" class="text-danger"></span>
+        </div>
+
+        <div class="form-group mb-4">
+            <label asp-for="ConfirmPassword" class="form-label">Confirm Password</label>
+            <div class="password-input-group">
+                <input asp-for="ConfirmPassword" type="password" class="form-control" placeholder="••••••••" />
+                <button type="button" class="password-toggle" aria-label="Show password">
+                    <i class="fas fa-eye"></i>
+                </button>
+            </div>
+            <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+        </div>
+
+        <button type="submit" class="nav-button mb-4">Create Account</button>
+
+        <div class="extra-links d-flex flex-column gap-2">
+            <a asp-action="Login" asp-controller="Account">Already have an account? Sign In</a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <script>
+        // Password visibility toggle
+        document.querySelectorAll('.password-toggle').forEach(button => {
+            button.addEventListener('click', (e) => {
+                const input = button.previousElementSibling;
+                const isPassword = input.type === 'password';
+                input.type = isPassword ? 'text' : 'password';
+                button.querySelector('i').classList.toggle('fa-eye-slash', isPassword);
+                button.querySelector('i').classList.toggle('fa-eye', !isPassword);
+            });
+        });
+    </script>
+}

@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+
 namespace TechXpress_domain.Entities
 {
     public class Product
@@ -24,7 +25,7 @@ namespace TechXpress_domain.Entities
 
         public DateTime CreatedDate { get; set; } = DateTime.Now; // Set default value to current date/time
 
-        public DateTime UpdatedDate { get; set; } = DateTime.Now; // Set default value to current date/time
+        public DateTime UpdatedDate { get; set; } = DateTime.Now; 
 
         [StringLength(50, ErrorMessage = "The tag must be less than 50 characters.")]
         public string Tag { get; set; } // e.g., "New Release", "Best Seller"
@@ -32,5 +33,7 @@ namespace TechXpress_domain.Entities
         [ForeignKey(nameof(Category))]
         public int CategoryId { get; set; }
         public Category Category { get; set; }
+
+        public bool InStock { get; set; } // New property
     }
 }

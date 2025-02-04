@@ -6,247 +6,236 @@
     <title>TechXpress - Innovation Unleashed</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-   @section Styles {
-    <style>
-      
+    @section Styles {
+        <style>
 
-        /* Hero Section */
-        .hero {
-            min-height: 100vh;
-            background: linear-gradient(135deg, var(--dark) 0%, #1a1a1a 100%);
-            display: flex;
-            align-items: center;
-            position: relative;
-            overflow: hidden;
-        }
 
-            .hero::after {
-                content: '';
-                position: absolute;
-                width: 150%;
-                height: 150%;
-                background: repeating-linear-gradient( 45deg, var(--primary) 0%, var(--secondary) 10%, var(--accent) 20% );
-                opacity: 0.05;
-                animation: backgroundMove 20s linear infinite;
-                transform: translateZ(0);
+            /* Hero Section */
+            .hero {
+                min-height: 100vh;
+                background: linear-gradient(135deg, var(--dark) 0%, #1a1a1a 100%);
+                display: flex;
+                align-items: center;
+                position: relative;
+                overflow: hidden;
             }
 
-        @@keyframes backgroundMove {   
-            0%
-
-        {
-            transform: translate(-50%, -50%) rotate(0deg);
-        }
-
-        100% {
-            transform: translate(-50%, -50%) rotate(360deg);
-        }
-
-        }
-
-        .hero-content {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 0 2rem;
-            position: relative;
-            z-index: 2;
-            color: white;
-        }
-
-        .hero-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 4rem;
-            align-items: center;
-        }
-
-        .hero-text h1 {
-            font-size: 5rem;
-            line-height: 1.1;
-            font-weight: 800;
-            margin-bottom: 2rem;
-            background: linear-gradient(45deg, var(--primary), var(--accent));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            animation: titleGlow 3s ease-in-out infinite alternate;
-        }
-
-        .hero-text p {
-            font-size: 1.25rem;
-            margin-bottom: 3rem;
-            color: rgba(255, 255, 255, 0.8);
-        }
-
-        @@keyframes titleGlow {
-            0%
-
-        {
-            text-shadow: 0 0 20px rgba(255, 51, 102, 0.1);
-        }
-
-        100% {
-            text-shadow: 0 0 40px rgba(255, 51, 102, 0.3);
-        }
-
-        }
-
-        .floating-elements {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-        }
-
-        .floating-element {
-            position: absolute;
-            background: linear-gradient(45deg, var(--primary), var(--secondary));
-            border-radius: 50%;
-            opacity: 0.1;
-            animation: float 6s ease-in-out infinite;
-        }
-
-        @@keyframes float {
-            0%, 100%
-
-        {
-            transform: translateY(0);
-        }
-
-        50% {
-            transform: translateY(-20px);
-        }
-
-        }
-
-        .device-mockup {
-            width: 100%;
-            max-width: 600px;
-            height: 400px;
-            background: linear-gradient(45deg, #2a2a2a, #3a3a3a);
-            border-radius: 20px;
-            position: relative;
-            overflow: hidden;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-            padding: 20px; 
-        }
-
-        .device-screen {
-            position: absolute;
-            top: 5%;
-            left: 5%;
-            width: 90%;
-            height: 90%;
-            border-radius: 10px;
-            overflow: hidden;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-        }
-
-            .device-screen::after {
-                content: '';
-                position: absolute;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background: linear-gradient( 45deg, transparent 0%, rgba(255, 255, 255, 0.1) 50%, transparent 100% );
-                animation: scanline 2s linear infinite;
-                z-index: 2;
-            }
-
-            .device-screen img {
-                width: 100%;
-                height: 100%;
-                object-fit: cover;
-                opacity: 0.9; /* Slightly reduce opacity for effect */
-                transition: transform 0.5s ease;
-            }
-
-            .device-screen:hover img {
-                transform: scale(1.05);
-            }
-
-            .device-screen::before {
-                content: '';
-                position: absolute;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background: linear-gradient( 45deg, rgba(var(--primary-rgb), 0.1), rgba(var(--secondary-rgb), 0.1) );
-                z-index: 1;
-            }
-        @@keyframes scanline {
-            0%
-
-        {
-            transform: translateY(-100%);
-        }
-
-        100% {
-            transform: translateY(100%);
-        }
-
-        }
-
-        /* Features Section */
-        .features {
-            padding: 8rem 2rem;
-            background: white;
-        }
-
-        .section-title {
-            text-align: center;
-            margin-bottom: 5rem;
-            font-size: 3rem;
-            font-weight: 800;
-            color: var(--dark);
-        }
-
-        .features-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 3rem;
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-
-        .feature-card {
-            background: white;
-            padding: 3rem;
-            border-radius: 30px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-            .feature-card::before {
-                content: '';
-                position: absolute;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 5px;
-                background: linear-gradient(to right, var(--primary), var(--secondary));
-                transform: scaleX(0);
-                transition: transform 0.3s ease;
-            }
-
-            .feature-card:hover {
-                transform: translateY(-10px);
-            }
-
-                .feature-card:hover::before {
-                    transform: scaleX(1);
+                .hero::after {
+                    content: '';
+                    position: absolute;
+                    width: 150%;
+                    height: 150%;
+                    background: repeating-linear-gradient( 45deg, var(--primary) 0%, var(--secondary) 10%, var(--accent) 20% );
+                    opacity: 0.05;
+                    animation: backgroundMove 20s linear infinite;
+                    transform: translateZ(0);
                 }
 
-        .feature-icon {
-            font-size: 3rem;
-            margin-bottom: 1.5rem;
-            background: linear-gradient(45deg, var(--primary), var(--secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
+            @@keyframes backgroundMove {
+                0% {
+                    transform: translate(-50%, -50%) rotate(0deg);
+                }
+
+                100% {
+                    transform: translate(-50%, -50%) rotate(360deg);
+                }
+            }
+
+            .hero-content {
+                max-width: 1400px;
+                margin: 0 auto;
+                padding: 0 2rem;
+                position: relative;
+                z-index: 2;
+                color: white;
+            }
+
+            .hero-grid {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 4rem;
+                align-items: center;
+            }
+
+            .hero-text h1 {
+                font-size: 5rem;
+                line-height: 1.1;
+                font-weight: 800;
+                margin-bottom: 2rem;
+                background: linear-gradient(45deg, var(--primary), var(--accent));
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                animation: titleGlow 3s ease-in-out infinite alternate;
+            }
+
+            .hero-text p {
+                font-size: 1.25rem;
+                margin-bottom: 3rem;
+                color: rgba(255, 255, 255, 0.8);
+            }
+
+            @@keyframes titleGlow {
+                0% {
+                    text-shadow: 0 0 20px rgba(255, 51, 102, 0.1);
+                }
+
+                100% {
+                    text-shadow: 0 0 40px rgba(255, 51, 102, 0.3);
+                }
+            }
+
+            .floating-elements {
+                position: absolute;
+                width: 100%;
+                height: 100%;
+                pointer-events: none;
+            }
+
+            .floating-element {
+                position: absolute;
+                background: linear-gradient(45deg, var(--primary), var(--secondary));
+                border-radius: 50%;
+                opacity: 0.1;
+                animation: float 6s ease-in-out infinite;
+            }
+
+            @@keyframes float {
+                0%, 100% {
+                    transform: translateY(0);
+                }
+
+                50% {
+                    transform: translateY(-20px);
+                }
+            }
+
+            .device-mockup {
+                width: 100%;
+                max-width: 600px;
+                height: 400px;
+                background: linear-gradient(45deg, #2a2a2a, #3a3a3a);
+                border-radius: 20px;
+                position: relative;
+                overflow: hidden;
+                box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+                padding: 20px;
+            }
+
+            .device-screen {
+                position: absolute;
+                top: 5%;
+                left: 5%;
+                width: 90%;
+                height: 90%;
+                border-radius: 10px;
+                overflow: hidden;
+                background: linear-gradient(135deg, var(--primary), var(--secondary));
+            }
+
+                .device-screen::after {
+                    content: '';
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background: linear-gradient( 45deg, transparent 0%, rgba(255, 255, 255, 0.1) 50%, transparent 100% );
+                    animation: scanline 2s linear infinite;
+                    z-index: 2;
+                }
+
+                .device-screen img {
+                    width: 100%;
+                    height: 100%;
+                    object-fit: cover;
+                    opacity: 0.9; /* Slightly reduce opacity for effect */
+                    transition: transform 0.5s ease;
+                }
+
+                .device-screen:hover img {
+                    transform: scale(1.05);
+                }
+
+                .device-screen::before {
+                    content: '';
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background: linear-gradient( 45deg, rgba(var(--primary-rgb), 0.1), rgba(var(--secondary-rgb), 0.1) );
+                    z-index: 1;
+                }
+
+            @@keyframes scanline {
+                0% {
+                    transform: translateY(-100%);
+                }
+
+                100% {
+                    transform: translateY(100%);
+                }
+            }
+
+            /* Features Section */
+            .features {
+                padding: 8rem 2rem;
+                background: white;
+            }
+
+            .section-title {
+                text-align: center;
+                margin-bottom: 5rem;
+                font-size: 3rem;
+                font-weight: 800;
+                color: var(--dark);
+            }
+
+            .features-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                gap: 3rem;
+                max-width: 1400px;
+                margin: 0 auto;
+            }
+
+            .feature-card {
+                background: white;
+                padding: 3rem;
+                border-radius: 30px;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+                transition: all 0.3s ease;
+                position: relative;
+                overflow: hidden;
+            }
+
+                .feature-card::before {
+                    content: '';
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 5px;
+                    background: linear-gradient(to right, var(--primary), var(--secondary));
+                    transform: scaleX(0);
+                    transition: transform 0.3s ease;
+                }
+
+                .feature-card:hover {
+                    transform: translateY(-10px);
+                }
+
+                    .feature-card:hover::before {
+                        transform: scaleX(1);
+                    }
+
+            .feature-icon {
+                font-size: 3rem;
+                margin-bottom: 1.5rem;
+                background: linear-gradient(45deg, var(--primary), var(--secondary));
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+            }
 
             /* Products Section Styles */
             .products {
@@ -397,13 +386,13 @@
                 font-weight: 700;
                 color: var(--primary);
             }
-            /*
-            .product-old-price {
-                color: #999;
-                text-decoration: line-through;
-                font-size: 0.9rem;
-            }
-            */
+            
+                        .product-old-price {
+                            color: #999;
+                            text-decoration: line-through;
+                            font-size: 0.9rem;
+                        }
+                        
             /* Modal Styles */
             .modal {
                 display: none;
@@ -587,22 +576,50 @@
             }
 
             @@media (max-width: 768px) {
-                .modal-grid
+                .modal-grid {
+                    grid-template-columns: 1fr;
+                }
 
-            {
-                grid-template-columns: 1fr;
+                .modal-content {
+                    padding: 1rem;
+                }
+
+                .product-meta {
+                    grid-template-columns: 1fr;
+                }
             }
 
-            .modal-content {
-                padding: 1rem;
+
+            .toast {
+                position: fixed;
+                bottom: 20px;
+                right: 20px;
+                padding: 15px 25px;
+                border-radius: 8px;
+                color: white;
+                font-weight: 500;
+                animation: slideIn 0.3s ease-out;
+                z-index: 1000;
             }
 
-            .product-meta {
-                grid-template-columns: 1fr;
-            }
+                .toast.success {
+                    background: #28a745;
+                }
 
+                .toast.error {
+                    background: #dc3545;
+                }
+
+            @@keyframes slideIn {
+                from {
+                    transform: translateX(100%);
+                }
+
+                to {
+                    transform: translateX(0);
+                }
             }
-    </style>
+        </style>
     }
     @section Scripts {
         <script>
@@ -663,6 +680,78 @@
 
                 quantityInput.value = newValue;
             }
+
+
+            // Add to Cart Functionality
+            async function addToCart(productId) {
+                try {
+                    const response = await fetch('/Cart/Add', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                        },
+                        body: JSON.stringify({
+                            productId: productId,
+                            quantity: document.getElementById('quantity')?.value || 1
+                        })
+                    });
+
+                    if (response.ok) {
+                        showToast('Product added to cart!');
+                        updateCartCount(1);
+                    } else {
+                        showToast('Failed to add to cart', 'error');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    showToast('Network error', 'error');
+                }
+            }
+
+            // Add to Wishlist Functionality
+            async function addToWishlist(productId) {
+                try {
+                    const response = await fetch('/Wishlist/Add', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                        },
+                        body: JSON.stringify({ productId: productId })
+                    });
+
+                    if (response.ok) {
+                        showToast('Added to wishlist!');
+                        event.target.classList.toggle('active');
+                    } else {
+                        showToast('Failed to add to wishlist', 'error');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    showToast('Network error', 'error');
+                }
+            }
+
+            // Toast Notification
+            function showToast(message, type = 'success') {
+                const toast = document.createElement('div');
+                toast.className = `toast ${type}`;
+                toast.textContent = message;
+                document.body.appendChild(toast);
+
+                setTimeout(() => toast.remove(), 3000);
+            }
+
+            // Update Cart Count
+            function updateCartCount(change) {
+                const cartCount = document.getElementById('cart-count');
+                if (cartCount) {
+                    const current = parseInt(cartCount.textContent) || 0;
+                    cartCount.textContent = current + change;
+                }
+            }
+        
         </script>
     }
 </head>
@@ -683,12 +772,12 @@
                         <a href="#products" class="nav-button">Explore Products</a>
                     </div>
                     <div class="hero-image">
-                    <div class="device-mockup">
-                        <div class="device-screen">
-                            <img src="~/IMG/CP.jpg" alt="TechXpress">
+                        <div class="device-mockup">
+                            <div class="device-screen">
+                                <img src="~/IMG/CP.jpg" alt="TechXpress">
+                            </div>
                         </div>
                     </div>
-                </div>
                 </div>
             </div>
     </section>
@@ -725,14 +814,19 @@
                         <img src="@product.ImageUrl" alt="@product.Name" class="product-image">
                         <div class="product-overlay">
                             <div class="product-actions">
-                                <button class="action-button" title="Add to Wishlist">
+                                <button class="action-button"
+                                        title="Add to Wishlist"
+                                        onclick="addToWishlist('@product.Id')">
                                     <i class="fas fa-heart"></i>
                                 </button>
-                                <button class="action-button" title="Quick View"
+                                <button class="action-button"
+                                        title="Quick View"
                                         onclick="openModal('@product.Name', '@product.Description', @product.Price, '@product.ImageUrl')">
                                     <i class="fas fa-eye"></i>
                                 </button>
-                                <button class="action-button" title="Add to Cart">
+                                <button class="action-button"
+                                        title="Add to Cart"
+                                        onclick="addToCart('@product.Id')">
                                     <i class="fas fa-shopping-cart"></i>
                                 </button>
                             </div>
@@ -751,18 +845,24 @@
                             <span class="rating-count">(24 Reviews)</span>
                         </div>
                         <div class="product-price-container">
-                            <span class="product-price">@product.Price.ToString("C")</span>
-                            
-                             @* </>@if (product.Price.HasValue) *@
+                            @*if (product.Price.value!= null )*@
                             {
-                            <span class="product-old-price">@product.Price.ToString("C")</span> 
-                            @* "Price. Value" when creating the price object *@ 
+                                <span class="product-old-price">@product.Price.ToString("C")</span>
                             }
+                            <span class="product-price">@product.Price.ToString("C")</span>
+
+                            @* </>@if (product.Price.HasValue) *@
+                            {
+                            <span class="product-old-price">@product.Price.ToString("C")</span>
+                            @* "Price. Value" when creating the price object *@ 
+                                    }
                         </div>
                     </div>
                 </div>
             }
         </div>
+
+                          
     </section>
 
     <!-- Enhanced Modal -->
@@ -852,6 +952,6 @@
         </div>
     </div>
 
-    
+
 </body>
 </html>

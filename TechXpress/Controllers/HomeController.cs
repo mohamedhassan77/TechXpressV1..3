@@ -3,7 +3,10 @@ using Microsoft.AspNetCore.Mvc;
 using TechXpress.Models;
 using TechXpress.Data;
 using TechXpress_application.Interfaces ;
-using Microsoft.Extensions.Logging; // Assuming you have a Data folder for the DbContext or repository
+using TechXpress_application.Services ;
+using Microsoft.Extensions.Logging;
+using TechXpress_application.Services;
+using TechXpress.Repositories; // Assuming you have a Data folder for the DbContext or repository
 
 namespace TechXpress.Controllers
 {
@@ -11,19 +14,29 @@ namespace TechXpress.Controllers
     {
         private readonly ILogger<HomeController> _logger;
         private readonly IProductRepository _productRepository; 
+        private readonly ICategoryRepository _categoryRepository; 
 
-        public HomeController(ILogger<HomeController> logger, IProductRepository productRepository)
+        public HomeController(ILogger<HomeController> logger, IProductRepository productRepository , ICategoryRepository categoryRepository)
         {
             _logger = logger;
             _productRepository = productRepository;
+            _categoryRepository = categoryRepository;
+
+
         }
 
         public async Task<IActionResult> Index()
         {
-            // Get featured products (e.g., top 3 featured products)
-            var featuredProducts = await _productRepository.GetFeaturedProductsAsync(); // Await the async method
-            return View(featuredProducts); // Passing products to the view
+            // Fetch both featured products and categories before returning the view
+            // Fetch products and categories sequentially
+            var featuredProducts = await _productRepository.GetFeaturedProductsAsync();
+            var categories = await _categoryRepository.GetAllAsync();
+
+            ViewData["Categories"] = categories;
+            return View(featuredProducts);
         }
+
+
 
         public IActionResult Privacy()
         {

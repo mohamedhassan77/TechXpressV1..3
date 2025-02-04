@@ -1,24 +1,24 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using TechXpress_domain.Entities;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
-using TechXpress_context = TechXpress_infrastructure.Data.TechXpress_context;
+using TechXpress.Repositories;
+using TechXpress_domain.Entities;
 
 namespace TechXpress.Controllers
 {
     [Authorize(Roles = "Admin")]
     public class CategoryController : Controller
     {
-        private readonly TechXpress_context _context;
+        private readonly ICategoryRepository _categoryRepository;
 
-        public CategoryController(TechXpress_context context)
+        public CategoryController(ICategoryRepository categoryRepository)
         {
-            _context = context;
+            _categoryRepository = categoryRepository;
         }
 
         public async Task<IActionResult> Index()
         {
-            return View();
+            var categories = await _categoryRepository.GetAllAsync();
+            return View(categories);
         }
 
         public IActionResult Create()
@@ -32,13 +32,79 @@ namespace TechXpress.Controllers
         {
             if (ModelState.IsValid)
             {
-                _context.Add(category);
-                await _context.SaveChangesAsync();
+                await _categoryRepository.AddAsync(category);
+                TempData["SuccessMessage"] = "Category created successfully!";
                 return RedirectToAction(nameof(Index));
             }
             return View(category);
         }
 
-        // Add Edit, Delete, and Details actions similarly
+        public async Task<IActionResult> Edit(int id)
+        {
+            var category = await _categoryRepository.GetByIdAsync(id);
+            if (category == null)
+            {
+                return NotFound();
+            }
+            return View(category);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, Category category)
+        {
+            if (id != category.Id)
+            {
+                return NotFound();
+            }
+
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    await _categoryRepository.UpdateAsync(category);
+                    TempData["SuccessMessage"] = "Category updated successfully!";
+                    return RedirectToAction(nameof(Index));
+                }
+                catch
+                {
+                    return View(category);
+                }
+            }
+            return View(category);
+        }
+
+        public async Task<IActionResult> Delete(int id)
+        {
+            var category = await _categoryRepository.GetByIdAsync(id);
+            if (category == null)
+            {
+                return NotFound();
+            }
+            return View(category);
+        }
+
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(int id)
+        {
+            if (await _categoryRepository.ExistsAsync(id))
+            {
+                await _categoryRepository.DeleteAsync(id);
+                TempData["SuccessMessage"] = "Category deleted successfully!";
+                return RedirectToAction(nameof(Index));
+            }
+            return NotFound();
+        }
+
+        public async Task<IActionResult> Details(int id)
+        {
+            var category = await _categoryRepository.GetByIdAsync(id);
+            if (category == null)
+            {
+                return NotFound();
+            }
+            return View(category);
+        }
     }
 }

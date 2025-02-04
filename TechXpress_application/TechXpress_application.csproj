@@ -10,8 +10,4 @@
     <ProjectReference Include="..\TechXpress_domain\TechXpress_domain.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Services\" />
-  </ItemGroup>
-
 </Project>

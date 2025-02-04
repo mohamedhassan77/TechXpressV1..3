@@ -7,6 +7,9 @@
 
         // Navigation property
         public UserProfile UserProfile { get; set; }
+        public ICollection<Cart> Carts { get; set; }
+        public ICollection<Wishlist> Wishlists { get; set; }
 
     }
 }
+  

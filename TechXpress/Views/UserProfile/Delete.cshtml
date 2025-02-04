@@ -1,83 +1,105 @@
 ﻿@model TechXpress_domain.Entities.UserProfile
-
 @{
     ViewData["Title"] = "Delete User Profile";
 }
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const deleteButton = document.querySelector('.buy-now-button');
+            deleteButton.addEventListener('click', function(e) {
+                if (!confirm('Are you absolutely sure you want to delete your profile? This action cannot be undone.')) {
+                    e.preventDefault();
+                }
+            });
+        });
+    </script>
+}
 
+@section Styles {
+    <style>
+        :root {
+            --dark: #1a1a1a;
+            --primary: #ff3366;
+            --secondary: #6a11cb;
+            --light: #f8f9fa;
+        }
+    </style>
+}
 <section class="hero">
+    <div class="floating-elements">
+        <div class="floating-element" style="width: 50px; height: 50px; top: 20%; left: 10%;"></div>
+        <div class="floating-element" style="width: 30px; height: 30px; top: 60%; left: 80%;"></div>
+    </div>
     <div class="hero-content">
         <div class="hero-text">
             <h1>Delete User Profile</h1>
-            <p>Confirm deletion of the user profile.</p>
+            <p>Are you sure you want to permanently remove your profile? This action cannot be undone.</p>
         </div>
     </div>
 </section>
 
-<div class="container mt-4">
-    <div class="card">
-        <div class="card-body">
-            <p>Are you sure you want to delete this user profile?</p>
-
-            <div class="mb-3">
-                <p><strong>First Name:</strong> @Model.FirstName</p>
-                <p><strong>Last Name:</strong> @Model.LastName</p>
-                <p><strong>Email:</strong> @Model.Email</p>
-                <p><strong>Phone Number:</strong> @Model.PhoneNumber</p>
+<div class="container mt-4" style="max-width: 800px; margin: 0 auto; padding: 0 2rem;">
+    <div class="product-card" style="background: white; border-radius: 20px; padding: 2rem; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);">
+        <div class="user-profile-details">
+            <h2 style="color: var(--dark); margin-bottom: 1.5rem; font-size: 1.5rem;">Profile Details to be Deleted</h2>
+            <div class="profile-info" style="margin-bottom: 2rem;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div>
+                        <strong style="color: #666;">First Name</strong>
+                        <p style="color: var(--dark); font-weight: 600;">@Model.FirstName</p>
+                    </div>
+                    <div>
+                        <strong style="color: #666;">Last Name</strong>
+                        <p style="color: var(--dark); font-weight: 600;">@Model.LastName</p>
+                    </div>
+                </div>
+                <div style="margin-top: 1rem;">
+                    <strong style="color: #666;">Email</strong>
+                    <p style="color: var(--dark); font-weight: 600;">@Model.Email</p>
+                </div>
+                <div style="margin-top: 1rem;">
+                    <strong style="color: #666;">Phone Number</strong>
+                    <p style="color: var(--dark); font-weight: 600;">@Model.PhoneNumber</p>
+                </div>
 
                 @if (Model.Addresses != null && Model.Addresses.Any())
                 {
-                    foreach (var address in Model.Addresses)
-                    {
-                        <p><strong>Address:</strong> @address.AddressLine, @address.City, @address.State, @address.ZipCode, @address.Country</p>
-                    }
+                    <div style="margin-top: 1rem;">
+                        <strong style="color: #666;">Address</strong>
+                        @foreach (var address in Model.Addresses)
+                        {
+                            <p style="color: var(--dark); font-weight: 600;">
+                                @address.AddressLine, @address.City, @address.State, @address.ZipCode, @address.Country
+                            </p>
+                        }
+                    </div>
                 }
                 else
                 {
-                    <p><strong>Address:</strong> No address available</p>
+                    <div style="margin-top: 1rem;">
+                        <strong style="color: #666;">Address</strong>
+                        <p style="color: var(--dark); font-weight: 600;">No address available</p>
+                    </div>
                 }
 
-                <p><strong>Date of Birth:</strong> @Model.DateOfBirth.ToShortDateString()</p>
+                <div style="margin-top: 1rem;">
+                    <strong style="color: #666;">Date of Birth</strong>
+                    <p style="color: var(--dark); font-weight: 600;">@Model.DateOfBirth.ToShortDateString()</p>
+                </div>
             </div>
 
             <form asp-action="DeleteConfirmed" method="post">
                 <input type="hidden" asp-for="Id" />
-                <button type="submit" class="btn btn-danger">Delete</button>
-                <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+                <div class="modal-actions" style="display: flex; gap: 1rem;">
+                    <button type="submit" class="buy-now-button" style="background-color: #dc3545; flex: 1;">
+                        <i class="fas fa-trash"></i> Confirm Delete
+                    </button>
+                    <a asp-action="Index" class="add-to-cart-button" style="flex: 1;">
+                        <i class="fas fa-times"></i> Cancel
+                    </a>
+                </div>
             </form>
         </div>
     </div>
 </div>
 
-@section Styles {
-    <style>
-        .hero {
-            background-color: #f8f9fa;
-            padding: 2rem;
-            text-align: center;
-        }
-
-        .hero-content {
-            max-width: 800px;
-            margin: 0 auto;
-        }
-
-        .hero-text h1 {
-            font-size: 2rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .hero-text p {
-            font-size: 1.2rem;
-            color: #666;
-        }
-
-        .card {
-            margin-top: 20px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        .card-body {
-            padding: 1.5rem;
-        }
-    </style>
-}
