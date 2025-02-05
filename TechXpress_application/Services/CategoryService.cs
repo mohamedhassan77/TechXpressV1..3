@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using TechXpress.Repositories;
+using TechXpress_application.Interfaces;
 using TechXpress_domain.Entities;
 
 namespace TechXpress_application.Services

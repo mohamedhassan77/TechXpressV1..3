@@ -1,9 +1,12 @@
 ﻿using TechXpress_domain.Entities;
-
-public interface ICartRepository
+namespace TechXpress_application.Interfaces
 {
-    Task<Cart> GetByUserIdAsync(string userId);
-    Task AddProductToCartAsync(string userId, int productId, int quantity);
-    Task RemoveProductFromCartAsync(string userId, int productId);
-    Task UpdateCartItemQuantityAsync(string userId, int productId, int quantity);
+    public interface ICartRepository
+    {
+        Task<Cart> GetByUserIdAsync(string userId);
+        Task AddProductToCartAsync(string userId, int productId, int quantity);
+        Task RemoveProductFromCartAsync(string userId, int productId);
+        Task UpdateCartItemQuantityAsync(string userId, int productId, int quantity);
+        Task ClearCartAsync(string userId);
+    }
 }

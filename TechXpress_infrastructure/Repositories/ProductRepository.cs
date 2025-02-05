@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using TechXpress_domain.Entities;
-using TechXpress_application.Interfaces; // Reference the interface from Application layer
+using TechXpress_application.Interfaces; 
 using TechXpress_infrastructure.Data;
 using System.Collections.Generic;
 using System.Linq;

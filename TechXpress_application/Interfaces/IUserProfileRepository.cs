@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using TechXpress_domain.Entities;
 
-namespace TechXpress.Repositories
+namespace TechXpress_application.Interfaces
 {
     public interface IUserProfileRepository
     {

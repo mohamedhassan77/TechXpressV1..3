@@ -76,7 +76,7 @@ namespace TechXpress.Controllers
 
             var rating = 4.5f; // Example rating
 
-            // Combine data into a view model (create a ProductDetailsViewModel if not already created)
+            // Combine data into a view model 
             var viewModel = new ProductDetailsViewModel
             {
                 Product = product,
@@ -198,30 +198,10 @@ namespace TechXpress.Controllers
             return RedirectToAction("Index");
         }
 
-        [HttpPost]
-        public async Task<IActionResult> AddToCart(int productId, int quantity = 1)
-        {
-            var userId = _userManager.GetUserId(User);
-            await _cartRepository.AddProductToCartAsync(userId, productId, quantity);
-            return RedirectToAction("Index");
-        }
+    
 
-        [HttpPost]
-        public async Task<IActionResult> RemoveFromCart(int productId)
-        {
-            var userId = _userManager.GetUserId(User);
-            await _cartRepository.RemoveProductFromCartAsync(userId, productId);
-            return RedirectToAction("Index");
-        }
 
-        [HttpPost]
-        public async Task<IActionResult> UpdateCartItemQuantity(int productId, int quantity)
-        {
-            var userId = _userManager.GetUserId(User);
-            await _cartRepository.UpdateCartItemQuantityAsync(userId, productId, quantity);
-            return RedirectToAction("Index");
-        }
-
+ 
     }
 }
        

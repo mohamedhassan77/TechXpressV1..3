@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace TechXpress.Repositories
+namespace TechXpress_application.Interfaces
 {
     public interface IWishlistRepository
     {

@@ -4,48 +4,37 @@
     ViewData["Title"] = "Wishlist";
 }
 
-<h2>Your Wishlist</h2>
-<table class="table">
-    <thead>
-        <tr>
-            <th>Product</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var product in Model)
-        {
+<div class="container mt-4">
+    <h1>Your Wishlist</h1>
+    <table class="table">
+        <thead>
             <tr>
-                <td>@product.Name</td>
-                <td>
-                    <button class="btn btn-danger" onclick="removeFromWishlist(@product.Id)">Remove</button>
-                </td>
+                <th>Product</th>
+                <th>Price</th>
+                <th>Actions</th>
             </tr>
-        }
-    </tbody>
-</table>
-
-@section Scripts {
-   < script>
-            function removeFromWishlist(productId) {
-                // Implement the logic to remove the product from the wishlist
-                // This could involve an AJAX call to the server
-                fetch(`/Wishlist/Remove/${productId}`, {
-                    method: 'POST',
-                    headers: {
-                        'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        location.reload(); // Reload the page to reflect changes
-                    } else {
-                        alert('Failed to remove product from wishlist.');
-                    }
-                })
-                .catch(error => console.error('Error:', error));
+        </thead>
+        <tbody>
+            @foreach (var product in Model)
+            {
+                <tr>
+                    <td>@product.Name</td>
+                    <td>@product.Price.ToString("C")</td>
+                    <td>
+                        <form asp-action="RemoveFromWishlist" method="post" class="d-inline">
+                            <input type="hidden" name="productId" value="@product.Id" />
+                            <button type="submit" class="btn btn-sm btn-danger">Remove</button>
+                        </form>
+                        <form asp-controller="Cart" asp-action="AddToCart" method="post" class="d-inline">
+                            <input type="hidden" name="productId" value="@product.Id" />
+                            <button type="submit" class="btn btn-sm btn-primary">Add to Cart</button>
+                        </form>
+                    </td>
+                </tr>
             }
-        </script>
-}
-    
+        </tbody>
+    </table>
+    <div class="text-end">
+        <a href="/" class="btn btn-secondary">Continue Shopping</a>
+    </div>
+</div>

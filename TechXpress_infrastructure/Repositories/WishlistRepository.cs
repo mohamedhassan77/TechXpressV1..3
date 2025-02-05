@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using TechXpress_infrastructure.Data;
+using TechXpress_application.Interfaces;
+
 using Microsoft.EntityFrameworkCore;
 
 namespace TechXpress.Repositories

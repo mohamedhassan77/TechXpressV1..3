@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using TechXpress_infrastructure.Data;
+using TechXpress_application.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace TechXpress.Repositories
@@ -77,6 +78,20 @@ namespace TechXpress.Repositories
                     cartItem.Quantity = quantity;
                     await _context.SaveChangesAsync();
                 }
+            }
+        }
+
+        public async Task ClearCartAsync(string userId)
+        {
+            var cart = await _context.Carts
+                .Include(c => c.CartItems)
+                .FirstOrDefaultAsync(c => c.UserId == userId);
+
+            if (cart != null)
+            {
+                _context.CartItems.RemoveRange(cart.CartItems);
+                _context.Carts.Remove(cart);
+                await _context.SaveChangesAsync();
             }
         }
     }

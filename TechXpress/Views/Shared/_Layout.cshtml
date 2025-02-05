@@ -42,11 +42,6 @@
                     <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         Categories
                     </a>
-                    <a href="/Cart" class="nav-link">
-                        <i class="fas fa-shopping-cart"></i>
-                        <span id="cart-counter" class="badge bg-primary">0</span>
-                    </a>
-
                     <div class="dropdown-menu" aria-labelledby="navbarDropdown">
                         @foreach (var category in await CategoryService.GetAllCategoriesAsync())
                         {
@@ -54,8 +49,18 @@
                         }
                     </div>
                 </li>
-                <div id="toast-container" class="toast-container"></div>
-
+                <li>
+                    <a href="/Cart" class="nav-link">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span id="cart-counter" class="badge bg-primary">0</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="/Wishlist" class="nav-link">
+                        <i class="fas fa-heart"></i>
+                        <span id="wishlist-counter" class="badge bg-primary">0</span>
+                    </a>
+                </li>
                 <li><a href="#contact" class="nav-link">Contact</a></li>
                 <partial name="_LoginPartial" />
             </ul>
@@ -159,6 +164,29 @@
                     toggle.setAttribute('aria-expanded', 'false');
                 }
             });
+        });
+
+
+			// Update cart and wishlist counters
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        // Listen for cart and wishlist updates
+        document.addEventListener('cartUpdated', () => showToast('Cart updated!'));
+        document.addEventListener('wishlistUpdated', () => showToast('Wishlist updated!'));
+
+
+         document.addEventListener('DOMContentLoaded', function () {
+            const toastMessage = '@TempData["ToastMessage"]';
+            if (toastMessage) {
+                showToast(toastMessage);
+            }
         });
     </script>
 </body>

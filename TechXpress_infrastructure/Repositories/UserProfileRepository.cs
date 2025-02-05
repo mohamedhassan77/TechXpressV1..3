@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using TechXpress.Repositories;
+using TechXpress_application.Interfaces;
 using TechXpress_domain.Entities;
 using TechXpress_infrastructure.Data;
 

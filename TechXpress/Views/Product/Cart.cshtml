@@ -1,5 +1,48 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@model IEnumerable<CartItem>
+
 @{
+    ViewData["Title"] = "Cart";
 }
+
+<div class="container mt-4">
+    <h1>Your Cart</h1>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Product</th>
+                <th>Quantity</th>
+                <th>Price</th>
+                <th>Total</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.Product.Name</td>
+                    <td>
+                        <form asp-action="UpdateCartItemQuantity" method="post" class="d-inline">
+                            <input type="hidden" name="productId" value="@item.ProductId" />
+                            <input type="number" name="quantity" value="@item.Quantity" min="1" class="form-control" style="width: 80px;" />
+                            <button type="submit" class="btn btn-sm btn-primary">Update</button>
+                        </form>
+                    </td>
+                    <td>@item.Product.Price.ToString("C")</td>
+                    <td>@((item.Quantity * item.Product.Price).ToString("C"))</td>
+                    <td>
+                        <form asp-action="RemoveFromCart" method="post" class="d-inline">
+                            <input type="hidden" name="productId" value="@item.ProductId" />
+                            <button type="submit" class="btn btn-sm btn-danger">Remove</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <div class="text-end">
+        <h4>Total: @Model.Sum(item => item.Quantity * item.Product.Price).ToString("C")</h4>
+        <a href="/" class="btn btn-secondary">Continue Shopping</a>
+        <a href="/Checkout" class="btn btn-primary">Proceed to Checkout</a>
+    </div>
+</div>

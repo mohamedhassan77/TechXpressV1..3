@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using TechXpress_domain.Entities;
-using TechXpress.Repositories;
+using TechXpress_application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 
 namespace TechXpress.Controllers

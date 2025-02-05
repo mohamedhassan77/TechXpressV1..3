@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using TechXpress.Repositories;
-using TechXpress_domain.Entities;
+ using TechXpress_domain.Entities;
 using TechXpress_infrastructure.Data;
+using TechXpress_application.Interfaces;
 
 namespace TechXpress.Data.Repositories
 {

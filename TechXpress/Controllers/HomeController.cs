@@ -6,7 +6,7 @@ using TechXpress_application.Interfaces ;
 using TechXpress_application.Services ;
 using Microsoft.Extensions.Logging;
 using TechXpress_application.Services;
-using TechXpress.Repositories; // Assuming you have a Data folder for the DbContext or repository
+using TechXpress.Repositories; 
 
 namespace TechXpress.Controllers
 {
@@ -27,8 +27,7 @@ namespace TechXpress.Controllers
 
         public async Task<IActionResult> Index()
         {
-            // Fetch both featured products and categories before returning the view
-            // Fetch products and categories sequentially
+          
             var featuredProducts = await _productRepository.GetFeaturedProductsAsync();
             var categories = await _categoryRepository.GetAllAsync();
 
