@@ -1,0 +1,245 @@
+﻿@model IEnumerable<CartItem>
+
+@{
+    ViewData["Title"] = "Cart";
+}
+
+@section styles {
+
+<style >
+
+        /* General Styles */
+        body {
+            margin: 0 ;
+            font-family: 'Arial', sans-serif;
+            background-color: #f8f9fa;
+            display: contents;
+            justify-content:   center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        /* Cart Container */
+        .cart-container {
+            width: 100%;
+            max-width: 1500px;
+			margin: 0 auto;
+            padding:    30px ;
+			display:      block;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Cart Card */
+        .cart-card {
+            background: #ffffff;
+            border-radius: 15px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            width: 100%;
+        }
+
+        /* Cart Title */
+        .cart-title {
+            text-align: center;
+            font-size: 2rem;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        /* Cart Table */
+        .cart-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+            .cart-table th,
+            .cart-table td {
+                padding: 15px;
+                text-align: left;
+                border-bottom: 1px solid #ddd;
+            }
+
+            .cart-table th {
+                background-color: #f8f9fa;
+                font-weight: 600;
+                color: #555;
+            }
+
+        /* Product Info */
+        .product-info {
+            display: flex;
+            align-items: center;
+        }
+
+        .product-image {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-right: 15px;
+        }
+
+        .product-details h3 {
+            margin: 0;
+            font-size: 1.1rem;
+            color: #333;
+        }
+
+        .sku {
+            margin: 0;
+            font-size: 0.9rem;
+            color: #777;
+        }
+
+        /* Quantity Form */
+        .quantity-form {
+            display: flex;
+            align-items: center;
+        }
+
+        .quantity-input {
+            width: 80px;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+            margin-right: 10px;
+            text-align: center;
+        }
+
+        .update-btn {
+            padding: 8px 15px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background-color 0.3s ease;
+        }
+
+            .update-btn:hover {
+                background-color: #0056b3;
+            }
+
+        /* Remove Button */
+        .remove-btn {
+            padding: 8px 15px;
+            background-color: #dc3545;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background-color 0.3s ease;
+        }
+
+            .remove-btn:hover {
+                background-color: #a71d2a;
+            }
+
+        /* Cart Total */
+        .cart-total {
+            text-align: right;
+            margin-top: 20px;
+        }
+
+            .cart-total h3 {
+                margin: 0;
+                font-size: 1.5rem;
+                color: #333;
+            }
+
+        /* Cart Actions */
+        .cart-actions {
+            margin-top: 20px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .continue-shopping {
+            padding: 10px 20px;
+            background-color: #6c757d;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 0.9rem;
+            transition: background-color 0.3s ease;
+        }
+
+            .continue-shopping:hover {
+                background-color: #5a6268;
+            }
+
+        .checkout-btn {
+            padding: 10px 20px;
+            background-color: #28a745;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 0.9rem;
+            transition: background-color 0.3s ease;
+        }
+
+            .checkout-btn:hover {
+                background-color: #218838;
+            }
+</style>
+}
+<div class="cart-container">
+    <div class="cart-card">
+        <h1 class="cart-title">Your Cart</h1>
+        <table class="cart-table">
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Quantity</th>
+                    <th>Price</th>
+                    <th>Total</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>
+                            <div class="product-info">
+                                <img src="@item.Product.ImageUrl" alt="@item.Product.Name" class="product-image" />
+                                <div class="product-details">
+                                    <h3>@item.Product.Name</h3>
+                                    <p class="sku">SKU: @item.Product.Id</p>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <form asp-action="UpdateCartItemQuantity" method="post" class="quantity-form">
+                                <input type="hidden" name="productId" value="@item.ProductId" />
+                                <input type="number" name="quantity" value="@item.Quantity" min="1" class="quantity-input" />
+                                <button type="submit" class="update-btn">Update</button>
+                            </form>
+                        </td>
+                        <td>@item.Product.Price.ToString("C")</td>
+                        <td>@((item.Quantity * item.Product.Price).ToString("C"))</td>
+                        <td>
+                            <form asp-action="RemoveFromCart" method="post" class="remove-form">
+                                <input type="hidden" name="productId" value="@item.ProductId" />
+                                <button type="submit" class="remove-btn">Remove</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        <div class="cart-total">
+            <h3>Total: @Model.Sum(item => item.Quantity * item.Product.Price).ToString("C")</h3>
+            <div class="cart-actions">
+                <a href="/" class="continue-shopping">Continue Shopping</a>
+                <a href="/Checkout" class="checkout-btn">Proceed to Checkout</a>
+            </div>
+        </div>
+    </div>
+</div>

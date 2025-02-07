@@ -167,27 +167,42 @@
         });
 
 
-			// Update cart and wishlist counters
-        function showToast(message, type = 'success') {
-            const toast = document.createElement('div');
-            toast.className = `toast ${type}`;
-            toast.textContent = message;
-            document.body.appendChild(toast);
 
-            setTimeout(() => toast.remove(), 3000);
-        }
+            document.addEventListener('DOMContentLoaded', function () {
+                // Function to update the cart counter
+                async function updateCartCount() {
+                    const response = await fetch('/Cart/GetCartCount');
+                    const data = await response.json();
+                    document.getElementById('cart-counter').textContent = data.count;
+                }
 
-        // Listen for cart and wishlist updates
-        document.addEventListener('cartUpdated', () => showToast('Cart updated!'));
-        document.addEventListener('wishlistUpdated', () => showToast('Wishlist updated!'));
+                // Function to update the wishlist counter
+                async function updateWishlistCount() {
+                    const response = await fetch('/Wishlist/GetWishlistCount');
+                    const data = await response.json();
+                    document.getElementById('wishlist-counter').textContent = data.count;
+                }
+
+                // Initial calls to update counters
+                updateCartCount();
+                updateWishlistCount();
+
+                // Event listeners for cart and wishlist updates
+                document.addEventListener('cartUpdated', updateCartCount);
+                document.addEventListener('wishlistUpdated', updateWishlistCount);
+            });
 
 
-         document.addEventListener('DOMContentLoaded', function () {
-            const toastMessage = '@TempData["ToastMessage"]';
-            if (toastMessage) {
-                showToast(toastMessage);
+            // Toast Notification
+            function showToast(message, type = 'success') {
+                const toast = document.createElement('div');
+                toast.className = `toast ${type}`;
+                toast.textContent = message;
+                document.body.appendChild(toast);
+
+                setTimeout(() => toast.remove(), 3000);
             }
-        });
+
     </script>
 </body>
 </html>

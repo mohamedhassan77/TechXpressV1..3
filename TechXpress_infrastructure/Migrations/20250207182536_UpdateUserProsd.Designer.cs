@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace TechXpress_infrastructure.Migrations
 {
     [DbContext(typeof(TechXpress_context))]
-    [Migration("20250207122819_initialcrea")]
-    partial class initialcrea
+    [Migration("20250207182536_UpdateUserProsd")]
+    partial class UpdateUserProsd
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -458,7 +458,7 @@ namespace TechXpress_infrastructure.Migrations
                     b.HasOne("Cart", "Cart")
                         .WithMany()
                         .HasForeignKey("CartId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Cart", null)
@@ -474,7 +474,7 @@ namespace TechXpress_infrastructure.Migrations
                     b.HasOne("TechXpress_domain.Entities.ApplicationUser", "applicationUser")
                         .WithMany()
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Cart");
@@ -535,17 +535,6 @@ namespace TechXpress_infrastructure.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("TechXpress_domain.Entities.ApplicationUser", b =>
-                {
-                    b.HasOne("TechXpress_domain.Entities.UserProfile", "UserProfile")
-                        .WithOne("ApplicationUser")
-                        .HasForeignKey("TechXpress_domain.Entities.ApplicationUser", "Id")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("UserProfile");
-                });
-
             modelBuilder.Entity("TechXpress_domain.Entities.Product", b =>
                 {
                     b.HasOne("TechXpress_domain.Entities.Category", "Category")
@@ -559,6 +548,17 @@ namespace TechXpress_infrastructure.Migrations
                         .HasForeignKey("WishlistId");
 
                     b.Navigation("Category");
+                });
+
+            modelBuilder.Entity("TechXpress_domain.Entities.UserProfile", b =>
+                {
+                    b.HasOne("TechXpress_domain.Entities.ApplicationUser", "ApplicationUser")
+                        .WithOne("UserProfile")
+                        .HasForeignKey("TechXpress_domain.Entities.UserProfile", "Id")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("ApplicationUser");
                 });
 
             modelBuilder.Entity("TechXpress_domain.Entities.Wishlist", b =>
@@ -592,6 +592,9 @@ namespace TechXpress_infrastructure.Migrations
                 {
                     b.Navigation("Carts");
 
+                    b.Navigation("UserProfile")
+                        .IsRequired();
+
                     b.Navigation("Wishlists");
                 });
 
@@ -603,9 +606,6 @@ namespace TechXpress_infrastructure.Migrations
             modelBuilder.Entity("TechXpress_domain.Entities.UserProfile", b =>
                 {
                     b.Navigation("Addresses");
-
-                    b.Navigation("ApplicationUser")
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("TechXpress_domain.Entities.Wishlist", b =>

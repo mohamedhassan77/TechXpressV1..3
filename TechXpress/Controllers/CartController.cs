@@ -8,6 +8,8 @@ using System.Linq;
 
 namespace TechXpress.Controllers
 {
+    [Authorize]
+
     public class CartController : Controller
     {
         private readonly ICartRepository _cartRepository;
@@ -24,7 +26,15 @@ namespace TechXpress.Controllers
         {
             var userId = _userManager.GetUserId(User);
             var cart = await _cartRepository.GetByUserIdAsync(userId);
-            return View(cart?.CartItems ?? new List<CartItem>());
+            if (cart == null)
+            {
+                cart = new Cart
+                {
+                    UserId = userId,
+                    CartItems = new List<CartItem>()
+                };
+            }
+            return View(cart?.CartItems);
         }
 
         [HttpPost]
@@ -61,6 +71,7 @@ namespace TechXpress.Controllers
             await _cartRepository.UpdateCartItemQuantityAsync(userId, productId, quantity);
             return RedirectToAction(nameof(Index));
         }
+
         [HttpGet]
         public async Task<IActionResult> GetCartCount()
         {

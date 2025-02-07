@@ -6,10 +6,9 @@
     <title>TechXpress - Innovation Unleashed</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+
     @section Styles {
         <style>
-
-
             /* Hero Section */
             .hero {
                 min-height: 100vh;
@@ -25,20 +24,22 @@
                     position: absolute;
                     width: 150%;
                     height: 150%;
-                    background: repeating-linear-gradient( 45deg, var(--primary) 0%, var(--secondary) 10%, var(--accent) 20% );
+                    background: repeating-linear-gradient(45deg, var(--primary) 0%, var(--secondary) 10%, var(--accent) 20%);
                     opacity: 0.05;
                     animation: backgroundMove 20s linear infinite;
                     transform: translateZ(0);
                 }
-
             @@keyframes backgroundMove {
-                0% {
-                    transform: translate(-50%, -50%) rotate(0deg);
-                }
+                0%
 
-                100% {
-                    transform: translate(-50%, -50%) rotate(360deg);
-                }
+            {
+                transform: translate(-50%, -50%) rotate(0deg);
+            }
+
+            100% {
+                transform: translate(-50%, -50%) rotate(360deg);
+            }
+
             }
 
             .hero-content {
@@ -67,21 +68,23 @@
                 -webkit-text-fill-color: transparent;
                 animation: titleGlow 3s ease-in-out infinite alternate;
             }
+            @@keyframes titleGlow {
+                0%
+
+            {
+                text-shadow: 0 0 20px rgba(255, 51, 102, 0.1);
+            }
+
+            100% {
+                text-shadow: 0 0 40px rgba(255, 51, 102, 0.3);
+            }
+
+            }
 
             .hero-text p {
                 font-size: 1.25rem;
                 margin-bottom: 3rem;
                 color: rgba(255, 255, 255, 0.8);
-            }
-
-            @@keyframes titleGlow {
-                0% {
-                    text-shadow: 0 0 20px rgba(255, 51, 102, 0.1);
-                }
-
-                100% {
-                    text-shadow: 0 0 40px rgba(255, 51, 102, 0.3);
-                }
             }
 
             .floating-elements {
@@ -98,15 +101,17 @@
                 opacity: 0.1;
                 animation: float 6s ease-in-out infinite;
             }
-
             @@keyframes float {
-                0%, 100% {
-                    transform: translateY(0);
-                }
+                0%, 100%
 
-                50% {
-                    transform: translateY(-20px);
-                }
+            {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-20px);
+            }
+
             }
 
             .device-mockup {
@@ -139,44 +144,45 @@
                     left: 0;
                     width: 100%;
                     height: 100%;
-                    background: linear-gradient( 45deg, transparent 0%, rgba(255, 255, 255, 0.1) 50%, transparent 100% );
+                    background: linear-gradient(45deg, transparent 0%, rgba(255, 255, 255, 0.1) 50%, transparent 100%);
                     animation: scanline 2s linear infinite;
                     z-index: 2;
                 }
-
-                .device-screen img {
-                    width: 100%;
-                    height: 100%;
-                    object-fit: cover;
-                    opacity: 0.9; /* Slightly reduce opacity for effect */
-                    transition: transform 0.5s ease;
-                }
-
-                .device-screen:hover img {
-                    transform: scale(1.05);
-                }
-
-                .device-screen::before {
-                    content: '';
-                    position: absolute;
-                    top: 0;
-                    left: 0;
-                    width: 100%;
-                    height: 100%;
-                    background: linear-gradient( 45deg, rgba(var(--primary-rgb), 0.1), rgba(var(--secondary-rgb), 0.1) );
-                    z-index: 1;
-                }
-
             @@keyframes scanline {
-                0% {
-                    transform: translateY(-100%);
-                }
+                0%
 
-                100% {
-                    transform: translateY(100%);
-                }
+            {
+                transform: translateY(-100%);
             }
 
+            100% {
+                transform: translateY(100%);
+            }
+
+            }
+
+            .device-screen img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                opacity: 0.9;
+                transition: transform 0.5s ease;
+            }
+
+            .device-screen:hover img {
+                transform: scale(1.05);
+            }
+
+            .device-screen::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: linear-gradient(45deg, rgba(var(--primary-rgb), 0.1), rgba(var(--secondary-rgb), 0.1));
+                z-index: 1;
+            }
             /* Features Section */
             .features {
                 padding: 8rem 2rem;
@@ -203,7 +209,7 @@
                 background: white;
                 padding: 3rem;
                 border-radius: 30px;
-                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+                box-shadow: 0 10px 30px rgba(0,0,0,0.05);
                 transition: all 0.3s ease;
                 position: relative;
                 overflow: hidden;
@@ -236,8 +242,7 @@
                 -webkit-background-clip: text;
                 -webkit-text-fill-color: transparent;
             }
-
-            /* Products Section Styles */
+            /* Products Section */
             .products {
                 padding: 8rem 2rem;
                 background: var(--light);
@@ -386,13 +391,12 @@
                 font-weight: 700;
                 color: var(--primary);
             }
-            
-                        .product-old-price {
-                            color: #999;
-                            text-decoration: line-through;
-                            font-size: 0.9rem;
-                        }
-                        
+
+            .product-old-price {
+                color: #999;
+                text-decoration: line-through;
+                font-size: 0.9rem;
+            }
             /* Modal Styles */
             .modal {
                 display: none;
@@ -534,8 +538,7 @@
                 margin-bottom: 2rem;
             }
 
-            .add-to-cart-button,
-            .buy-now-button {
+            .add-to-cart-button, .buy-now-button {
                 flex: 1;
                 padding: 1rem;
                 border: none;
@@ -574,21 +577,22 @@
                 font-size: 0.9rem;
                 color: #666;
             }
-
             @@media (max-width: 768px) {
-                .modal-grid {
-                    grid-template-columns: 1fr;
-                }
+                .modal-grid
 
-                .modal-content {
-                    padding: 1rem;
-                }
-
-                .product-meta {
-                    grid-template-columns: 1fr;
-                }
+            {
+                grid-template-columns: 1fr;
             }
 
+            .modal-content {
+                padding: 1rem;
+            }
+
+            .product-meta {
+                grid-template-columns: 1fr;
+            }
+
+            }
 
             .toast {
                 position: fixed;
@@ -609,145 +613,81 @@
                 .toast.error {
                     background: #dc3545;
                 }
-
             @@keyframes slideIn {
-                from {
-                    transform: translateX(100%);
-                }
+                from
 
-                to {
-                    transform: translateX(0);
-                }
+            {
+                transform: translateX(100%);
+            }
+
+            to {
+                transform: translateX(0);
+            }
+
             }
         </style>
     }
+
     @section Scripts {
         <script>
-                    function openModal(name, description, price, imageUrl) {
-                const modal = document.getElementById('productModal');
-                modal.style.display = 'flex';
-
-                // Add smooth entrance animation
-                setTimeout(() => {
-                    modal.classList.add('active');
-                }, 10);
-
-                // Set content
-                document.getElementById('modal-product-name').innerText = name;
-                document.getElementById('modal-product-description').innerText = description;
-                document.getElementById('modal-product-price').innerText = price.toLocaleString('en-US', {
-                    style: 'currency',
-                    currency: 'EGP'
-                });
-                document.getElementById('modal-product-image').src = imageUrl;
-                document.getElementById('modal-thumbnail-1').src = imageUrl;
+            function openModal(name, description, price, imageUrl, productId) {
+              const modal = document.getElementById('productModal');
+              modal.style.display = 'flex';
+              setTimeout(() => { modal.classList.add('active'); }, 10);
+              document.getElementById('modal-product-name').innerText = name;
+              document.getElementById('modal-product-description').innerText = description;
+              document.getElementById('modal-product-price').innerText = parseFloat(price).toLocaleString('en-US', {
+                style: 'currency',
+                currency: 'EGP'
+              });
+              document.getElementById('modal-product-image').src = imageUrl;
+              document.getElementById('modal-thumbnail-1').src = imageUrl;
+              // Set the product ID in the hidden inputs.
+              document.getElementById("modalProductId").value = productId;
+              document.getElementById("modalProductIdOrder").value = productId;
             }
 
             function closeModal() {
-                const modal = document.getElementById('productModal');
-                modal.classList.remove('active');
-                setTimeout(() => {
-                    modal.style.display = 'none';
-                }, 300);
+              const modal = document.getElementById('productModal');
+              modal.classList.remove('active');
+              setTimeout(() => { modal.style.display = 'none'; }, 300);
             }
-
-            // Add event listener to close modal when clicking outside the modal content
-            document.addEventListener('DOMContentLoaded', function() {
-                const modal = document.getElementById('productModal');
-
-                modal.addEventListener('click', function(event) {
-                    // Check if the click is directly on the modal (not on the modal content)
-                    if (event.target === modal) {
-                        closeModal();
-                    }
-                });
-
-                // Ensure modal can be closed with Escape key
-                document.addEventListener('keydown', function(event) {
-                    if (event.key === 'Escape' && modal.style.display === 'flex') {
-                        closeModal();
-                    }
-                });
-            });
 
             function updateQuantity(change) {
-                const quantityInput = document.getElementById('quantity');
-                let currentValue = parseInt(quantityInput.value);
-                let newValue = currentValue + change;
-
-                // Ensure quantity stays between 1 and 99
-                newValue = Math.max(1, Math.min(newValue, 99));
-
-                quantityInput.value = newValue;
+              var quantityInput = document.getElementById("quantity");
+              var currentQuantity = parseInt(quantityInput.value);
+              var newQuantity = currentQuantity + change;
+              if (newQuantity >= parseInt(quantityInput.min) && newQuantity <= parseInt(quantityInput.max)) {
+                quantityInput.value = newQuantity;
+              }
             }
-
-
-                   
-            document.addEventListener('DOMContentLoaded', function () {
-                // Function to update the cart counter
-                async function updateCartCount() {
-                    const response = await fetch('/Cart/GetCartCount');
-                    const data = await response.json();
-                    document.getElementById('cart-counter').textContent = data.count;
-                }
-
-                // Function to update the wishlist counter
-                async function updateWishlistCount() {
-                    const response = await fetch('/Wishlist/GetWishlistCount');
-                    const data = await response.json();
-                    document.getElementById('wishlist-counter').textContent = data.count;
-                }
-
-                // Initial calls to update counters
-                updateCartCount();
-                updateWishlistCount();
-
-                // Event listeners for cart and wishlist updates
-                document.addEventListener('cartUpdated', updateCartCount);
-                document.addEventListener('wishlistUpdated', updateWishlistCount);
-            });
-        
-
-            // Toast Notification
-            function showToast(message, type = 'success') {
-                const toast = document.createElement('div');
-                toast.className = `toast ${type}`;
-                toast.textContent = message;
-                document.body.appendChild(toast);
-
-                setTimeout(() => toast.remove(), 3000);
-            }
-
-        
-        
         </script>
     }
 </head>
 <body>
-
     <section class="hero">
         <div class="floating-elements">
             <div class="floating-element" style="width: 50px; height: 50px; top: 20%; left: 10%;"></div>
             <div class="floating-element" style="width: 30px; height: 30px; top: 60%; left: 80%;"></div>
-            <div class="floating-element" style="width: 40px; height: 40px;
-           <div class="floating-element" style="width: 40px; height: 40px; top: 80%; left: 30%;"></div>
+            <div class="floating-element" style="width: 40px; height: 40px;"></div>
+            <div class="floating-element" style="width: 40px; height: 40px; top: 80%; left: 30%;"></div>
         </div>
-            <div class="hero-content">
-                <div class="hero-grid">
-                    <div class="hero-text">
-                        <h1>Innovation for Tomorrow</h1>
-                        <p>Experience cutting-edge technology that transforms your everyday life. Discover products that combine style, functionality, and innovation.</p>
-                        <a href="#products" class="nav-button">Explore Products</a>
-                    </div>
-                    <div class="hero-image">
-                        <div class="device-mockup">
-                            <div class="device-screen">
-                                <img src="~/IMG/CP.jpg" alt="TechXpress">
-                            </div>
+        <div class="hero-content">
+            <div class="hero-grid">
+                <div class="hero-text">
+                    <h1>Innovation for Tomorrow</h1>
+                    <p>Experience cutting-edge technology that transforms your everyday life. Discover products that combine style, functionality, and innovation.</p>
+                    <a href="#products" class="nav-button">Explore Products</a>
+                </div>
+                <div class="hero-image">
+                    <div class="device-mockup">
+                        <div class="device-screen">
+                            <img src="~/IMG/CP.jpg" alt="TechXpress">
                         </div>
                     </div>
                 </div>
             </div>
+        </div>
     </section>
 
     <section id="features" class="features">
@@ -787,16 +727,11 @@
                                     <button type="submit" class="action-button" title="Add to Wishlist">
                                         <i class="fas fa-heart"></i>
                                     </button>
-                                    
                                 </form>
-                                    <input type="hidden" name="productId" value="@product.Id" />
-
-                                <button type="submit" class="action-button"   title="Quick View"
-                                        onclick="openModal('@product.Name', '@product.Description', @product.Price, '@product.ImageUrl')">
+                                <button type="button" class="action-button" title="Quick View"
+                                        onclick="openModal('@product.Name', '@product.Description', @product.Price, '@product.ImageUrl', '@product.Id')">
                                     <i class="fas fa-eye"></i>
                                 </button>
-                                
-
                                 <form asp-controller="Cart" asp-action="AddToCart" method="post">
                                     <input type="hidden" name="productId" value="@product.Id" />
                                     <button type="submit" class="action-button" title="Add to Cart">
@@ -825,8 +760,6 @@
                 </div>
             }
         </div>
-
-                          
     </section>
 
     <!-- Enhanced Modal -->
@@ -835,7 +768,6 @@
             <button class="close-button" onclick="closeModal()" aria-label="Close modal">
                 <i class="fas fa-times"></i>
             </button>
-
             <div class="modal-grid">
                 <div class="modal-gallery">
                     <div class="main-image-container">
@@ -853,7 +785,6 @@
                         </div>
                     </div>
                 </div>
-
                 <div class="modal-details">
                     <div class="modal-header">
                         <h2 id="modal-product-name"></h2>
@@ -868,16 +799,13 @@
                             <span>(4.5/5)</span>
                         </div>
                     </div>
-
                     <div class="modal-price-container">
                         <h3 id="modal-product-price"></h3>
                         <span class="stock-status in-stock">
                             <i class="fas fa-check-circle"></i> In Stock
                         </span>
                     </div>
-
                     <p id="modal-product-description"></p>
-
                     <div class="modal-options">
                         <div class="quantity-selector">
                             <button class="quantity-btn" onclick="updateQuantity(-1)">-</button>
@@ -885,18 +813,22 @@
                             <button class="quantity-btn" onclick="updateQuantity(1)">+</button>
                         </div>
                     </div>
-
                     <div class="modal-actions">
-                        <button class="add-to-cart-button">
-                            <i class="fas fa-shopping-cart"></i>
-                            Add to Cart
-                        </button>
-                        <button class="buy-now-button">
-                            <i class="fas fa-bolt"></i>
-                            Buy Now
-                        </button>
+                        <form asp-controller="Cart" asp-action="AddToCart" method="post">
+                            <input type="hidden" id="modalProductId" name="productId" value="" />
+                            <button class="add-to-cart-button">
+                                <i class="fas fa-shopping-cart"></i>
+                                Add to Cart
+                            </button>
+                        </form>
+                        <form asp-controller="CheckOut" asp-action="PlaceOrder" method="post">
+                            <input type="hidden" id="modalProductIdOrder" name="productId" value="" />
+                            <button class="buy-now-button">
+                                <i class="fas fa-bolt"></i>
+                                Buy Now
+                            </button>
+                        </form>
                     </div>
-
                     <div class="product-meta">
                         <div class="meta-item">
                             <i class="fas fa-shipping-fast"></i>
@@ -915,7 +847,6 @@
             </div>
         </div>
     </div>
-
 
 </body>
 </html>

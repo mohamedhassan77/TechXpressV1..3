@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using System.Reflection.Emit;
 using TechXpress_domain.Entities;
 using TechXpress_domain.ValueObjects;
 
@@ -23,58 +22,51 @@ public class TechXpress_context : IdentityDbContext<ApplicationUser>
     {
         base.OnModelCreating(builder);
 
-        // Product configuration
         builder.Entity<Product>()
             .Property(p => p.Price)
             .HasColumnType("decimal(18,2)");
 
-        // UserProfile configuration
         builder.Entity<UserProfile>()
             .HasMany(u => u.Addresses)
             .WithOne(a => a.UserProfile)
             .HasForeignKey(a => a.UserProfileId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        // ApplicationUser - UserProfile relationship
         builder.Entity<ApplicationUser>()
             .HasOne(u => u.UserProfile)
             .WithOne(b => b.ApplicationUser)
             .HasForeignKey<UserProfile>(u => u.Id)
             .OnDelete(DeleteBehavior.NoAction);
 
-        // Category configuration
         builder.Entity<Category>()
             .HasMany(c => c.Products)
             .WithOne(p => p.Category)
             .HasForeignKey(p => p.CategoryId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        // Cart configuration
         builder.Entity<Cart>()
             .HasOne(c => c.User)
             .WithMany(u => u.Carts)
             .HasForeignKey(c => c.UserId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        // Wishlist configuration
         builder.Entity<Wishlist>()
             .HasOne(w => w.User)
             .WithMany(u => u.Wishlists)
             .HasForeignKey(w => w.UserId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        // CartItem configuration
         builder.Entity<CartItem>()
-            .HasOne(c => c.Cart)
-            .WithMany()
-            .HasForeignKey(c => c.CartId)
-            .OnDelete(DeleteBehavior.NoAction); // Change to NoAction
+            .HasOne(ci => ci.Cart)
+            .WithMany(c => c.CartItems) 
+            .HasForeignKey(ci => ci.CartId)
+            .OnDelete(DeleteBehavior.Cascade);
 
         builder.Entity<CartItem>()
-            .HasOne(ci => ci.applicationUser)
-            .WithMany()
+            .HasOne(ci => ci.applicationUser) 
+            .WithMany() 
             .HasForeignKey(ci => ci.UserId)
-            .OnDelete(DeleteBehavior.NoAction); // Change to NoAction
+            .OnDelete(DeleteBehavior.Restrict);
 
         builder.Entity<CartItem>()
             .HasKey(ci => new { ci.ProductId, ci.CartId });

@@ -455,7 +455,7 @@ namespace TechXpress_infrastructure.Migrations
                     b.HasOne("Cart", "Cart")
                         .WithMany()
                         .HasForeignKey("CartId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Cart", null)
@@ -471,7 +471,7 @@ namespace TechXpress_infrastructure.Migrations
                     b.HasOne("TechXpress_domain.Entities.ApplicationUser", "applicationUser")
                         .WithMany()
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Cart");

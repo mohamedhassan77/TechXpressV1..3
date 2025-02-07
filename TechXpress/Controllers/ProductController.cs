@@ -172,7 +172,22 @@ namespace TechXpress.Controllers
         {
             var userId = _userManager.GetUserId(User);
             var wishlist = await _wishlistRepository.GetByUserIdAsync(userId);
-            return View(wishlist?.Products ?? new List<Product>());
+            var wishlistitems = wishlist?.Products ?? new List<Product>();
+
+            var productViewModels = wishlistitems.Select(p => new ProductViewModel
+            {
+                Id = p.Id,
+                Name = p.Name,
+                Price = p.Price,
+                Description = p.Description,   
+                ImageUrl = p.ImageUrl,
+                IsFeatured = p.IsFeatured,
+                Tag = p.Tag,
+                CreatedDate = p.CreatedDate,
+                UpdatedDate = p.UpdatedDate
+            }).ToList();
+            return View(productViewModels);
+
         }
 
         public async Task<IActionResult> Cart()

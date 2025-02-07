@@ -1,0 +1,184 @@
+﻿@model IEnumerable<ProductViewModel>
+
+@{
+    ViewData["Title"] = "Wishlist";
+}
+
+@section styles {
+<style>
+    body {
+            margin: 0;
+            font-family: 'Arial', sans-serif;
+            background-color: #f8f9fa;
+            display: contents;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+    }
+
+    .wishlist-container {
+            width: 100%;
+            max-width: 1500px;
+            margin: 0 auto;
+            padding: 30px;
+            display: block;
+            justify-content: center;
+            align-items: center;
+    }
+
+    .wishlist-card {
+        background: #ffffff;
+        border-radius: 15px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        padding: 30px;
+        width: 100%;
+    }
+
+    .wishlist-title {
+        text-align: center;
+        font-size: 2rem;
+        margin-bottom: 20px;
+        color: #333;
+    }
+
+    .wishlist-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+    }
+
+        .wishlist-table th,
+        .wishlist-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .wishlist-table th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+            color: #555;
+        }
+
+    .product-info {
+        display: flex;
+        align-items: center;
+    }
+
+    .product-image {
+        width: 80px;
+        height: 80px;
+        object-fit: cover;
+        border-radius: 8px;
+        margin-right: 15px;
+    }
+
+    .product-details h3 {
+        margin: 0;
+        font-size: 1.1rem;
+        color: #333;
+    }
+
+    .sku {
+        margin: 0;
+        font-size: 0.9rem;
+        color: #777;
+    }
+
+    .actions {
+        display: flex;
+        gap: 10px;
+    }
+
+    .remove-btn {
+        padding: 8px 15px;
+        background-color: #dc3545;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        transition: background-color 0.3s ease;
+    }
+
+        .remove-btn:hover {
+            background-color: #a71d2a;
+        }
+
+    .add-to-cart-btn {
+        padding: 8px 15px;
+        background-color: #28a745;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        transition: background-color 0.3s ease;
+    }
+
+        .add-to-cart-btn:hover {
+            background-color: #218838;
+        }
+
+    .continue-shopping {
+        padding: 10px 20px;
+        background-color: #6c757d;
+        color: #fff;
+        text-decoration: none;
+        border-radius: 5px;
+        font-size: 0.9rem;
+        transition: background-color 0.3s ease;
+    }
+
+        .continue-shopping:hover {
+            background-color: #5a6268;
+        }
+</style>
+}
+
+<div class="wishlist-container">
+    <div class="wishlist-card">
+        <h1 class="wishlist-title">Your Wishlist</h1>
+        <table class="wishlist-table">
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Price</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var product in Model)
+                {
+                    <tr>
+                        <td>
+                            <div class="product-info">
+                                <img src="@product.ImageUrl" alt="@product.Name" class="product-image" />
+                                <div class="product-details">
+                                    <h3>@product.Name</h3>
+                                    <p class="sku">SKU: @product.Id</p>
+                                </div>
+                            </div>
+                        </td>
+                        <td>@product.Price.ToString("C")</td>
+                        <td>
+                            <div class="actions">
+                                <form asp-action="RemoveFromWishlist" method="post">
+                                    <input type="hidden" name="productId" value="@product.Id" />
+                                    <button type="submit" class="remove-btn">Remove</button>
+                                </form>
+                                <form asp-controller="Cart" asp-action="AddToCart" method="post">
+                                    <input type="hidden" name="productId" value="@product.Id" />
+                                    <button type="submit" class="add-to-cart-btn">Add to Cart</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        <div class="text-end">
+            <a href="/" class="continue-shopping">Continue Shopping</a>
+        </div>
+    </div>
+</div>

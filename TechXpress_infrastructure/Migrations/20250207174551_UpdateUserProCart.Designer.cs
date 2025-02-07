@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace TechXpress_infrastructure.Migrations
 {
     [DbContext(typeof(TechXpress_context))]
-    [Migration("20250207125013_UpdateUserProfileRelationship")]
-    partial class UpdateUserProfileRelationship
+    [Migration("20250207174551_UpdateUserProCart")]
+    partial class UpdateUserProCart
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -458,7 +458,7 @@ namespace TechXpress_infrastructure.Migrations
                     b.HasOne("Cart", "Cart")
                         .WithMany()
                         .HasForeignKey("CartId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Cart", null)
@@ -474,7 +474,7 @@ namespace TechXpress_infrastructure.Migrations
                     b.HasOne("TechXpress_domain.Entities.ApplicationUser", "applicationUser")
                         .WithMany()
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Cart");

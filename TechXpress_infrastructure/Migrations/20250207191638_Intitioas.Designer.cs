@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace TechXpress_infrastructure.Migrations
 {
     [DbContext(typeof(TechXpress_context))]
-    [Migration("20250207125644_initialc")]
-    partial class initialc
+    [Migration("20250207191638_Intitioas")]
+    partial class Intitioas
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -458,7 +458,7 @@ namespace TechXpress_infrastructure.Migrations
                     b.HasOne("Cart", "Cart")
                         .WithMany()
                         .HasForeignKey("CartId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Cart", null)
@@ -474,7 +474,7 @@ namespace TechXpress_infrastructure.Migrations
                     b.HasOne("TechXpress_domain.Entities.ApplicationUser", "applicationUser")
                         .WithMany()
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Cart");

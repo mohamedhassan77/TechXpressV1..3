@@ -29,29 +29,43 @@ namespace TechXpress.Repositories
 
         public async Task AddProductToCartAsync(string userId, int productId, int quantity)
         {
+            var cart = await _context.Carts
+                .Include(c => c.CartItems)
+                .FirstOrDefaultAsync(c => c.UserId == userId);
 
-           
-            var cart = await GetByUserIdAsync(userId);
             if (cart == null)
             {
-                cart = new Cart { UserId = userId };
+                cart = new Cart
+                {
+                    UserId = userId,
+                    Id = userId,
+                    CartItems = new List<CartItem>()
+                };
                 _context.Carts.Add(cart);
+                await _context.SaveChangesAsync(); 
             }
 
-            var cartItem = cart.CartItems.FirstOrDefault(ci => ci.ProductId == productId  );
-            if (cartItem == null)
+            var cartItem = cart.CartItems.FirstOrDefault(ci => ci.ProductId == productId);
+            if (cartItem != null)
             {
-                var product = await _context.Products.FindAsync(productId);
-                if (product != null)
-                {
-                    cart.CartItems.Add(new CartItem {  CartId = cart.Id, ProductId = productId, Product = product, Quantity = quantity , UserId =userId });
-                }
+                cartItem.Quantity += quantity;
+                _context.CartItems.Update(cartItem);
             }
             else
             {
-                cartItem.Quantity += quantity;
-            }
+                // Create a new CartItem if the product is not in the cart.
+                cartItem = new CartItem
+                {
+                    CartId = cart.Id,
+                    ProductId = productId,
+                    Quantity = quantity,
+                    UserId = userId,
+                };
 
+                
+                _context.CartItems.Add(cartItem);
+                cart.CartItems.Add(cartItem);
+            }
             await _context.SaveChangesAsync();
         }
 
