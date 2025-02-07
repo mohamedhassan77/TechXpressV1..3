@@ -27,6 +27,7 @@ namespace TechXpress_domain.Entities
         [StringLength(12, ErrorMessage = "Phone number cannot exceed 12 characters.")]
         public string PhoneNumber { get; set; }
 
+        public string ImageUrl { get; set; } = "https://www.pngarts.com/files/10/Default-Profile-Picture-Download-PNG-Image.png";
         public DateTime DateOfBirth { get; set; }
 
         // Navigation property

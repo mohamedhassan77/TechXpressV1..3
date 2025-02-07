@@ -228,18 +228,20 @@ body {
 }
 
     .footer-links li {
+        
         margin-bottom: 1rem;
     }
 
-    .footer-links a {
+    .footer a {
         color: #FF3366;
         text-decoration: none;
         transition: color 0.3s ease;
     }
 
-        .footer-links a:hover {
+        .footer a:hover {
             color: var(--accent);
         }
+
 
 .social-icons {
     display: flex;
@@ -343,3 +345,108 @@ body {
             font-size: 1.2em;
             margin-right: 0.5rem;
         }
+
+/* Profile Container */
+.profile-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Profile Name Next to Image */
+.profile-name {
+    font-weight: 600;
+    font-size: 14px;
+    color: #333;
+}
+
+/* Profile Picture */
+.profile-pic {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #ddd;
+    transition: border 0.3s ease-in-out;
+}
+
+.profile-container:hover .profile-pic {
+    border-color: #007bff;
+}
+
+/* Dropdown Menu */
+.profile-dropdown {
+    position: absolute;
+    top: 55px;
+    right: 0;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    min-width: 200px;
+    display: none;
+    flex-direction: column;
+    z-index: 1000;
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+    /* Smooth Dropdown Open */
+    .profile-dropdown.show {
+        display: flex;
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+/* Dropdown Header */
+.dropdown-header {
+    display: flex;
+    align-items: center;
+    padding: 12px;
+    border-bottom: 1px solid #ddd;
+}
+
+.dropdown-profile-pic {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    margin-right: 10px;
+}
+
+.dropdown-email {
+    font-size: 12px;
+    color: gray;
+}
+
+/* Dropdown Items */
+.profile-dropdown .dropdown-item {
+    padding: 10px 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    color: #333;
+    text-decoration: none;
+    transition: background 0.3s ease;
+}
+
+    .profile-dropdown .dropdown-item:hover {
+        background: #f1f1f1;
+    }
+
+/* Logout Button */
+.profile-dropdown button {
+    width: 100%;
+    background: none;
+    border: none;
+    color: #d9534f;
+    font-size: 14px;
+    text-align: left;
+    padding: 10px 15px;
+    cursor: pointer;
+}
+
+    .profile-dropdown button:hover {
+        background: #ffebeb;
+    }

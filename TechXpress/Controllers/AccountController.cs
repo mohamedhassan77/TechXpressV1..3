@@ -188,7 +188,7 @@ namespace TechXpress.Controllers
             EmailService emailService = new EmailService();
             emailService.SendEmailAsync("","","");
 
-
+                
             /*==============================================================================*/
             _logger.LogInformation($"Password reset link: {resetLink}");
 

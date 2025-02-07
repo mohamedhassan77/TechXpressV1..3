@@ -46,8 +46,35 @@ namespace TechXpress.Controllers
             {
                 return NotFound();
             }
-            return View(product);
+
+            var specifications = new List<string>
+            {
+                "Color: Red",
+                "Size: Medium",
+                "Weight: 1.5 kg"
+            };
+
+            var reviews = new List<string>
+            {
+                "Great product!",
+                "Highly recommend it.",
+                "Would buy again."
+            };
+
+            var rating = 4.5f; // Example rating
+
+            // Combine data into a view model 
+            var viewModel = new ProductDetailsViewModel
+            {
+                Product = product,
+                Specifications = string.Join("; ", specifications),
+                Rating = rating,
+                Reviews = string.Join(" | ", reviews)
+            };
+
+            return View(viewModel);
         }
+
 
         // GET: Product/GetProductDetails/5
         // This action is used to show detailed info (e.g., specifications and reviews) for a product.

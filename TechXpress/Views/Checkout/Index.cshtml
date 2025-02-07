@@ -4,33 +4,138 @@
     ViewData["Title"] = "Checkout";
 }
 
-<div class="container mt-4">
-    <h1>Checkout</h1>
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Product</th>
-                <th>Quantity</th>
-                <th>Price</th>
-                <th>Total</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var item in Model)
-            {
+<div class="container checkout-container">
+    <h1 class="checkout-title">Checkout</h1>
+
+    <div class="table-responsive">
+        <table class="table checkout-table">
+            <thead>
                 <tr>
-                    <td>@item.Product.Name</td>
-                    <td>@item.Quantity</td>
-                    <td>@item.Product.Price.ToString("C")</td>
-                    <td>@((item.Quantity * item.Product.Price).ToString("C"))</td>
+                    <th>Product</th>
+                    <th>Image</th>
+                    <th>Quantity</th>
+                    <th>Price</th>
+                    <th>Total</th>
                 </tr>
-            }
-        </tbody>
-    </table>
-    <div class="text-end">
-        <h4>Total: @Model.Sum(item => item.Quantity * item.Product.Price).ToString("C")</h4>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@item.Product.Name</td>
+                        <td>
+                            <img src="@item.Product.ImageUrl" alt="@item.Product.Name" class="product-img">
+                        </td>
+                        <td>@item.Quantity</td>
+                        <td>@item.Product.Price.ToString("C")</td>
+                        <td>@((item.Quantity * item.Product.Price).ToString("C"))</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <div class="checkout-summary">
+        <h4>Total: <span class="total-price">@Model.Sum(item => item.Quantity * item.Product.Price).ToString("C")</span></h4>
+
         <form asp-action="PlaceOrder" method="post">
-            <button type="submit" class="btn btn-primary">Place Order</button>
+            <button type="submit" class="btn btn-checkout">
+                <i class="fas fa-credit-card"></i> Confirm Purchase
+            </button>
         </form>
     </div>
 </div>
+
+@section Styles {
+    <style>
+        /* Container Styling */
+        .checkout-container {
+            max-width: 850px;
+            margin: 40px auto;
+            padding: 30px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .checkout-title {
+            text-align: center;
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 25px;
+            color: #333;
+        }
+
+        /* Table Styling */
+        .checkout-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #fff;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+            .checkout-table thead {
+                background: #343a40;
+                color: white;
+                font-size: 1.1rem;
+            }
+
+            .checkout-table th, .checkout-table td {
+                padding: 14px;
+                text-align: center;
+                border-bottom: 1px solid #ddd;
+                vertical-align: middle;
+            }
+
+            .checkout-table tbody tr:hover {
+                background: rgba(0, 0, 0, 0.05);
+            }
+
+        /* Product Image */
+        .product-img {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
+
+        /* Checkout Summary */
+        .checkout-summary {
+            text-align: right;
+            margin-top: 30px;
+            padding-top: 15px;
+            border-top: 2px solid #ddd;
+        }
+
+        .total-price {
+            color: #28a745;
+            font-weight: bold;
+            font-size: 1.8rem;
+        }
+
+        /* Checkout Button */
+        .btn-checkout {
+            background: linear-gradient(135deg, #ff7e5f, #ff4757);
+            color: white;
+            font-size: 1.2rem;
+            font-weight: bold;
+            padding: 12px 28px;
+            border-radius: 8px;
+            border: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 4px 10px rgba(255, 71, 87, 0.3);
+        }
+
+            .btn-checkout:hover {
+                background: linear-gradient(135deg, #ff4757, #e63946);
+                transform: translateY(-2px);
+                box-shadow: 0 6px 16px rgba(255, 71, 87, 0.4);
+            }
+    </style>
+}

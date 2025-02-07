@@ -625,6 +625,20 @@
             }
 
             }
+
+            .product-link {
+                text-decoration: none;
+                color: var(--primary);
+                font-weight: bold;
+                transition: color 0.3s ease;
+            }
+
+                .product-link:hover {
+                    color: #FF3366;
+                    text-decoration: underline;
+                }
+
+
         </style>
     }
 
@@ -661,6 +675,109 @@
                 quantityInput.value = newQuantity;
               }
             }
+
+
+             // Add event listener to close modal when clicking outside the modal content
+            document.addEventListener('DOMContentLoaded', function() {
+                const modal = document.getElementById('productModal');
+
+                modal.addEventListener('click', function(event) {
+                    // Check if the click is directly on the modal (not on the modal content)
+                    if (event.target === modal) {
+                        closeModal();
+                    }
+                });
+
+                // Ensure modal can be closed with Escape key
+                document.addEventListener('keydown', function(event) {
+                    if (event.key === 'Escape' && modal.style.display === 'flex') {
+                        closeModal();
+                    }
+                });
+            });
+
+            function updateQuantity(change) {
+                const quantityInput = document.getElementById('quantity');
+                let currentValue = parseInt(quantityInput.value);
+                let newValue = currentValue + change;
+
+                // Ensure quantity stays between 1 and 99
+                newValue = Math.max(1, Math.min(newValue, 99));
+
+                quantityInput.value = newValue;
+            }
+
+
+            // Add to Cart Functionality
+            async function addToCart(productId) {
+                try {
+                    const response = await fetch('/Cart/Add', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                        },
+                        body: JSON.stringify({
+                            productId: productId,
+                            quantity: document.getElementById('quantity')?.value || 1
+                        })
+                    });
+
+                    if (response.ok) {
+                        showToast('Product added to cart!');
+                        updateCartCount(1);
+                    } else {
+                        showToast('Failed to add to cart', 'error');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    showToast('Network error', 'error');
+                }
+            }
+
+            // Add to Wishlist Functionality
+            async function addToWishlist(productId) {
+                try {
+                    const response = await fetch('/Wishlist/Add', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                        },
+                        body: JSON.stringify({ productId: productId })
+                    });
+
+                    if (response.ok) {
+                        showToast('Added to wishlist!');
+                        event.target.classList.toggle('active');
+                    } else {
+                        showToast('Failed to add to wishlist', 'error');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    showToast('Network error', 'error');
+                }
+            }
+
+            // Toast Notification
+            function showToast(message, type = 'success') {
+                const toast = document.createElement('div');
+                toast.className = `toast ${type}`;
+                toast.textContent = message;
+                document.body.appendChild(toast);
+
+                setTimeout(() => toast.remove(), 3000);
+            }
+
+            // Update Cart Count
+            function updateCartCount(change) {
+                const cartCount = document.getElementById('cart-count');
+                if (cartCount) {
+                    const current = parseInt(cartCount.textContent) || 0;
+                    cartCount.textContent = current + change;
+                }
+            }
+        
         </script>
     }
 </head>
@@ -717,6 +834,8 @@
             @foreach (var product in Model)
             {
                 <div class="product-card">
+                    
+              
                     <div class="product-badge">@product.Tag</div>
                     <div class="product-image-container">
                         <img src="@product.ImageUrl" alt="@product.Name" class="product-image">
@@ -739,11 +858,15 @@
                                     </button>
                                 </form>
                             </div>
+                   
                         </div>
                     </div>
                     <div class="product-content">
                         <div class="product-category">@product.Category.Name</div>
+                         <a asp-controller="Product" asp-action="Details" asp-route-id="@product.Id" class="product-link">
+                    
                         <h3 class="product-title">@product.Name</h3>
+                        </a>
                         <div class="product-rating">
                             <div class="stars">
                                 @for (int i = 0; i < 5; i++)
