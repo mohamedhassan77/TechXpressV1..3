@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
+using System.Threading.Tasks;
 using TechXpress.Models;
 using TechXpress_domain.Entities;
 
@@ -11,15 +13,18 @@ namespace TechXpress.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly ILogger<AccountController> _logger;
+        private readonly TechXpress_context _context;
 
         public AccountController(
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
-            ILogger<AccountController> logger)
+            ILogger<AccountController> logger,
+            TechXpress_context context) 
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _logger = logger;
+            _context = context;
         }
 
         [HttpGet]
@@ -41,8 +46,15 @@ namespace TechXpress.Controllers
 
             try
             {
+                var user = await _userManager.FindByEmailAsync(model.Email);
+                if (user == null)
+                {
+                    ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+                    return View(model);
+                }
+
                 var result = await _signInManager.PasswordSignInAsync(
-                    model.Email,
+                    user.UserName, 
                     model.Password,
                     model.RememberMe,
                     lockoutOnFailure: true);
@@ -50,12 +62,10 @@ namespace TechXpress.Controllers
                 if (result.Succeeded)
                 {
                     _logger.LogInformation("User logged in.");
-
                     if (!string.IsNullOrEmpty(model.ReturnUrl) && Url.IsLocalUrl(model.ReturnUrl))
                     {
                         return Redirect(model.ReturnUrl);
                     }
-
                     return RedirectToAction("Index", "Home");
                 }
 
@@ -104,21 +114,38 @@ namespace TechXpress.Controllers
                     UserName = model.Email,
                     Email = model.Email
                 };
+                
 
-                var result = await _userManager.CreateAsync(user, model.Password);
-
-                if (result.Succeeded)
+                using (var transaction = await _context.Database.BeginTransactionAsync())
                 {
-                    await _userManager.AddToRoleAsync(user, "User");
-                    _logger.LogInformation("User created a new account with password.");
+                    var result = await _userManager.CreateAsync(user, model.Password);
 
-                    await _signInManager.SignInAsync(user, isPersistent: false);
-                    return RedirectToAction("Index", "Home");
-                }
+                    if (result.Succeeded)
+                    {
+                        var userProfile = new UserProfile
+                        {
+                            Id = user.Id, 
+                            FirstName = model.FirstName,
+                            LastName = model.LastName,
+                            Email = model.Email,
+                            PhoneNumber = model.PhoneNumber,
+                            DateOfBirth = model.DateOfBirth
+                        };
+                        _context.UserProfiles.Add(userProfile);
+                        await _context.SaveChangesAsync();
 
-                foreach (var error in result.Errors)
-                {
-                    ModelState.AddModelError(string.Empty, error.Description);
+                        await _userManager.AddToRoleAsync(user, "User");
+                        _logger.LogInformation("User created a new account with password.");
+
+                        await _signInManager.SignInAsync(user, isPersistent: false);
+                        await transaction.CommitAsync();
+                        return RedirectToAction("Index", "Home");
+                    }
+
+                    foreach (var error in result.Errors)
+                    {
+                        ModelState.AddModelError(string.Empty, error.Description);
+                    }
                 }
             }
 

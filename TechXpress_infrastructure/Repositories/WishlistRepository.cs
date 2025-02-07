@@ -30,7 +30,7 @@ namespace TechXpress.Repositories
             var wishlist = await GetByUserIdAsync(userId);
             if (wishlist == null)
             {
-                wishlist = new Wishlist { UserId = userId };
+                wishlist = new Wishlist { Id = Guid.NewGuid().ToString(),UserId = userId };
                 _context.Wishlists.Add(wishlist);
             }
 

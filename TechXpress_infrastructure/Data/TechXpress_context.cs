@@ -38,9 +38,9 @@ public class TechXpress_context : IdentityDbContext<ApplicationUser>
         // ApplicationUser - UserProfile relationship
         builder.Entity<ApplicationUser>()
             .HasOne(u => u.UserProfile)
-            .WithOne()
-            .HasForeignKey<ApplicationUser>(u => u.Id)
-            .OnDelete(DeleteBehavior.Cascade);
+            .WithOne(b => b.ApplicationUser)
+            .HasForeignKey<UserProfile>(u => u.Id)
+            .OnDelete(DeleteBehavior.NoAction);
 
         // Category configuration
         builder.Entity<Category>()
@@ -63,22 +63,20 @@ public class TechXpress_context : IdentityDbContext<ApplicationUser>
             .HasForeignKey(w => w.UserId)
             .OnDelete(DeleteBehavior.Cascade);
 
-
+        // CartItem configuration
         builder.Entity<CartItem>()
-    .HasOne(c => c.Cart)
-    .WithMany()
-    .HasForeignKey(c => c.CartId)
-    .OnDelete(deleteBehavior: DeleteBehavior.NoAction);
+            .HasOne(c => c.Cart)
+            .WithMany()
+            .HasForeignKey(c => c.CartId)
+            .OnDelete(DeleteBehavior.NoAction); // Change to NoAction
 
-
-
-        // Add this to configure the ApplicationUser relationship
         builder.Entity<CartItem>()
             .HasOne(ci => ci.applicationUser)
             .WithMany()
             .HasForeignKey(ci => ci.UserId)
-    .OnDelete(deleteBehavior: DeleteBehavior.NoAction);
+            .OnDelete(DeleteBehavior.NoAction); // Change to NoAction
+
         builder.Entity<CartItem>()
-     .HasKey(ci => new { ci.ProductId, ci.CartId });
+            .HasKey(ci => new { ci.ProductId, ci.CartId });
     }
 }

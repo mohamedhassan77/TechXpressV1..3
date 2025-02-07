@@ -19,7 +19,7 @@
     @RenderSection("Styles", required: false)
 </head>
 <body>
-    <a href="#main-content" class="skip-link">Skip to main content</a>
+    <a href="main-content" class="skip-link">Skip to main content</a>
 
     <!-- Enhanced Navbar -->
     <nav class="navbar" aria-label="Main navigation">
@@ -104,7 +104,7 @@
         <div class="footer-bottom">
             <p>
                 &copy; 2024 TechXpress. All rights reserved. |
-                <a asp-controller="Home" asp-action="Privacy">Privacy Policy</a>
+                <a class="footer-bottom"  asp-controller="Home" asp-action="Privacy">Privacy Policy</a>
             </p>
         </div>
     </footer>

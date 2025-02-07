@@ -29,6 +29,8 @@ namespace TechXpress.Repositories
 
         public async Task AddProductToCartAsync(string userId, int productId, int quantity)
         {
+
+           
             var cart = await GetByUserIdAsync(userId);
             if (cart == null)
             {
@@ -36,13 +38,13 @@ namespace TechXpress.Repositories
                 _context.Carts.Add(cart);
             }
 
-            var cartItem = cart.CartItems.FirstOrDefault(ci => ci.ProductId == productId);
+            var cartItem = cart.CartItems.FirstOrDefault(ci => ci.ProductId == productId  );
             if (cartItem == null)
             {
                 var product = await _context.Products.FindAsync(productId);
                 if (product != null)
                 {
-                    cart.CartItems.Add(new CartItem { ProductId = productId, Product = product, Quantity = quantity });
+                    cart.CartItems.Add(new CartItem {  CartId = cart.Id, ProductId = productId, Product = product, Quantity = quantity , UserId =userId });
                 }
             }
             else

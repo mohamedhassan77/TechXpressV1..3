@@ -1,103 +1,172 @@
 ﻿@model RegisterViewModel
 
 @{
-    ViewData["Title"] = "Create Account";
+    ViewData["Title"] = "Register";
     Layout = "_Layout";
 }
 
 @section Styles {
     <style>
+        body {
+            background-color: var(--light);
+             font-family: 'Inter', sans-serif;
+        }
+
         .register-container {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            padding: 3rem;
-            border-radius: 15px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-            width: 100%;
-            max-width: 400px;
-            margin: 2rem auto;
-            position: relative;
-            z-index: 1;
+            background: white;
+            border-radius: 20px;
+            padding: 4rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            margin: 6rem auto;
+            text-align: center;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            animation: slideUp 0.8s ease-out;
         }
 
-        .register-title {
-            font-size: 2.5rem;
-            font-weight: 700;
+        @@keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h2 {
             margin-bottom: 2rem;
-            background: linear-gradient(to right, #FF3366, #00F5A0);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            text-align: center;
+            color: var(--primary);
+            font-size: 2.5rem;
+            font-weight: 600;
         }
 
-        .error-message {
-            color: #ff4d4d;
-            margin-bottom: 1rem;
-            text-align: center;
-            background: rgba(255, 77, 77, 0.1);
-            padding: 0.75rem;
-            border-radius: 8px;
+        .form-control {
+            display: block;
+            width: 100%;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            font-size: 1rem;
+            background-color: var(--light);
+            color: var(--dark);
+            transition: all 0.3s ease;
         }
+
+            .form-control:focus {
+                border-color: var(--primary);
+                box-shadow: 0 0 8px rgba(255, 111, 97, 0.2);
+                outline: none;
+            }
+
+        .btn-primary {
+            background-color: var(--primary);
+            border: none;
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+            .btn-primary:hover {
+                background-color: var(--secondary);
+                transform: translateY(-3px);
+                box-shadow: 0 5px 15px rgba(107, 91, 149, 0.3);
+            }
+
+        .form-check {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-check-input {
+            margin-right: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+            .form-check-input:checked {
+                background-color: var(--primary);
+                border-color: var(--primary);
+            }
+
+        .text-danger {
+            font-size: 0.9rem;
+            color: #e74c3c;
+        }
+
+        p {
+            font-size: 1rem;
+            color: var(--Light);
+        }
+
+        a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+            a:hover {
+                color: var(--secondary);
+                text-decoration: underline;
+            }
     </style>
 }
 
+
 <div class="register-container">
-    <h1 class="register-title">Create Account</h1>
-
+    <h2>Register</h2>
     <form asp-action="Register" method="post">
-        @if (!ViewData.ModelState.IsValid)
-        {
-            <div asp-validation-summary="ModelOnly" class="error-message"></div>
-        }
-
-        <div class="form-group mb-4">
-            <label asp-for="Email" class="form-label">Email Address</label>
-            <input asp-for="Email" class="form-control" placeholder="hello@techxpress.com" />
+        <div class="form-group">
+            <label asp-for="Email"></label>
+            <input asp-for="Email" class="form-control" placeholder="Enter your email" />
             <span asp-validation-for="Email" class="text-danger"></span>
         </div>
-
-        <div class="form-group mb-4">
-            <label asp-for="Password" class="form-label">Password</label>
-            <div class="password-input-group">
-                <input asp-for="Password" type="password" class="form-control" placeholder="••••••••" />
-                <button type="button" class="password-toggle" aria-label="Show password">
-                    <i class="fas fa-eye"></i>
-                </button>
-            </div>
+        <div class="form-group">
+            <label asp-for="Password"></label>
+            <input asp-for="Password" class="form-control" type="password" placeholder="Enter your password" />
             <span asp-validation-for="Password" class="text-danger"></span>
         </div>
-
-        <div class="form-group mb-4">
-            <label asp-for="ConfirmPassword" class="form-label">Confirm Password</label>
-            <div class="password-input-group">
-                <input asp-for="ConfirmPassword" type="password" class="form-control" placeholder="••••••••" />
-                <button type="button" class="password-toggle" aria-label="Show password">
-                    <i class="fas fa-eye"></i>
-                </button>
-            </div>
+        <div class="form-group">
+            <label asp-for="ConfirmPassword"></label>
+            <input asp-for="ConfirmPassword" class="form-control" type="password" placeholder="Confirm your password" />
             <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
         </div>
-
-        <button type="submit" class="nav-button mb-4">Create Account</button>
-
-        <div class="extra-links d-flex flex-column gap-2">
-            <a asp-action="Login" asp-controller="Account">Already have an account? Sign In</a>
+        <div class="form-group">
+            <label asp-for="FirstName"></label>
+            <input asp-for="FirstName" class="form-control" placeholder="Enter your first name" />
+            <span asp-validation-for="FirstName" class="text-danger"></span>
         </div>
+        <div class="form-group">
+            <label asp-for="LastName"></label>
+            <input asp-for="LastName" class="form-control" placeholder="Enter your last name" />
+            <span asp-validation-for="LastName" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="PhoneNumber"></label>
+            <input asp-for="PhoneNumber" class="form-control" placeholder="Enter your phone number" />
+            <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="DateOfBirth"></label>
+            <input asp-for="DateOfBirth" class="form-control" type="date" />
+            <span asp-validation-for="DateOfBirth" class="text-danger"></span>
+        </div>
+        <button type="submit" class="btn btn-primary">Register</button>
     </form>
+    <div class="mt-4">
+        <p>Already have an account? <a asp-action="Login">Login</a></p>
+    </div>
 </div>
 
 @section Scripts {
-    <script>
-        // Password visibility toggle
-        document.querySelectorAll('.password-toggle').forEach(button => {
-            button.addEventListener('click', (e) => {
-                const input = button.previousElementSibling;
-                const isPassword = input.type === 'password';
-                input.type = isPassword ? 'text' : 'password';
-                button.querySelector('i').classList.toggle('fa-eye-slash', isPassword);
-                button.querySelector('i').classList.toggle('fa-eye', !isPassword);
-            });
-        });
-    </script>
+    <partial name="_ValidationScriptsPartial" />
 }

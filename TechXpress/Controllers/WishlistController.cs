@@ -9,7 +9,6 @@ using TechXpress.Repositories;
 
 namespace TechXpress.Controllers
 {
-    [Authorize]
     public class WishlistController : Controller
     {
         private readonly IWishlistRepository _wishlistRepository;

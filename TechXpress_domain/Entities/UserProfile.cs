@@ -1,11 +1,14 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using TechXpress_domain.ValueObjects;
 
 namespace TechXpress_domain.Entities
 {
     public class UserProfile
     {
-        [Key] // Primary key for the UsersProfile table
+        [Key]
+        [ForeignKey("ApplicationUser")]
         public string Id { get; set; }
 
         [Required(ErrorMessage = "First name is required.")]
@@ -26,7 +29,9 @@ namespace TechXpress_domain.Entities
 
         public DateTime DateOfBirth { get; set; }
 
-        // Navigation property to Address (one-to-many relationship)
-        public ICollection<Address> Addresses { get; set; } // A user can have multiple addresses
+        // Navigation property
+        public ICollection<Address> Addresses { get; set; } = new List<Address>();
+        public virtual ApplicationUser ApplicationUser { get; set; }
+
     }
 }

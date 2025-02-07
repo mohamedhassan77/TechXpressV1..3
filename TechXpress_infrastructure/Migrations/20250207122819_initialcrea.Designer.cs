@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace TechXpress_infrastructure.Migrations
 {
     [DbContext(typeof(TechXpress_context))]
-    [Migration("20250204202710_AddCartItemPrimaryKey")]
-    partial class AddCartItemPrimaryKey
+    [Migration("20250207122819_initialcrea")]
+    partial class initialcrea
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -254,7 +254,6 @@ namespace TechXpress_infrastructure.Migrations
                         .HasColumnType("bit");
 
                     b.Property<string>("UserName")
-                        .IsRequired()
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
 
@@ -539,9 +538,9 @@ namespace TechXpress_infrastructure.Migrations
             modelBuilder.Entity("TechXpress_domain.Entities.ApplicationUser", b =>
                 {
                     b.HasOne("TechXpress_domain.Entities.UserProfile", "UserProfile")
-                        .WithOne()
+                        .WithOne("ApplicationUser")
                         .HasForeignKey("TechXpress_domain.Entities.ApplicationUser", "Id")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("UserProfile");
@@ -604,6 +603,9 @@ namespace TechXpress_infrastructure.Migrations
             modelBuilder.Entity("TechXpress_domain.Entities.UserProfile", b =>
                 {
                     b.Navigation("Addresses");
+
+                    b.Navigation("ApplicationUser")
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("TechXpress_domain.Entities.Wishlist", b =>

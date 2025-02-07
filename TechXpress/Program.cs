@@ -2,12 +2,11 @@ using TechXpress_infrastructure.Data;
 using TechXpress_infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
 using TechXpress.Data.Repositories;
-using TechXpress.Repositories;
-using Microsoft.AspNetCore.Identity;
+ using Microsoft.AspNetCore.Identity;
 using TechXpress_domain.Entities;
-using TechXpress.Data;
-using TechXpress_application.Interfaces;
+ using TechXpress_application.Interfaces;
  using TechXpress_application.Services;
+using TechXpress.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,7 +25,9 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
 builder.Services.AddScoped<IUserProfileRepository, UserProfileRepository>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
-builder.Services.AddScoped<CategoryService>();
+builder.Services.AddScoped<CategoryService>(); 
+builder.Services.AddScoped<ICartRepository ,CartRepository>();
+builder.Services.AddScoped<IWishlistRepository,WishlistRepository>();
 
 var app = builder.Build();
 

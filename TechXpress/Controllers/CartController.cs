@@ -8,7 +8,6 @@ using System.Linq;
 
 namespace TechXpress.Controllers
 {
-    [Authorize]
     public class CartController : Controller
     {
         private readonly ICartRepository _cartRepository;
@@ -34,6 +33,10 @@ namespace TechXpress.Controllers
         {
             var userId = _userManager.GetUserId(User);
             await _cartRepository.AddProductToCartAsync(userId, productId, quantity);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return BadRequest("User ID is null or empty.");
+            }
             // Trigger cart updated event
             TempData["ToastMessage"] = "Product added to cart!";
             return RedirectToAction(nameof(Index));
