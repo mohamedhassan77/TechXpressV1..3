@@ -1,0 +1,111 @@
+﻿@model TechXpress_domain.Entities.UserProfile
+
+@{
+    ViewData["Title"] = "My Account";
+}
+
+<div class="account-container">
+    <h1>My Account</h1>
+    <div class="profile-details">
+        <div class="profile-picture-container">
+            <img src="@Model.ImageUrl" alt="Profile Picture" class="profile-picture" />
+        </div>
+        <div class="profile-info">
+            <h2>@Model.FirstName @Model.LastName</h2>
+            <p><strong>Email:</strong> @Model.Email</p>
+            <p><strong>Phone:</strong> @Model.PhoneNumber</p>
+            <p><strong>Date of Birth:</strong> @Model.DateOfBirth.ToString("d")</p>
+        </div>
+    </div>
+    <div class="profile-actions">
+        <a href="@Url.Action("EditProfile", "Account")" class="btn btn-primary">Edit Profile</a>
+        <a href="@Url.Action("ChangePassword", "Account")" class="btn btn-secondary">Change Password</a>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        /* Container for the account details */
+        .account-container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 1.5rem;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Layout for the profile details */
+        .profile-details {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 2rem;
+            margin-bottom: 2rem;
+            text-align: left;
+        }
+
+        /* Profile picture styling */
+        .profile-picture-container {
+            flex: 0 0 150px;
+        }
+
+        .profile-picture {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--primary);
+        }
+
+        /* Profile information styling */
+        .profile-info {
+            flex: 1;
+        }
+
+            .profile-info h2 {
+                font-size: 2rem;
+                margin-bottom: 0.5rem;
+                color: var(--dark);
+            }
+
+            .profile-info p {
+                font-size: 1rem;
+                margin: 0.3rem 0;
+                color: var(--text);
+            }
+
+        /* Action buttons styling */
+        .profile-actions {
+            text-align: center;
+        }
+
+            .profile-actions a {
+                display: inline-block;
+                margin: 0.5rem;
+                padding: 0.75rem 1.5rem;
+                border-radius: 5px;
+                text-decoration: none;
+                font-weight: bold;
+                transition: background 0.3s ease;
+            }
+
+        .btn-primary {
+            background: var(--primary);
+            color: #fff;
+        }
+
+            .btn-primary:hover {
+                background: var(--secondary);
+            }
+
+        .btn-secondary {
+            background: #555;
+            color: #fff;
+        }
+
+            .btn-secondary:hover {
+                background: #333;
+            }
+    </style>
+}

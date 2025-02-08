@@ -253,5 +253,28 @@ namespace TechXpress.Controllers
             return View();
         }
 
+
+        [HttpGet]
+        [Authorize]
+        public async Task<IActionResult> Manage()
+        {
+            // Retrieve the current authenticated user.
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                // If user is not found, redirect to login.
+                return RedirectToAction("Login", "Account");
+            }
+
+            // Retrieve the user profile from the database using the user's Id.
+            var userProfile = await _context.UserProfiles.FindAsync(user.Id);
+            if (userProfile == null)
+            {
+                // Optionally, you can create a new UserProfile if it doesn't exist.
+                return NotFound("User profile not found.");
+            }
+
+            return View(userProfile);
+        }
     }
 }
