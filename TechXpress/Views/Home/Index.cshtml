@@ -667,14 +667,7 @@
               setTimeout(() => { modal.style.display = 'none'; }, 300);
             }
 
-            function updateQuantity(change) {
-              var quantityInput = document.getElementById("quantity");
-              var currentQuantity = parseInt(quantityInput.value);
-              var newQuantity = currentQuantity + change;
-              if (newQuantity >= parseInt(quantityInput.min) && newQuantity <= parseInt(quantityInput.max)) {
-                quantityInput.value = newQuantity;
-              }
-            }
+          
 
 
              // Add event listener to close modal when clicking outside the modal content
@@ -769,14 +762,7 @@
                 setTimeout(() => toast.remove(), 3000);
             }
 
-            // Update Cart Count
-            function updateCartCount(change) {
-                const cartCount = document.getElementById('cart-count');
-                if (cartCount) {
-                    const current = parseInt(cartCount.textContent) || 0;
-                    cartCount.textContent = current + change;
-                }
-            }
+            
         
         </script>
     }

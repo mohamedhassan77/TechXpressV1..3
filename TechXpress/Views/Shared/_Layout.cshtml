@@ -5,8 +5,16 @@
 @inject Microsoft.AspNetCore.Identity.SignInManager<ApplicationUser> SignInManager
 
 @{
+    // Get current user (if authenticated) and profile image URL with a fallback.
     var user = User.Identity.IsAuthenticated ? await UserManager.GetUserAsync(User) : null;
-    var profileImageUrl = user?.UserProfile?.ImageUrl ?? "https://www.pngarts.com/files/10/Default-Profile-Picture-Download-PNG-Image.png"; 
+    var profileImageUrl = user?.UserProfile?.ImageUrl
+        ?? "https://www.pngarts.com/files/10/Default-Profile-Picture-Download-PNG-Image.png";
+
+    // Load categories once and split them into two columns.
+    var categories = await CategoryService.GetAllCategoriesAsync();
+    int halfCount = (int)Math.Ceiling(categories.Count() / 2.0);
+    var firstColumn = categories.Take(halfCount).ToList();
+    var secondColumn = categories.Skip(halfCount).ToList();
 }
 
 <!DOCTYPE html>
@@ -23,14 +31,13 @@
           integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg=="
           crossorigin="anonymous"
           referrerpolicy="no-referrer" />
-
     @RenderSection("Styles", required: false)
 </head>
 <body>
-    <a href="main-content" class="skip-link">Skip to main content</a>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
 
     <!-- Navbar -->
-    <nav class="navbar">
+    <nav class="navbar" aria-label="Main navigation">
         <div class="nav-container">
             <a href="/" class="logo">
                 <i class="fas fa-bolt"></i> TechXpress
@@ -43,15 +50,32 @@
             <ul class="nav-menu">
                 <li><a href="#features" class="nav-link">Features</a></li>
                 <li><a href="#products" class="nav-link">Products</a></li>
+
+                <!-- Categories Dropdown (Two-Column) -->
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown">Categories</a>
-                    <div class="dropdown-menu">
-                        @foreach (var category in await CategoryService.GetAllCategoriesAsync())
-                        {
-                            <a class="dropdown-item" href="/Category/@category.Id">@category.Name</a>
-                        }
+                    <a class="nav-link dropdown-toggle" href="#" id="categoriesDropdown" aria-haspopup="true" aria-expanded="false">
+                        Categories
+                    </a>
+                    <div class="dropdown-menu two-column-dropdown" aria-labelledby="categoriesDropdown">
+                        <div class="dropdown-column">
+                            @foreach (var category in firstColumn)
+                            {
+                                <a class="two-col-dropdown-item" asp-controller="Category" asp-action="Details" asp-route-id="@category.Id">
+                                    @category.Name
+                                </a>
+                            }
+                        </div>
+                        <div class="dropdown-column">
+                            @foreach (var category in secondColumn)
+                            {
+                                <a class="two-col-dropdown-item" asp-controller="Category" asp-action="Details" asp-route-id="@category.Id">
+                                    @category.Name
+                                </a>
+                            }
+                        </div>
                     </div>
                 </li>
+                <!-- Cart and Wishlist Links -->
                 <li>
                     <a href="/Cart" class="nav-link">
                         <i class="fas fa-shopping-cart"></i>
@@ -66,26 +90,25 @@
                 </li>
                 <li><a href="#contact" class="nav-link">Contact</a></li>
 
-                <!-- Profile Dropdown -->
+                  <!-- Profile Dropdown -->
                 <li class="nav-item profile-container">
                     <a href="#" class="profile-trigger" id="profileTrigger">
-                        <img src="@profileImageUrl" alt="User Profile Picture" class="profile-pic">
+                        <img src="@profileImageUrl" alt="User Profile Picture" class="profile-pic" />
                     </a>
                     <div class="profile-dropdown" id="profileDropdown">
-                        @if (SignInManager.IsSignedIn(User))
+                        @if (SignInManager.IsSignedIn(User) && user != null)
                         {
-                            
-{
-                                  <a href="/Account/Manage" class="dropdown-item">
-                                             <b>@user.Email  </b>
-                                         </a>
-
-               
+                            <div class="dropdown-header">
+                                <img src="@profileImageUrl" alt="User Profile Picture" class="dropdown-profile-pic" />
+                                <div>
+                                    <b>@user.UserProfile?.FirstName @user.UserProfile?.LastName</b>
+                                    <p class="dropdown-email">@user.Email</p>
+                                </div>
+                            </div>
+                            <a href="/Account/Manage" class="dropdown-item">My Account</a>
                             <form method="post" asp-controller="Account" asp-action="Logout">
                                 <button type="submit" class="dropdown-item">Logout</button>
-
                             </form>
-                        }
                         }
                         else
                         {
@@ -104,41 +127,37 @@
     </main>
 
     <!-- Footer -->
-    <footer class="footer">
+    <footer class="footer" role="contentinfo">
         <div class="footer-grid">
             <div>
-                <h2>About TechXpress</h2>
+                <h2 class="footer-title">About TechXpress</h2>
                 <p>Your premier destination for cutting-edge technology and innovative gadgets.</p>
             </div>
-
             <div>
-                <h2>Quick Links</h2>
-                <ul>
+                <h2 class="footer-title">Quick Links</h2>
+                <ul class="footer-links">
                     <li><a href="#features">Features</a></li>
                     <li><a href="#products">Products</a></li>
                     <li><a href="#contact">Contact</a></li>
                     <li><a href="/support">Support</a></li>
                 </ul>
             </div>
-
             <div>
-                <h2>Connect</h2>
+                <h2 class="footer-title">Connect</h2>
                 <div class="social-icons">
-                    <a href="#"><i class="fab fa-facebook"></i></a>
-                    <a href="#"><i class="fab fa-twitter"></i></a>
-                    <a href="#"><i class="fab fa-instagram"></i></a>
-                    <a href="#"><i class="fab fa-linkedin"></i></a>
+                    <a href="#" aria-label="Facebook"><i class="fab fa-facebook"></i></a>
+                    <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                    <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                    <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin"></i></a>
                 </div>
             </div>
         </div>
-
         <div class="footer-bottom">
             <p>&copy; 2024 TechXpress. All rights reserved. | <a asp-controller="Home" asp-action="Privacy">Privacy Policy</a></p>
         </div>
     </footer>
 
     @RenderSection("Scripts", required: false)
-
     <script src="~/js/site.js"></script>
 </body>
 </html>
