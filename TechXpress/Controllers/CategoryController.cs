@@ -1,72 +1,99 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
+using TechXpress.Models;
 using TechXpress_domain.Entities;
-using TechXpress_application.Services;
+using TechXpress_domain.Interfaces.Services;
 
 namespace TechXpress.Controllers
 {
-    // Require Admin for all actions by default.
-    [Authorize(Roles = "Admin")]
     public class CategoryController : Controller
     {
-        private readonly CategoryService _categoryService;
+        private readonly ICategoryService _categoryService;
 
-        public CategoryController(CategoryService categoryService)
+        public CategoryController(ICategoryService categoryService)
         {
             _categoryService = categoryService;
         }
 
-        // GET: /Category/Index
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int pageNumber = 1, int pageSize = 10, string sortBy = "name_asc")
         {
-            var categories = await _categoryService.GetAllCategoriesAsync();
-            return View(categories);
+            var categories = await _categoryService.GetAllCategoriesAsync(pageNumber, pageSize, sortBy);
+            var viewModel = new System.Collections.Generic.List<CategoryViewModel>();
+            foreach (var cat in categories)
+            {
+                viewModel.Add(new CategoryViewModel
+                {
+                    Id = cat.Id,
+                    Name = cat.Name,
+                    Description = cat.Description,
+                    ImageUrl = cat.ImageUrl,
+                    CreatedAt = cat.CreatedAt,
+                    UpdatedAt = cat.UpdatedAt,
+                    IsFeatured = false // or set as needed
+                });
+            }
+            return View(viewModel);
         }
 
-        // GET: /Category/Create
         public IActionResult Create()
         {
-            return View();
+            return View(new CategoryViewModel());
         }
 
-        // POST: /Category/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Category category)
+        public async Task<IActionResult> Create(CategoryViewModel model)
         {
             if (ModelState.IsValid)
             {
+                var category = new Category
+                {
+                    Name = model.Name,
+                    Description = model.Description,
+                    ImageUrl = model.ImageUrl
+                };
                 await _categoryService.AddCategoryAsync(category);
                 TempData["SuccessMessage"] = "Category created successfully!";
                 return RedirectToAction(nameof(Index));
             }
-            return View(category);
+            return View(model);
         }
 
-        // GET: /Category/Edit/5
         public async Task<IActionResult> Edit(int id)
         {
             var category = await _categoryService.GetCategoryByIdAsync(id);
-            if (category == null)
+            if (category == null) return NotFound();
+            var model = new CategoryViewModel
             {
-                return NotFound();
-            }
-            return View(category);
+                Id = category.Id,
+                Name = category.Name,
+                Description = category.Description,
+                ImageUrl = category.ImageUrl,
+                CreatedAt = category.CreatedAt,
+                UpdatedAt = category.UpdatedAt
+            };
+            return View(model);
         }
 
-        // POST: /Category/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, Category category)
+        public async Task<IActionResult> Edit(int id, CategoryViewModel model)
         {
-            if (id != category.Id)
-            {
+            if (id != model.Id)
                 return NotFound();
-            }
 
             if (ModelState.IsValid)
             {
+                var category = new Category
+                {
+                    Id = model.Id,
+                    Name = model.Name,
+                    Description = model.Description,
+                    ImageUrl = model.ImageUrl,
+                    CreatedAt = model.CreatedAt,
+                    UpdatedAt = System.DateTime.UtcNow
+                };
                 try
                 {
                     await _categoryService.UpdateCategoryAsync(category);
@@ -78,21 +105,25 @@ namespace TechXpress.Controllers
                     ModelState.AddModelError("", "An error occurred while updating the category.");
                 }
             }
-            return View(category);
+            return View(model);
         }
 
-        // GET: /Category/Delete/5
         public async Task<IActionResult> Delete(int id)
         {
             var category = await _categoryService.GetCategoryByIdAsync(id);
-            if (category == null)
+            if (category == null) return NotFound();
+            var model = new CategoryViewModel
             {
-                return NotFound();
-            }
-            return View(category);
+                Id = category.Id,
+                Name = category.Name,
+                Description = category.Description,
+                ImageUrl = category.ImageUrl,
+                CreatedAt = category.CreatedAt,
+                UpdatedAt = category.UpdatedAt
+            };
+            return View(model);
         }
 
-        // POST: /Category/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
@@ -106,8 +137,6 @@ namespace TechXpress.Controllers
             return NotFound();
         }
 
-        // GET: /Category/Details/5
-        // Allow anonymous access to the details view.
         [AllowAnonymous]
         public async Task<IActionResult> Details(int id)
         {
@@ -116,7 +145,41 @@ namespace TechXpress.Controllers
             {
                 return NotFound();
             }
-            return View(category);
+
+            var viewModel = new CategoryViewModel
+            {
+                Id = category.Id,
+                Name = category.Name,
+                Description = category.Description,
+                ImageUrl = category.ImageUrl,
+                CreatedAt = category.CreatedAt,
+                UpdatedAt = category.UpdatedAt,
+                Products = category.Products?.Select(p => new ProductViewModel
+                {
+                    Id = p.Id,
+                    Name = p.Name,
+                    Description = p.Description,
+                    Price = p.Price,
+                    DiscountPrice = p.DiscountPrice,
+                    ImageUrl = p.ImageUrl,
+                    IsFeatured = p.IsFeatured,
+                    CreatedDate = p.CreatedDate,
+                    UpdatedDate = p.UpdatedDate,
+                    Tag = p.Tag,
+                    Brand = p.Brand,
+                    CategoryId = p.CategoryId,
+                    StockQuantity = p.StockQuantity,
+                    SKU = p.SKU,
+                    Specifications = p.Specifications,
+                    OldPrice = p.OldPrice,
+                    ProductImages = p.ProductImages.ToList(),
+                    AverageRating = p.Reviews.Any() ? p.Reviews.Average(r => r.Rating) : 0,
+                    ReviewCount = p.Reviews.Count()
+                }).ToList() ?? new List<ProductViewModel>()
+            };
+
+            return View(viewModel);
         }
+
     }
 }

@@ -1,0 +1,23 @@
+@model TechXpress.Models.UserProfileViewModel
+
+@{
+    ViewData["Title"] = "Profile";
+}
+
+<div class="profile-page">
+    <div class="profile-header">
+        <img src="@Model.ProfilePictureUrl" alt="Profile Picture" class="profile-avatar" />
+        <div class="profile-info">
+            <h1>@Model.FirstName @Model.LastName</h1>
+            <p>@Model.Email</p>
+            <p>@Model.PhoneNumber</p>
+        </div>
+    </div>
+
+    <div class="profile-section">
+        <h2 class="section-title">About Me</h2>
+        <p>Date of Birth: @(Model.DateOfBirth?.ToString("MM/dd/yyyy") ?? "N/A")</p>
+        <p>Joined: @Model.CreatedAt.ToString("MM/dd/yyyy")</p>
+        <p>Gender: @Model.Gender</p>
+    </div>
+</div>

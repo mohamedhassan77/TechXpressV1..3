@@ -1,15 +1,13 @@
-﻿using TechXpress_domain.Entities;
-using System.Collections.Generic;
+﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
-using TechXpress_infrastructure.Data;
-using TechXpress_application.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using TechXpress_domain.Entities;
+using TechXpress_domain.Interfaces.Repositories;
+using TechXpress_infrastructure.Data;
 
-namespace TechXpress.Repositories
+namespace TechXpress_infrastructure.Repositories
 {
-  
-
     public class CartRepository : ICartRepository
     {
         private readonly TechXpress_context _context;
@@ -19,96 +17,90 @@ namespace TechXpress.Repositories
             _context = context;
         }
 
-        public async Task<Cart> GetByUserIdAsync(string userId)
-        {
-            return await _context.Carts
-                .Include(c => c.CartItems)
-                .ThenInclude(ci => ci.Product)
-                .FirstOrDefaultAsync(c => c.UserId == userId);
-        }
-
-        public async Task AddProductToCartAsync(string userId, int productId, int quantity)
+        public async Task<Cart> GetCartByUserIdAsync(string userId)
         {
             var cart = await _context.Carts
                 .Include(c => c.CartItems)
+                    .ThenInclude(ci => ci.Product)
                 .FirstOrDefaultAsync(c => c.UserId == userId);
+            return cart ?? new Cart { UserId = userId };
+        }
 
-            if (cart == null)
-            {
-                cart = new Cart
-                {
-                    UserId = userId,
-                    Id = userId,
-                    CartItems = new List<CartItem>()
-                };
-                _context.Carts.Add(cart);
-                await _context.SaveChangesAsync(); 
-            }
+        public async Task<Cart> AddItemAsync(string userId, int productId, int quantity)
+        {
+            var cart = await GetCartByUserIdAsync(userId);
+            var existingItem = cart.CartItems.FirstOrDefault(i => i.ProductId == productId);
 
-            var cartItem = cart.CartItems.FirstOrDefault(ci => ci.ProductId == productId);
-            if (cartItem != null)
+            if (existingItem != null)
             {
-                cartItem.Quantity += quantity;
-                _context.CartItems.Update(cartItem);
+                existingItem.Quantity += quantity;
             }
             else
             {
-                // Create a new CartItem if the product is not in the cart.
-                cartItem = new CartItem
+                cart.CartItems.Add(new CartItem
                 {
                     CartId = cart.Id,
                     ProductId = productId,
-                    Quantity = quantity,
-                    UserId = userId,
-                };
-
-                
-                _context.CartItems.Add(cartItem);
-                cart.CartItems.Add(cartItem);
+                    Quantity = quantity
+                });
             }
-            await _context.SaveChangesAsync();
+
+            cart.UpdatedAt = DateTime.UtcNow;
+
+            if (!_context.Carts.Any(c => c.UserId == userId))
+            {
+                await _context.Carts.AddAsync(cart);
+            }
+            else
+            {
+                _context.Entry(cart).State = EntityState.Modified;
+            }
+
+            await SaveChangesAsync();
+            return cart;
         }
 
-        public async Task RemoveProductFromCartAsync(string userId, int productId)
+        public async Task<Cart> RemoveItemAsync(string userId, int productId)
         {
-            var cart = await GetByUserIdAsync(userId);
-            if (cart != null)
+            var cart = await GetCartByUserIdAsync(userId);
+            var item = cart.CartItems.FirstOrDefault(i => i.ProductId == productId);
+            if (item != null)
             {
-                var cartItem = cart.CartItems.FirstOrDefault(ci => ci.ProductId == productId);
-                if (cartItem != null)
-                {
-                    cart.CartItems.Remove(cartItem);
-                    await _context.SaveChangesAsync();
-                }
+                _context.CartItems.Remove(item);
+                cart.UpdatedAt = DateTime.UtcNow;
+                await SaveChangesAsync();
             }
+            return cart;
         }
 
-        public async Task UpdateCartItemQuantityAsync(string userId, int productId, int quantity)
+        public async Task<Cart> UpdateQuantityAsync(string userId, int productId, int quantity)
         {
-            var cart = await GetByUserIdAsync(userId);
-            if (cart != null)
+            var cart = await GetCartByUserIdAsync(userId);
+            var item = cart.CartItems.FirstOrDefault(i => i.ProductId == productId);
+            if (item != null)
             {
-                var cartItem = cart.CartItems.FirstOrDefault(ci => ci.ProductId == productId);
-                if (cartItem != null)
-                {
-                    cartItem.Quantity = quantity;
-                    await _context.SaveChangesAsync();
-                }
+                item.Quantity = quantity;
+                cart.UpdatedAt = DateTime.UtcNow;
+                _context.Entry(item).State = EntityState.Modified;
+                await SaveChangesAsync();
             }
+            return cart;
         }
 
         public async Task ClearCartAsync(string userId)
         {
-            var cart = await _context.Carts
-                .Include(c => c.CartItems)
-                .FirstOrDefaultAsync(c => c.UserId == userId);
+            var cart = await GetCartByUserIdAsync(userId);
+            var itemsToRemove = await _context.CartItems
+                .Where(ci => ci.CartId == cart.Id)
+                .ToListAsync();
+            _context.CartItems.RemoveRange(itemsToRemove);
+            cart.UpdatedAt = DateTime.UtcNow;
+            await SaveChangesAsync();
+        }
 
-            if (cart != null)
-            {
-                _context.CartItems.RemoveRange(cart.CartItems);
-                _context.Carts.Remove(cart);
-                await _context.SaveChangesAsync();
-            }
+        public async Task SaveChangesAsync()
+        {
+            await _context.SaveChangesAsync();
         }
     }
 }

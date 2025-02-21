@@ -1,27 +1,62 @@
-﻿using System.Net;
+﻿using System;
+using System.Net;
 using System.Net.Mail;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
+using TechXpress_domain.Interfaces.Services;
 
-public class EmailService
+namespace TechXpress_application.Services
 {
-    public async Task SendEmailAsync(string toEmail, string subject, string message)
+    public class EmailService : IEmailService
     {
-        var smtpClient = new SmtpClient("smtp.your-email-provider.com")
-        {
-            Port = 587,
-            Credentials = new NetworkCredential("techXpress@TechXpress.com", "password"),
-            EnableSsl = true,
-        };
+        private readonly IConfiguration _configuration;
+        private readonly ILogger<EmailService> _logger;
 
-        var mailMessage = new MailMessage
+        public EmailService(IConfiguration configuration, ILogger<EmailService> logger)
         {
-            From = new MailAddress("your-email@example.com"),
-            Subject = subject,
-            Body = message,
-            IsBodyHtml = true,
-        };
-        mailMessage.To.Add(toEmail);
+            _configuration = configuration;
+            _logger = logger;
+        }
 
-        await smtpClient.SendMailAsync(mailMessage);
+        public async Task<bool> SendEmailAsync(string toEmail, string subject, string body)
+        {
+            try
+            {
+                var smtpServer = _configuration["EmailSettings:SmtpServer"];
+                var port = int.Parse(_configuration["EmailSettings:Port"]);
+                var senderEmail = _configuration["EmailSettings:SenderEmail"];
+                var senderName = _configuration["EmailSettings:SenderName"];
+                var username = _configuration["EmailSettings:Username"];
+                var password = _configuration["EmailSettings:Password"];
+                var enableSSL = bool.Parse(_configuration["EmailSettings:EnableSSL"]);
+
+                using var smtpClient = new SmtpClient(smtpServer)
+                {
+                    Port = port,
+                    Credentials = new NetworkCredential(username, password),
+                    EnableSsl = enableSSL
+                };
+
+                using var mailMessage = new MailMessage
+                {
+                    From = new MailAddress(senderEmail, senderName),
+                    Subject = subject,
+                    Body = body,
+                    IsBodyHtml = true
+                };
+
+                mailMessage.To.Add(toEmail);
+
+                await smtpClient.SendMailAsync(mailMessage);
+                _logger.LogInformation($"Email sent successfully to {toEmail}");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Failed to send email to {toEmail}: {ex.Message}");
+                return false;
+            }
+        }
     }
 }

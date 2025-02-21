@@ -1,141 +1,347 @@
-﻿@model IEnumerable<CartItem>
+﻿@model CheckoutViewModel
 
 @{
     ViewData["Title"] = "Checkout";
 }
 
-<div class="container checkout-container">
-    <h1 class="checkout-title">Checkout</h1>
+<div class="checkout-container">
+    <div class="checkout-grid">
+        <div class="checkout-form">
+            <h1>Checkout</h1>
+            
+            <form asp-action="PlaceOrder" method="post">
+                <div class="form-section">
+                    <h2>Shipping Address</h2>
+                    <div class="saved-addresses">
+                        @foreach (var address in Model.SavedAddresses)
+                        {
+                            <div class="address-card">
+                                <input type="radio" name="shippingAddressId" value="@address.Id" 
+                                       id="address_@address.Id" @(address.IsDefault ? "checked" : "")>
+                                <label for="address_@address.Id">
+                                    <strong>@address.FullName</strong>
+                                    <p>@address.Street</p>
+                                    <p>@address.City, @address.State @address.PostalCode</p>
+                                    <p>@address.Phone</p>
+                                </label>
+                            </div>
+                        }
+                        <button type="button" class="btn-add-address" onclick="showNewAddressForm()">
+                            <i class="fas fa-plus"></i> Add New Address
+                        </button>
+                    </div>
 
-    <div class="table-responsive">
-        <table class="table checkout-table">
-            <thead>
-                <tr>
-                    <th>Product</th>
-                    <th>Image</th>
-                    <th>Quantity</th>
-                    <th>Price</th>
-                    <th>Total</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var item in Model)
+                    <div id="newAddressForm" class="new-address-form" style="display: none;">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label asp-for="NewAddress.FirstName">First Name</label>
+                                <input asp-for="NewAddress.FirstName" class="form-control" />
+                                <span asp-validation-for="NewAddress.FirstName" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="NewAddress.LastName">Last Name</label>
+                                <input asp-for="NewAddress.LastName" class="form-control" />
+                                <span asp-validation-for="NewAddress.LastName" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label asp-for="NewAddress.Street">Street Address</label>
+                            <input asp-for="NewAddress.Street" class="form-control" />
+                            <span asp-validation-for="NewAddress.Street" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label asp-for="NewAddress.City">City</label>
+                                <input asp-for="NewAddress.City" class="form-control" />
+                                <span asp-validation-for="NewAddress.City" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="NewAddress.State">State</label>
+                                <input asp-for="NewAddress.State" class="form-control" />
+                                <span asp-validation-for="NewAddress.State" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="NewAddress.PostalCode">Postal Code</label>
+                                <input asp-for="NewAddress.PostalCode" class="form-control" />
+                                <span asp-validation-for="NewAddress.PostalCode" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label asp-for="NewAddress.Phone">Phone</label>
+                            <input asp-for="NewAddress.Phone" class="form-control" />
+                            <span asp-validation-for="NewAddress.Phone" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h2>Payment Method</h2>
+                    <div class="payment-methods">
+                        <div class="payment-method">
+                            <input type="radio" name="paymentMethod" value="card" id="card" checked>
+                            <label for="card">
+                                <i class="fas fa-credit-card"></i>
+                                Credit/Debit Card
+                            </label>
+                            <div class="payment-details" id="cardDetails">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Card Number</label>
+                                        <input type="text" class="form-control" id="cardNumber" />
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Expiry Date</label>
+                                        <input type="text" class="form-control" placeholder="MM/YY" />
+                                    </div>
+                                    <div class="form-group">
+                                        <label>CVV</label>
+                                        <input type="text" class="form-control" maxlength="4" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="payment-method">
+                            <input type="radio" name="paymentMethod" value="paypal" id="paypal">
+                            <label for="paypal">
+                                <i class="fab fa-paypal"></i>
+                                PayPal
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="order-summary">
+            <h2>Order Summary</h2>
+            <div class="cart-items">
+                @foreach (var item in Model.CartItems)
                 {
-                    <tr>
-                        <td>@item.Product.Name</td>
-                        <td>
-                            <img src="@item.Product.ImageUrl" alt="@item.Product.Name" class="product-img">
-                        </td>
-                        <td>@item.Quantity</td>
-                        <td>@item.Product.Price.ToString("C")</td>
-                        <td>@((item.Quantity * item.Product.Price).ToString("C"))</td>
-                    </tr>
+                    <div class="cart-item">
+                        <img src="@item.Product.ImageUrl" alt="@item.Product.Name">
+                        <div class="item-details">
+                            <h3>@item.Product.Name</h3>
+                            <p>Quantity: @item.Quantity</p>
+                            <p class="item-price">@((item.Product.Price * item.Quantity).ToString("C"))</p>
+                        </div>
+                    </div>
                 }
-            </tbody>
-        </table>
-    </div>
+            </div>
 
-    <div class="checkout-summary">
-        <h4>Total: <span class="total-price">@Model.Sum(item => item.Quantity * item.Product.Price).ToString("C")</span></h4>
+            <div class="summary-totals">
+                <div class="summary-row">
+                    <span>Subtotal</span>
+                    <span>@Model.Subtotal.ToString("C")</span>
+                </div>
+                <div class="summary-row">
+                    <span>Shipping</span>
+                    <span>@Model.ShippingCost.ToString("C")</span>
+                </div>
+                @if (Model.DiscountAmount > 0)
+                {
+                    <div class="summary-row discount">
+                        <span>Discount</span>
+                        <span>-@Model.DiscountAmount.ToString("C")</span>
+                    </div>
+                }
+                <div class="summary-row total">
+                    <span>Total</span>
+                    <span>@Model.Subtotal.ToString("C")</span>
+                </div>
+            </div>
 
-        <form asp-action="PlaceOrder" method="post">
-            <button type="submit" class="btn btn-checkout">
-                <i class="fas fa-credit-card"></i> Confirm Purchase
+            <button type="submit" class="btn-place-order">
+                Place Order
             </button>
-        </form>
+
+            <div class="secure-checkout">
+                <i class="fas fa-lock"></i>
+                Secure Checkout
+            </div>
+        </div>
     </div>
 </div>
 
 @section Styles {
     <style>
-        /* Container Styling */
         .checkout-container {
-            max-width: 850px;
+            max-width: 1200px;
             margin: 40px auto;
-            padding: 30px;
-            background: #f8f9fa;
-            border-radius: 12px;
-            box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+            padding: 0 20px;
         }
 
-        .checkout-title {
-            text-align: center;
-            font-size: 2rem;
-            font-weight: 700;
-            margin-bottom: 25px;
-            color: #333;
+        .checkout-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 40px;
         }
 
-        /* Table Styling */
-        .checkout-table {
-            width: 100%;
-            border-collapse: collapse;
-            background: #fff;
+        .form-section {
+            background: white;
             border-radius: 10px;
-            overflow: hidden;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
 
-            .checkout-table thead {
-                background: #343a40;
-                color: white;
-                font-size: 1.1rem;
-            }
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
 
-            .checkout-table th, .checkout-table td {
-                padding: 14px;
-                text-align: center;
-                border-bottom: 1px solid #ddd;
-                vertical-align: middle;
-            }
+        .form-group {
+            margin-bottom: 20px;
+        }
 
-            .checkout-table tbody tr:hover {
-                background: rgba(0, 0, 0, 0.05);
-            }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+        }
 
-        /* Product Image */
-        .product-img {
-            width: 60px;
-            height: 60px;
-            object-fit: cover;
-            border-radius: 8px;
+        .form-control {
+            width: 100%;
+            padding: 12px;
             border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
         }
 
-        /* Checkout Summary */
-        .checkout-summary {
-            text-align: right;
-            margin-top: 30px;
-            padding-top: 15px;
-            border-top: 2px solid #ddd;
-        }
-
-        .total-price {
-            color: #28a745;
-            font-weight: bold;
-            font-size: 1.8rem;
-        }
-
-        /* Checkout Button */
-        .btn-checkout {
-            background: linear-gradient(135deg, #ff7e5f, #ff4757);
-            color: white;
-            font-size: 1.2rem;
-            font-weight: bold;
-            padding: 12px 28px;
-            border-radius: 8px;
-            border: none;
-            transition: all 0.3s ease;
+        .address-card {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 10px;
             cursor: pointer;
-            display: inline-flex;
+        }
+
+        .address-card input[type="radio"] {
+            margin-right: 10px;
+        }
+
+        .btn-add-address {
+            width: 100%;
+            padding: 15px;
+            background: #f8f9fa;
+            border: 2px dashed #ddd;
+            border-radius: 5px;
+            color: #666;
+            cursor: pointer;
+        }
+
+        .payment-method {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 10px;
+        }
+
+        .payment-method label {
+            display: flex;
             align-items: center;
             gap: 10px;
-            box-shadow: 0 4px 10px rgba(255, 71, 87, 0.3);
+            cursor: pointer;
         }
 
-            .btn-checkout:hover {
-                background: linear-gradient(135deg, #ff4757, #e63946);
-                transform: translateY(-2px);
-                box-shadow: 0 6px 16px rgba(255, 71, 87, 0.4);
+        .payment-details {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+
+        .order-summary {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 20px;
+        }
+
+        .cart-item {
+            display: flex;
+            gap: 15px;
+            padding: 15px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .cart-item img {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 5px;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+        }
+
+        .summary-row.total {
+            border-top: 2px solid #eee;
+            margin-top: 10px;
+            padding-top: 15px;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .btn-place-order {
+            width: 100%;
+            padding: 15px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.1rem;
+            margin-top: 20px;
+            cursor: pointer;
+        }
+
+        .secure-checkout {
+            text-align: center;
+            color: #666;
+            margin-top: 15px;
+        }
+
+        @@media (max-width: 768px) {
+            .checkout-grid {
+                grid-template-columns: 1fr;
             }
+
+            .order-summary {
+                position: static;
+            }
+        }
     </style>
+}
+
+@section Scripts {
+    <script>
+        function showNewAddressForm() {
+            document.getElementById('newAddressForm').style.display = 'block';
+        }
+
+        // Payment method toggle
+        document.querySelectorAll('input[name="paymentMethod"]').forEach(input => {
+            input.addEventListener('change', function() {
+                document.getElementById('cardDetails').style.display = 
+                    this.value === 'card' ? 'block' : 'none';
+            });
+        });
+
+        // Card number formatting
+        document.getElementById('cardNumber').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            value = value.replace(/(.{4})/g, '$1 ').trim();
+            e.target.value = value;
+        });
+    </script>
 }

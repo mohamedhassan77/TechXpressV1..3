@@ -1,0 +1,42 @@
+@using TechXpress_domain.Entities
+<footer class="footer">
+    <div class="footer-grid">
+        <div class="footer-section">
+            <h3 class="footer-title">About Us</h3>
+            <p>TechXpress - Your one-stop shop for all things tech. We provide quality electronics and gadgets at competitive prices.</p>
+            <div class="social-icons">
+                <a href="#"><i class="fab fa-facebook"></i></a>
+                <a href="#"><i class="fab fa-twitter"></i></a>
+                <a href="#"><i class="fab fa-instagram"></i></a>
+                <a href="#"><i class="fab fa-linkedin"></i></a>
+            </div>
+        </div>
+        <div class="footer-section">
+            <h3 class="footer-title">Quick Links</h3>
+            <ul class="footer-links">
+                <li><a asp-controller="Home" asp-action="Index">Home</a></li>
+                <li><a asp-controller="Product" asp-action="Index">Products</a></li>
+                <li><a asp-controller="Category" asp-action="Index">Categories</a></li>
+                <li><a asp-controller="Home" asp-action="Privacy">Privacy Policy</a></li>
+            </ul>
+        </div>
+        <div class="footer-section">
+            <h3 class="footer-title">Contact Us</h3>
+            <ul class="footer-contact">
+                <li><i class="fas fa-phone"></i> +1 234 567 890</li>
+                <li><i class="fas fa-envelope"></i> support@techxpress.com</li>
+                <li><i class="fas fa-map-marker-alt"></i> 123 Tech Street, Digital City</li>
+            </ul>
+        </div>
+        <div class="footer-section">
+            <h3 class="footer-title">Newsletter</h3>
+            <form class="newsletter-form">
+                <input type="email" placeholder="Enter your email" required>
+                <button type="submit" class="btn btn-primary">Subscribe</button>
+            </form>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <p>&copy; @DateTime.Now.Year TechXpress. All rights reserved.</p>
+    </div>
+</footer>

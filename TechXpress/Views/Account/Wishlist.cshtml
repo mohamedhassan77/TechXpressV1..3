@@ -1,0 +1,38 @@
+@model TechXpress.Models.WishlistViewModel
+
+@{
+    ViewData["Title"] = "Your Wishlist";
+}
+
+<div class="auth-container">
+    <div class="auth-card">
+        <h2 class="text-center">@ViewData["Title"]</h2>
+        @if (Model.TotalItems == 0)
+        {
+            <div class="empty-cart text-center">
+                <i class="fas fa-heart-broken"></i>
+                <h2>Your wishlist is empty</h2>
+                <p>Browse products and add your favorites!</p>
+            </div>
+        }
+        else
+        {
+            <div class="wishlist-grid">
+                @foreach (var item in Model.WishlistItems)
+                {
+                    <div class="wishlist-item">
+                        <img src="@item.Product.ImageUrl" alt="@item.Product.Name" class="wishlist-image" />
+                        <div class="wishlist-content">
+                            <h3>@item.Product.Name</h3>
+                            <p>@item.Product.Price.ToString("C")</p>
+                        </div>
+                        <form asp-action="RemoveFromWishlist" method="post">
+                            <input type="hidden" name="productId" value="@item.ProductId" />
+                            <button type="submit" class="remove-wishlist">×</button>
+                        </form>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</div>

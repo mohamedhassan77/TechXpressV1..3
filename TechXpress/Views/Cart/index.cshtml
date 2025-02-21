@@ -1,245 +1,308 @@
-﻿@model IEnumerable<CartItem>
+﻿@model CartViewModel
+@* Add at the top of the file *@
+@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
+@{
+    var token = Antiforgery.GetAndStoreTokens(Context).RequestToken;
+}
 
 @{
-    ViewData["Title"] = "Cart";
+    ViewData["Title"] = "Shopping Cart";
 }
 
-@section styles {
-
-<style >
-
-        /* General Styles */
-        body {
-            margin: 0 ;
-            font-family: 'Arial', sans-serif;
-            background-color: #f8f9fa;
-            display: contents;
-            justify-content:   center;
-            align-items: center;
-            height: 100vh;
-        }
-
-        /* Cart Container */
-        .cart-container {
-            width: 100%;
-            max-width: 1500px;
-			margin: 0 auto;
-            padding:    30px ;
-			display:      block;
-            justify-content: center;
-            align-items: center;
-        }
-
-        /* Cart Card */
-        .cart-card {
-            background: #ffffff;
-            border-radius: 15px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            padding: 40px;
-            width: 100%;
-        }
-
-        /* Cart Title */
-        .cart-title {
-            text-align: center;
-            font-size: 2rem;
-            margin-bottom: 20px;
-            color: #333;
-        }
-
-        /* Cart Table */
-        .cart-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 20px;
-        }
-
-            .cart-table th,
-            .cart-table td {
-                padding: 15px;
-                text-align: left;
-                border-bottom: 1px solid #ddd;
-            }
-
-            .cart-table th {
-                background-color: #f8f9fa;
-                font-weight: 600;
-                color: #555;
-            }
-
-        /* Product Info */
-        .product-info {
-            display: flex;
-            align-items: center;
-        }
-
-        .product-image {
-            width: 80px;
-            height: 80px;
-            object-fit: cover;
-            border-radius: 8px;
-            margin-right: 15px;
-        }
-
-        .product-details h3 {
-            margin: 0;
-            font-size: 1.1rem;
-            color: #333;
-        }
-
-        .sku {
-            margin: 0;
-            font-size: 0.9rem;
-            color: #777;
-        }
-
-        /* Quantity Form */
-        .quantity-form {
-            display: flex;
-            align-items: center;
-        }
-
-        .quantity-input {
-            width: 80px;
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 1rem;
-            margin-right: 10px;
-            text-align: center;
-        }
-
-        .update-btn {
-            padding: 8px 15px;
-            background-color: #007bff;
-            color: #fff;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            transition: background-color 0.3s ease;
-        }
-
-            .update-btn:hover {
-                background-color: #0056b3;
-            }
-
-        /* Remove Button */
-        .remove-btn {
-            padding: 8px 15px;
-            background-color: #dc3545;
-            color: #fff;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            transition: background-color 0.3s ease;
-        }
-
-            .remove-btn:hover {
-                background-color: #a71d2a;
-            }
-
-        /* Cart Total */
-        .cart-total {
-            text-align: right;
-            margin-top: 20px;
-        }
-
-            .cart-total h3 {
-                margin: 0;
-                font-size: 1.5rem;
-                color: #333;
-            }
-
-        /* Cart Actions */
-        .cart-actions {
-            margin-top: 20px;
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-        }
-
-        .continue-shopping {
-            padding: 10px 20px;
-            background-color: #6c757d;
-            color: #fff;
-            text-decoration: none;
-            border-radius: 5px;
-            font-size: 0.9rem;
-            transition: background-color 0.3s ease;
-        }
-
-            .continue-shopping:hover {
-                background-color: #5a6268;
-            }
-
-        .checkout-btn {
-            padding: 10px 20px;
-            background-color: #28a745;
-            color: #fff;
-            text-decoration: none;
-            border-radius: 5px;
-            font-size: 0.9rem;
-            transition: background-color 0.3s ease;
-        }
-
-            .checkout-btn:hover {
-                background-color: #218838;
-            }
-</style>
-}
 <div class="cart-container">
-    <div class="cart-card">
-        <h1 class="cart-title">Your Cart</h1>
-        <table class="cart-table">
-            <thead>
-                <tr>
-                    <th>Product</th>
-                    <th>Quantity</th>
-                    <th>Price</th>
-                    <th>Total</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var item in Model)
+    <h1>Shopping Cart</h1>
+
+    @if (!Model.Items.Any())
+    {
+        <div class="empty-cart">
+            <i class="fas fa-shopping-cart"></i>
+            <h2>Your cart is empty</h2>
+            <p>Browse our products and add items to your cart</p>
+            <a href="/Product" class="btn-continue-shopping">Continue Shopping</a>
+        </div>
+    }
+    else
+    {
+        <div class="cart-grid">
+            <div class="cart-items">
+                @foreach (var item in Model.Items)
                 {
-                    <tr>
-                        <td>
-                            <div class="product-info">
-                                <img src="@item.Product.ImageUrl" alt="@item.Product.Name" class="product-image" />
-                                <div class="product-details">
-                                    <h3>@item.Product.Name</h3>
-                                    <p class="sku">SKU: @item.Product.Id</p>
-                                </div>
+                    <div class="cart-item">
+                        <div class="item-image">
+                            <img src="@item.Product.ImageUrl" alt="@item.Product.Name" />
+                        </div>
+                        <div class="item-details">
+                            <h3>@item.Product.Name</h3>
+                            <p class="item-price">@item.Product.Price.ToString("C")</p>
+                            <div class="quantity-controls">
+                                <button class="qty-btn" onclick="updateQuantity(@item.Product.Id, -1)">-</button>
+                                <input type="number" value="@item.Quantity" min="1" 
+                                       onchange="updateQuantity(@item.Product.Id, this.value)" />
+                                <button class="qty-btn" onclick="updateQuantity(@item.Product.Id, 1)">+</button>
                             </div>
-                        </td>
-                        <td>
-                            <form asp-action="UpdateCartItemQuantity" method="post" class="quantity-form">
-                                <input type="hidden" name="productId" value="@item.ProductId" />
-                                <input type="number" name="quantity" value="@item.Quantity" min="1" class="quantity-input" />
-                                <button type="submit" class="update-btn">Update</button>
-                            </form>
-                        </td>
-                        <td>@item.Product.Price.ToString("C")</td>
-                        <td>@((item.Quantity * item.Product.Price).ToString("C"))</td>
-                        <td>
-                            <form asp-action="RemoveFromCart" method="post" class="remove-form">
-                                <input type="hidden" name="productId" value="@item.ProductId" />
-                                <button type="submit" class="remove-btn">Remove</button>
-                            </form>
-                        </td>
-                    </tr>
+                        </div>
+                        <div class="item-total">
+                            <p>@((item.Product.Price * item.Quantity).ToString("C"))</p>
+                            <button class="remove-item" onclick="removeItem(@item.Product.Id)">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
                 }
-            </tbody>
-        </table>
-        <div class="cart-total">
-            <h3>Total: @Model.Sum(item => item.Quantity * item.Product.Price).ToString("C")</h3>
-            <div class="cart-actions">
-                <a href="/" class="continue-shopping">Continue Shopping</a>
-                <a href="/Checkout" class="checkout-btn">Proceed to Checkout</a>
+            </div>
+
+            <div class="cart-summary">
+                <h2>Order Summary</h2>
+                <div class="summary-row">
+                    <span>Subtotal</span>
+                    <span>@Model.Subtotal.ToString("C")</span>
+                </div>
+                <div class="summary-row">
+                    <span>Shipping</span>
+                    <span>@Model.ShippingCost.ToString("C")</span>
+                </div>
+                @if (Model.DiscountAmount > 0)
+                {
+                    <div class="summary-row discount">
+                        <span>Discount</span>
+                        <span>-@Model.DiscountAmount.ToString("C")</span>
+                    </div>
+                }
+                <div class="summary-row total">
+                    <span>Total</span>
+                    <span>@Model.Total.ToString("C")</span>
+                </div>
+
+                <div class="promo-code">
+                    <input type="text" id="promoCode" placeholder="Enter promo code" />
+                    <button onclick="applyPromoCode()">Apply</button>
+                </div>
+
+                <a href="/Checkout" class="btn-checkout">Proceed to Checkout</a>
+                <a href="/Product" class="btn-continue-shopping">Continue Shopping</a>
             </div>
         </div>
-    </div>
+    }
 </div>
+
+@section Styles {
+    <style>
+        .cart-container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .empty-cart {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .empty-cart i {
+            font-size: 4rem;
+            color: #ddd;
+            margin-bottom: 20px;
+        }
+
+        .cart-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 30px;
+        }
+
+        .cart-items {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .cart-item {
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            gap: 20px;
+            padding: 20px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .item-image img {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 5px;
+        }
+
+        .quantity-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .qty-btn {
+            width: 30px;
+            height: 30px;
+            border: 1px solid #ddd;
+            background: white;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .quantity-controls input {
+            width: 50px;
+            text-align: center;
+            padding: 5px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        .cart-summary {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            height: fit-content;
+            position: sticky;
+            top: 20px;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+        }
+
+        .summary-row.total {
+            border-top: 2px solid #eee;
+            margin-top: 10px;
+            padding-top: 15px;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .promo-code {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .promo-code input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        .promo-code button {
+            padding: 10px 20px;
+            background: #666;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .btn-checkout {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background: #28a745;
+            color: white;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+
+        .btn-continue-shopping {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background: #f8f9fa;
+            color: #333;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+
+        @@media (max-width: 768px) {
+            .cart-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .cart-summary {
+                position: static;
+            }
+        }
+    </style>
+}
+
+@section Scripts {
+    <script>
+        function updateQuantity(productId, change) {
+            let newQuantity;
+            if (typeof change === 'string') {
+                newQuantity = parseInt(change);
+            } else {
+                const input = document.querySelector(`input[onchange*="${productId}"]`);
+                newQuantity = parseInt(input.value) + change;
+            }
+
+            if (newQuantity < 1) return;
+
+            fetch('/Cart/UpdateQuantity', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                },
+                body: JSON.stringify({ productId, quantity: newQuantity })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                }
+            });
+        }
+
+        function removeItem(productId) {
+            if (confirm('Are you sure you want to remove this item?')) {
+                fetch('/Cart/RemoveItem', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                    },
+                    body: JSON.stringify({ productId })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    }
+                });
+            }
+        }
+
+        function applyPromoCode() {
+            const code = document.getElementById('promoCode').value;
+            fetch('/Cart/ApplyPromoCode', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                },
+                body: JSON.stringify({ code })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert(data.message);
+                }
+            });
+        }
+    </script>
+}

@@ -1,0 +1,68 @@
+@model TechXpress.Models.UserSettingsViewModel
+
+@{
+    ViewData["Title"] = "User Settings";
+}
+
+<div class="auth-container">
+    <div class="auth-card">
+        <h2 class="text-center">@ViewData["Title"]</h2>
+        <form asp-action="Settings" method="post" novalidate>
+            <div asp-validation-summary="All" class="text-danger"></div>
+
+            <div class="form-group form-check">
+                <input asp-for="EmailNotifications" class="form-check-input" />
+                <label asp-for="EmailNotifications" class="form-check-label">Email Notifications</label>
+            </div>
+            <div class="form-group form-check">
+                <input asp-for="MarketingEmails" class="form-check-input" />
+                <label asp-for="MarketingEmails" class="form-check-label">Marketing Emails</label>
+            </div>
+            <div class="form-group form-check">
+                <input asp-for="ShowBirthDate" class="form-check-input" />
+                <label asp-for="ShowBirthDate" class="form-check-label">Show Birth Date</label>
+            </div>
+            <div class="form-group form-check">
+                <input asp-for="SmsNotificationsEnabled" class="form-check-input" />
+                <label asp-for="SmsNotificationsEnabled" class="form-check-label">SMS Notifications</label>
+            </div>
+            <div class="form-group form-check">
+                <input asp-for="TwoFactorEnabled" class="form-check-input" />
+                <label asp-for="TwoFactorEnabled" class="form-check-label">Two-Factor Authentication</label>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="LanguagePreference" class="form-label">Language Preference</label>
+                <select asp-for="LanguagePreference" class="form-control">
+                    <option value="en">English</option>
+                    <option value="es">Spanish</option>
+                    <!-- Add additional languages as needed -->
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Theme" class="form-label">Theme</label>
+                <select asp-for="Theme" class="form-control">
+                    <option value="light">Light</option>
+                    <option value="dark">Dark</option>
+                </select>
+            </div>
+
+            <div class="form-group form-check">
+                <input asp-for="ProfileVisibility" class="form-check-input" />
+                <label asp-for="ProfileVisibility" class="form-check-label">Profile Visibility</label>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="PreferredCurrency" class="form-label">Preferred Currency</label>
+                <select asp-for="PreferredCurrency" class="form-control">
+                    <option value="USD">USD</option>
+                    <option value="EUR">EUR</option>
+                    <!-- Add more currencies as needed -->
+                </select>
+            </div>
+
+            <button type="submit" class="btn-reset">Save Settings</button>
+        </form>
+    </div>
+</div>

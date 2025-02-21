@@ -1,13 +1,15 @@
-﻿using TechXpress_domain.Entities;
+﻿using System.ComponentModel.DataAnnotations;
 
-public class CartItem
+namespace TechXpress_domain.Entities
 {
+    public class CartItem
+    {
+        public int CartId { get; set; }
+        public Cart? Cart { get; set; }
+        public int ProductId { get; set; }
+        public Product? Product { get; set; }
 
-    public int ProductId { get; set; }
-    public Product Product { get; set; }
-    public int Quantity { get; set; }
-    public string UserId { get; set; }
-    public ApplicationUser applicationUser { get; set; }
-    public string CartId { get; set; }
-    public Cart Cart { get; set; }
+        [Range(1, int.MaxValue, ErrorMessage = "Quantity must be at least 1")]
+        public int Quantity { get; set; }
+    }
 }

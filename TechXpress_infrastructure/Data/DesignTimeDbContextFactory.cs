@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
 using System.IO;
+using TechXpress_domain;
 
 namespace TechXpress_infrastructure.Data
 {

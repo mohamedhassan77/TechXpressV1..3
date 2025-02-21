@@ -1,0 +1,390 @@
+@model TechXpress.Models.OrderDetailsViewModel
+
+@{
+    ViewData["Title"] = $"Order #{Model.OrderId}";
+}
+
+<div class="order-details-container">
+    <div class="details-header">
+        <div class="header-left">
+            <h1>Order Details</h1>
+            <p class="order-number">Order #@Model.OrderId</p>
+            <p class="order-date">Placed on @Model.OrderDate.ToString("MMMM dd, yyyy")</p>
+        </div>
+        <div class="order-status @Model.CurrentStatus.ToLower()">
+            <span class="status-label">@Model.CurrentStatus</span>
+            @if (Model.CurrentStatus == "Shipped" && !string.IsNullOrEmpty(Model.TrackingNumber))
+            {
+                <div class="tracking-info">
+                    <p>Tracking Number: @Model.TrackingNumber</p>
+                    <a href="https://trackingservice.com/@Model.TrackingNumber" target="_blank" class="btn-track">
+                        Track Package <i class="fas fa-external-link-alt"></i>
+                    </a>
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="details-grid">
+        <div class="order-summary">
+            <div class="summary-section">
+                <h2>Items (@Model.Items.Count)</h2>
+                <div class="items-list">
+                    @foreach (var item in Model.Items)
+                    {
+                        <div class="order-item">
+                            <img src="@item.Product.ImageUrl" alt="@item.Product.Name">
+                            <div class="item-details">
+                                <h3>@item.Product.Name</h3>
+                                <p class="item-sku">SKU: @item.Product.SKU</p>
+                                <div class="item-price-qty">
+                                    <span class="item-price">@item.Subtotal.ToString("C")</span>
+                                    <span class="item-quantity">Qty: @item.Quantity</span>
+                                </div>
+                                <p class="item-total">@((item.Subtotal * item.Quantity).ToString("C"))</p>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <div class="summary-section">
+                <h2>Order Summary</h2>
+                <div class="price-breakdown">
+                    <div class="price-row">
+                        <span>Subtotal</span>
+                        <span>@Model.Subtotal.ToString("C")</span>
+                    </div>
+                    <div class="price-row">
+                        <span>Shipping</span>
+                        <span>@Model.ShippingCost.ToString("C")</span>
+                    </div>
+                    @if (Model.Discount > 0)
+                    {
+                        <div class="price-row discount">
+                            <span>Discount</span>
+                            <span>-@Model.Discount.ToString("C")</span>
+                        </div>
+                    }
+                    <div class="price-row tax">
+                        <span>Tax</span>
+                        <span>@Model.Tax.ToString("C")</span>
+                    </div>
+                    <div class="price-row total">
+                        <span>Total</span>
+                        <span>@Model.Total.ToString("C")</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="order-info">
+            <div class="info-section">
+                <h2>Shipping Address</h2>
+                <div class="address-details">
+                    <p class="name">@Model.ShippingAddress.FullName</p>
+                    <p>@Model.ShippingAddress.Street</p>
+                    <p>@Model.ShippingAddress.City, @Model.ShippingAddress.State @Model.ShippingAddress.PostalCode</p>
+                    <p>@Model.ShippingAddress.Country</p>
+                </div>
+            </div>
+
+            <div class="info-section">
+                <h2>Billing Address</h2>
+                <div class="address-details">
+                    <p class="name">@Model.BillingAddress.FullName</p>
+                    <p>@Model.BillingAddress.Street</p>
+                    <p>@Model.BillingAddress.City, @Model.BillingAddress.State @Model.BillingAddress.PostalCode</p>
+                    <p>@Model.BillingAddress.Country</p>
+                </div>
+            </div>
+
+            <div class="info-section">
+                <h2>Payment Information</h2>
+                <div class="payment-details">
+                    <p>Payment Method: @Model.PaymentMethod</p>
+                    @if (!string.IsNullOrEmpty(Model.PaymentMethod))
+                    {
+                        <p>Payment Reference: @Model.PaymentMethod</p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        .order-details-container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .details-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 30px;
+        }
+
+        .order-number {
+            font-size: 1.2rem;
+            color: #666;
+            margin: 5px 0;
+        }
+
+        .order-date {
+            color: #666;
+        }
+
+        .order-status {
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .order-status.pending { background: #fff3cd; color: #856404; }
+        .order-status.processing { background: #cce5ff; color: #004085; }
+        .order-status.shipped { background: #d4edda; color: #155724; }
+        .order-status.delivered { background: #d1e7dd; color: #0f5132; }
+        .order-status.cancelled { background: #f8d7da; color: #721c24; }
+
+        .tracking-info {
+            margin-top: 10px;
+            font-size: 0.9rem;
+        }
+
+        .btn-track {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .details-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 30px;
+        }
+
+        .summary-section,
+        .info-section {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .order-item {
+            display: flex;
+            gap: 20px;
+            padding: 15px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .order-item img {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 5px;
+        }
+
+        .item-details h3 {
+            margin: 0 0 5px;
+        }
+
+        .item-sku {
+            color: #666;
+            font-size: 0.9rem;
+            margin: 0 0 10px;
+        }
+
+        .item-price-qty {
+            display: flex;
+            gap: 15px;
+            color: #666;
+        }
+
+        .item-total {
+            font-weight: bold;
+            color: #28a745;
+            margin: 10px 0 0;
+        }
+
+        .price-breakdown {
+            margin-top: 15px;
+        }
+
+        .price-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+        }
+
+        .price-row.total {
+            border-top: 2px solid #eee;
+            margin-top: 10px;
+            padding-top: 15px;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .discount {
+            color: #28a745;
+        }
+
+        .address-details,
+        .payment-details {
+            margin-top: 15px;
+        }
+
+        .address-details p,
+        .payment-details p {
+            margin: 5px 0;
+        }
+
+        .name {
+            font-weight: bold;
+        }
+
+        .payment-method {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-info {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .order-timeline {
+            margin-top: 20px;
+        }
+
+        .timeline-item {
+            display: flex;
+            gap: 15px;
+            padding: 15px 0;
+            position: relative;
+        }
+
+        .timeline-item:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            left: 15px;
+            top: 45px;
+            bottom: 0;
+            width: 2px;
+            background: #eee;
+        }
+
+        .timeline-icon {
+            width: 30px;
+            height: 30px;
+            background: #f8f9fa;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1;
+        }
+
+        .timeline-item.current .timeline-icon {
+            background: #28a745;
+            color: white;
+        }
+
+        .timeline-content h4 {
+            margin: 0 0 5px;
+        }
+
+        .timeline-content p {
+            margin: 0;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .details-actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .btn-review,
+        .btn-cancel,
+        .btn-print,
+        .btn-invoice,
+        .btn-back {
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+
+        .btn-review { background: #28a745; color: white; border: none; }
+        .btn-cancel { background: #dc3545; color: white; border: none; }
+        .btn-print { background: #6c757d; color: white; border: none; }
+        .btn-invoice { background: #007bff; color: white; }
+        .btn-back { background: #f8f9fa; color: #333; border: 1px solid #ddd; }
+
+        @@media (max-width: 992px) {
+            .details-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @@media (max-width: 768px) {
+            .details-header {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .details-actions {
+                flex-direction: column;
+            }
+
+            .btn-review,
+            .btn-cancel,
+            .btn-print,
+            .btn-invoice,
+            .btn-back {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        @@media print {
+            .details-actions {
+                display: none;
+            }
+        }
+    </style>
+}
+
+@section Scripts {
+    <script>
+        function cancelOrder() {
+            if (confirm('Are you sure you want to cancel this order?')) {
+                fetch(`/Order/Cancel/@Model.OrderId`, {
+                    method: 'POST',
+                    headers: {
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    }
+                });
+            }
+        }
+    </script>
+}

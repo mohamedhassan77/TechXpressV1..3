@@ -1,0 +1,63 @@
+@model IEnumerable<TechXpress.Models.ProductViewModel>
+
+
+
+    @section Styles {
+        <style>
+
+        .card {
+            border-radius: 12px;
+            overflow: hidden;
+            transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+        }
+
+            .card:hover {
+                transform: scale(1.05);
+                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            }
+
+            .card img {
+                height: 180px;
+                object-fit: cover;
+            }
+
+        .card-body {
+            min-height: 180px;
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+        }
+
+        .card-text {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        </style>
+
+    }
+@foreach (var product in Model)
+{
+    <div class="col">
+        <div class="card h-100">
+            <img src="@product.ImageUrl" class="card-img-top" alt="@product.Name">
+            <div class="card-body">
+                <h5 class="card-title">@product.Name</h5>
+                <p class="card-text text-truncate">@product.Description</p>
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="h5 mb-0">$@product.Price.ToString("N2")</span>
+                    <div class="btn-group">
+                        <a href="@Url.Action("Details", "Product", new { id = product.Id })" class="btn btn-sm btn-outline-secondary">
+                            View Details
+                        </a>
+                        <button type="button" class="btn btn-sm btn-primary add-to-cart" data-product-id="@product.Id">
+                            Add to Cart
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}

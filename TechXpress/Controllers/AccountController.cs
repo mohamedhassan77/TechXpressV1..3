@@ -1,30 +1,27 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using TechXpress.Models;
+using TechXpress_domain.Interfaces.Services;
+using Microsoft.Extensions.Logging;
 using TechXpress_domain.Entities;
 
 namespace TechXpress.Controllers
 {
     public class AccountController : Controller
     {
-        private readonly UserManager<ApplicationUser> _userManager;
-        private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly IAuthService _authService;
+        private readonly IUserProfileService _userProfileService;
+        private readonly IEmailService _emailService;
         private readonly ILogger<AccountController> _logger;
-        private readonly TechXpress_context _context;
 
-        public AccountController(
-            UserManager<ApplicationUser> userManager,
-            SignInManager<ApplicationUser> signInManager,
-            ILogger<AccountController> logger,
-            TechXpress_context context) 
+        public AccountController(IAuthService authService, IUserProfileService userProfileService, IEmailService emailService, ILogger<AccountController> logger)
         {
-            _userManager = userManager;
-            _signInManager = signInManager;
+            _authService = authService;
+            _userProfileService = userProfileService;
+            _emailService = emailService;
             _logger = logger;
-            _context = context;
         }
 
         [HttpGet]
@@ -39,58 +36,24 @@ namespace TechXpress.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(LoginViewModel model)
         {
-            if (!ModelState.IsValid)
+            if (!ModelState.IsValid) return View(model);
+
+            var result = await _authService.LoginAsync(model.Email, model.Password, model.RememberMe);
+            if (result.Success)
             {
-                return View(model);
+                _logger.LogInformation("User logged in.");
+                return RedirectToAction("Index", "Home");
             }
 
-            try
-            {
-                var user = await _userManager.FindByEmailAsync(model.Email);
-                if (user == null)
-                {
-                    ModelState.AddModelError(string.Empty, "Invalid login attempt.");
-                    return View(model);
-                }
-
-                var result = await _signInManager.PasswordSignInAsync(
-                    user.UserName, 
-                    model.Password,
-                    model.RememberMe,
-                    lockoutOnFailure: true);
-
-                if (result.Succeeded)
-                {
-                    _logger.LogInformation("User logged in.");
-                    if (!string.IsNullOrEmpty(model.ReturnUrl) && Url.IsLocalUrl(model.ReturnUrl))
-                    {
-                        return Redirect(model.ReturnUrl);
-                    }
-                    return RedirectToAction("Index", "Home");
-                }
-
-                if (result.IsLockedOut)
-                {
-                    _logger.LogWarning("User account locked out.");
-                    return View("Lockout");
-                }
-
-                ModelState.AddModelError(string.Empty, "Invalid login attempt.");
-                return View(model);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Login error");
-                ModelState.AddModelError(string.Empty, "An unexpected error occurred.");
-                return View(model);
-            }
+            ModelState.AddModelError(string.Empty, result.Message);
+            return View(model);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Logout()
         {
-            await _signInManager.SignOutAsync();
+            await _authService.LogoutAsync();
             _logger.LogInformation("User logged out.");
             return RedirectToAction("Index", "Home");
         }
@@ -107,51 +70,28 @@ namespace TechXpress.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Register(RegisterViewModel model)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid) return View(model);
+
+            var registerDto = new RegisterDto
             {
-                var user = new ApplicationUser
-                {
-                    UserName = model.Email,
-                    Email = model.Email
-                };
-                
+                FirstName = model.FirstName,
+                LastName = model.LastName,
+                Email = model.Email,
+                Password = model.Password,
+                ConfirmPassword = model.ConfirmPassword,
+                DateOfBirth = model.DateOfBirth,
+                PhoneNumber = model.Phone
+            };
 
-                using (var transaction = await _context.Database.BeginTransactionAsync())
-                {
-                    var result = await _userManager.CreateAsync(user, model.Password);
-
-                    if (result.Succeeded)
-                    {
-                        var userProfile = new UserProfile
-                        {
-                            Id = user.Id, 
-                            FirstName = model.FirstName,
-                            LastName = model.LastName,
-                            Email = model.Email,
-                            PhoneNumber = model.PhoneNumber,
-                            DateOfBirth = model.DateOfBirth
-                        };
-                        _context.UserProfiles.Add(userProfile);
-                        await _context.SaveChangesAsync();
-
-                        await _userManager.AddToRoleAsync(user, "User");
-                        _logger.LogInformation("User created a new account with password.");
-
-                        await _signInManager.SignInAsync(user, isPersistent: false);
-                        await transaction.CommitAsync();
-                        return RedirectToAction("Index", "Home");
-                    }
-
-                    foreach (var error in result.Errors)
-                    {
-                        ModelState.AddModelError(string.Empty, error.Description);
-                    }
-                }
+            var result = await _authService.RegisterAsync(registerDto);
+            if (result.Success)
+            {
+                _logger.LogInformation("User registered successfully.");
+                return RedirectToAction("Index", "Home");
             }
 
+            ModelState.AddModelError(string.Empty, result.Message);
             return View(model);
-
-                  
         }
 
         [HttpGet]
@@ -166,32 +106,19 @@ namespace TechXpress.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ForgotPassword(ForgotPasswordViewModel model)
         {
-            if (!ModelState.IsValid)
+            if (!ModelState.IsValid) return View(model);
+
+            var result = await _authService.ForgotPasswordAsync(model.Email);
+            if (!result.Success)
             {
+                ModelState.AddModelError(string.Empty, result.Message);
                 return View(model);
             }
 
-            var user = await _userManager.FindByEmailAsync(model.Email);
-            if (user == null || !(await _userManager.IsEmailConfirmedAsync(user)))
-            {
-                return View("ForgotPasswordConfirmation");
-            }
+            var resetLink = Url.Action("ResetPassword", "Account", new { token = result.Data, email = model.Email }, Request.Scheme);
+            await _emailService.SendEmailAsync(model.Email, "Reset Your Password", $"Click <a href='{resetLink}'>here</a> to reset your password.");
 
-            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-            var resetLink = Url.Action("ResetPassword", "Account", new { token, email = model.Email }, Request.Scheme);
-
-
-            /*==============================================================================*/
-            // TODO: Send this reset link via email (implement email service)
-
-
-            EmailService emailService = new EmailService();
-            emailService.SendEmailAsync("","","");
-
-                
-            /*==============================================================================*/
-            _logger.LogInformation($"Password reset link: {resetLink}");
-
+            _logger.LogInformation($"Password reset link sent to {model.Email}");
             return View("ForgotPasswordConfirmation");
         }
 
@@ -202,18 +129,15 @@ namespace TechXpress.Controllers
             return View();
         }
 
-
-[HttpGet]
-[AllowAnonymous]
+        [HttpGet]
+        [AllowAnonymous]
         public IActionResult ResetPassword(string token, string email)
         {
             if (token == null || email == null)
             {
                 return BadRequest("Invalid password reset request.");
             }
-
-            var model = new ResetPasswordViewModel { Token = token, Email = email };
-            return View(model);
+            return View(new ResetPasswordViewModel { Token = token, Email = email });
         }
 
         [HttpPost]
@@ -221,28 +145,21 @@ namespace TechXpress.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ResetPassword(ResetPasswordViewModel model)
         {
-            if (!ModelState.IsValid)
-            {
-                return View(model);
-            }
+            if (!ModelState.IsValid) return View(model);
 
-            var user = await _userManager.FindByEmailAsync(model.Email);
-            if (user == null)
+            var result = await _authService.ResetPasswordAsync(new ResetPasswordDto
             {
-                return View("ResetPasswordConfirmation");
-            }
+                Email = model.Email,
+                Token = model.Token,
+                NewPassword = model.NewPassword
+            });
 
-            var result = await _userManager.ResetPasswordAsync(user, model.Token, model.Password);
-            if (result.Succeeded)
+            if (result.Success)
             {
                 return View("ResetPasswordConfirmation");
             }
 
-            foreach (var error in result.Errors)
-            {
-                ModelState.AddModelError(string.Empty, error.Description);
-            }
-
+            ModelState.AddModelError(string.Empty, result.Message);
             return View(model);
         }
 
@@ -253,28 +170,38 @@ namespace TechXpress.Controllers
             return View();
         }
 
-
         [HttpGet]
         [Authorize]
         public async Task<IActionResult> Manage()
         {
-            // Retrieve the current authenticated user.
-            var user = await _userManager.GetUserAsync(User);
-            if (user == null)
+            var userId = User.FindFirstValue(System.Security.Claims.ClaimTypes.NameIdentifier);
+            if (userId == null)
             {
-                // If user is not found, redirect to login.
-                return RedirectToAction("Login", "Account");
+                return Unauthorized("User is not authenticated.");
             }
 
-            // Retrieve the user profile from the database using the user's Id.
-            var userProfile = await _context.UserProfiles.FindAsync(user.Id);
-            if (userProfile == null)
+            var profile = await _userProfileService.GetUserProfileAsync(userId);
+            if (profile == null)
             {
-                // Optionally, you can create a new UserProfile if it doesn't exist.
                 return NotFound("User profile not found.");
             }
 
-            return View(userProfile);
+            // Map domain profile to view model
+            var viewModel = new UserProfileViewModel
+            {
+                UserId = profile.ApplicationUserId,
+                FirstName = profile.ApplicationUser.FirstName,
+                LastName = profile.ApplicationUser.LastName,
+                Email = profile.ApplicationUser.Email,
+                PhoneNumber = profile.PhoneNumber,
+                ProfilePictureUrl = profile.ProfileImage,
+                DateOfBirth = profile.DateOfBirth,
+                Gender = profile.Gender?.ToString(),
+                CreatedAt = profile.CreatedAt,
+                Addresses = profile.Addresses as List<Address> ?? new System.Collections.Generic.List<Address>()
+            };
+
+            return View(viewModel);
         }
     }
 }

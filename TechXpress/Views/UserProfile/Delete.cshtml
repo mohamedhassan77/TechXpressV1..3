@@ -46,16 +46,16 @@
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                     <div>
                         <strong style="color: #666;">First Name</strong>
-                        <p style="color: var(--dark); font-weight: 600;">@Model.FirstName</p>
+                        <p style="color: var(--dark); font-weight: 600;">@Model.ApplicationUser.FirstName</p>
                     </div>
                     <div>
                         <strong style="color: #666;">Last Name</strong>
-                        <p style="color: var(--dark); font-weight: 600;">@Model.LastName</p>
+                        <p style="color: var(--dark); font-weight: 600;">@Model.ApplicationUser.LastName</p>
                     </div>
                 </div>
                 <div style="margin-top: 1rem;">
                     <strong style="color: #666;">Email</strong>
-                    <p style="color: var(--dark); font-weight: 600;">@Model.Email</p>
+                    <p style="color: var(--dark); font-weight: 600;">@Model.ApplicationUser.Email</p>
                 </div>
                 <div style="margin-top: 1rem;">
                     <strong style="color: #666;">Phone Number</strong>
@@ -69,7 +69,7 @@
                         @foreach (var address in Model.Addresses)
                         {
                             <p style="color: var(--dark); font-weight: 600;">
-                                @address.AddressLine, @address.City, @address.State, @address.ZipCode, @address.Country
+                                @address.Phone, @address.City, @address.State, @address.PostalCode, @address.Country
                             </p>
                         }
                     </div>
@@ -84,12 +84,12 @@
 
                 <div style="margin-top: 1rem;">
                     <strong style="color: #666;">Date of Birth</strong>
-                    <p style="color: var(--dark); font-weight: 600;">@Model.DateOfBirth.ToShortDateString()</p>
+                    <p style="color: var(--dark); font-weight: 600;">@Model.DateOfBirth.ToString()</p>
                 </div>
             </div>
 
             <form asp-action="DeleteConfirmed" method="post">
-                <input type="hidden" asp-for="Id" />
+                <input type="hidden" asp-for="ApplicationUser.Id" />
                 <div class="modal-actions" style="display: flex; gap: 1rem;">
                     <button type="submit" class="buy-now-button" style="background-color: #dc3545; flex: 1;">
                         <i class="fas fa-trash"></i> Confirm Delete

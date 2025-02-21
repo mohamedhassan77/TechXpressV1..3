@@ -1,0 +1,221 @@
+@model OrderConfirmationViewModel
+
+@{
+    ViewData["Title"] = "Order Confirmation";
+}
+
+<div class="confirmation-container">
+    <div class="confirmation-card">
+        <div class="success-icon">
+            <i class="fas fa-check-circle"></i>
+        </div>
+        
+        <h1>Thank You for Your Order!</h1>
+        <p class="order-number">Order #@Model.OrderNumber</p>
+        
+        <div class="confirmation-details">
+            <div class="detail-row">
+                <span>Order Date:</span>
+                <span>@Model.OrderDate.ToString("MMMM dd, yyyy")</span>
+            </div>
+            <div class="detail-row">
+                <span>Payment Method:</span>
+                <span>@Model.PaymentMethod</span>
+            </div>
+            <div class="detail-row">
+                <span>Shipping Address:</span>
+                <div class="address-details">
+                    <p>@Model.ShippingAddress.FullName</p>
+                    <p>@Model.ShippingAddress.Street</p>
+                    <p>@Model.ShippingAddress.City, @Model.ShippingAddress.State @Model.ShippingAddress.PostalCode</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="order-items">
+            <h2>Order Items</h2>
+            @foreach (var item in Model.Items)
+            {
+                <div class="order-item">
+                    <img src="@item.Product.ImageUrl" alt="@item.Product.Name">
+                    <div class="item-details">
+                        <h3>@item.Product.Name</h3>
+                        <p>Quantity: @item.Quantity</p>
+                        <p class="item-price">@((item.Product.Price * item.Quantity).ToString("C"))</p>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <div class="order-summary">
+            <div class="summary-row">
+                <span>Subtotal</span>
+                <span>@Model.Subtotal.ToString("C")</span>
+            </div>
+            <div class="summary-row">
+                <span>Shipping</span>
+                <span>@Model.ShippingCost.ToString("C")</span>
+            </div>
+            @if (Model.DiscountAmount > 0)
+            {
+                <div class="summary-row discount">
+                    <span>Discount</span>
+                    <span>-@Model.DiscountAmount.ToString("C")</span>
+                </div>
+            }
+            <div class="summary-row total">
+                <span>Total</span>
+                <span>@Model.Total.ToString("C")</span>
+            </div>
+        </div>
+
+        <div class="confirmation-actions">
+            <a href="/Order/Details/@Model.OrderId" class="btn-view-order">View Order Details</a>
+            <a href="/Product" class="btn-continue-shopping">Continue Shopping</a>
+        </div>
+
+        <div class="confirmation-footer">
+            <p>A confirmation email has been sent to @Model.EmailConfirmationSent</p>
+            <p>For any questions about your order, please contact our support team.</p>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        .confirmation-container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .confirmation-card {
+            background: white;
+            border-radius: 10px;
+            padding: 40px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .success-icon {
+            color: #28a745;
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+
+        .order-number {
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .confirmation-details {
+            text-align: left;
+            margin: 30px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 5px;
+        }
+
+        .detail-row {
+            display: flex;
+            margin-bottom: 15px;
+        }
+
+        .detail-row > span:first-child {
+            width: 150px;
+            color: #666;
+        }
+
+        .address-details p {
+            margin: 0;
+        }
+
+        .order-items {
+            margin: 30px 0;
+            text-align: left;
+        }
+
+        .order-item {
+            display: flex;
+            gap: 15px;
+            padding: 15px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .order-item img {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 5px;
+        }
+
+        .order-summary {
+            margin: 30px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 5px;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+        }
+
+        .summary-row.total {
+            border-top: 2px solid #eee;
+            margin-top: 10px;
+            padding-top: 15px;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .confirmation-actions {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin: 30px 0;
+        }
+
+        .btn-view-order,
+        .btn-continue-shopping {
+            padding: 12px 30px;
+            border-radius: 5px;
+            text-decoration: none;
+            transition: background-color 0.3s;
+        }
+
+        .btn-view-order {
+            background: #007bff;
+            color: white;
+        }
+
+        .btn-continue-shopping {
+            background: #f8f9fa;
+            color: #333;
+        }
+
+        .confirmation-footer {
+            margin-top: 30px;
+            color: #666;
+        }
+
+        @@media (max-width: 576px) {
+            .confirmation-card {
+                padding: 20px;
+            }
+
+            .detail-row {
+                flex-direction: column;
+            }
+
+            .detail-row > span:first-child {
+                margin-bottom: 5px;
+            }
+
+            .confirmation-actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+}

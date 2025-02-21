@@ -1,10 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore;
-using TechXpress_domain.Entities;
-using TechXpress_application.Interfaces; 
-using TechXpress_infrastructure.Data;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using TechXpress_domain.Entities;
+using TechXpress_domain.Interfaces.Repositories;
+using TechXpress_infrastructure.Data;
 
 namespace TechXpress_infrastructure.Repositories
 {
@@ -17,38 +17,131 @@ namespace TechXpress_infrastructure.Repositories
             _context = context;
         }
 
-        public async Task<IEnumerable<Product>> GetAllAsync()
+        public async Task<Product> GetByIdAsync(int id)
         {
-            return await _context.Products.ToListAsync();
+            return await _context.Products
+                .Include(p => p.Category)
+                .Include(p => p.Reviews)
+                .FirstOrDefaultAsync(p => p.Id == id);
         }
 
-        public async Task<IEnumerable<Product>> GetFeaturedProductsAsync()
+        public async Task<IEnumerable<Product>> GetAllAsync()
+        {
+            return await _context.Products
+                .Include(p => p.Category)
+                .ToListAsync();
+        }
+        public async Task<IEnumerable<Product>> GetFeaturedProductsAsync(int page, int pageSize)
         {
             return await _context.Products
                 .Where(p => p.IsFeatured)
+                .OrderBy(p => p.Price)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+        }
+        public async Task<IEnumerable<Product>> GetByCategoryAsync(string category)
+        {
+            return await _context.Products
+                .Include(p => p.Category)
+                .Where(p => p.Category.Name == category)
                 .ToListAsync();
         }
 
-        public async Task<Product> GetByIdAsync(int id)
+        public async Task<(IEnumerable<Product>, int)> GetFilteredAsync(string category, string search, int skip, int take)
         {
-            return await _context.Products.FirstOrDefaultAsync(p => p.Id == id);
+            var query = _context.Products
+                .Include(p => p.Category)
+                .AsQueryable();
+
+            if (!string.IsNullOrEmpty(category))
+            {
+                query = query.Where(p => p.Category.Name == category);
+            }
+            if (!string.IsNullOrEmpty(search))
+            {
+                query = query.Where(p => p.Name.Contains(search) || p.Description.Contains(search));
+            }
+
+            int totalCount = await query.CountAsync();
+            var products = await query.OrderByDescending(p => p.Id)
+                                       .Skip(skip)
+                                       .Take(take)
+                                       .ToListAsync();
+            return (products, totalCount);
         }
 
-        public async Task AddAsync(Product product)
+        public async Task<IEnumerable<Product>> GetFilteredAsync(string category, decimal? minPrice, decimal? maxPrice, string sortBy)
+        {
+            var query = _context.Products
+                .Include(p => p.Category)
+                .AsQueryable();
+
+            if (!string.IsNullOrEmpty(category))
+            {
+                query = query.Where(p => p.Category.Name == category);
+            }
+            if (minPrice.HasValue)
+            {
+                query = query.Where(p => p.Price >= minPrice.Value);
+            }
+            if (maxPrice.HasValue)
+            {
+                query = query.Where(p => p.Price <= maxPrice.Value);
+            }
+
+            query = sortBy?.ToLower() switch
+            {
+                "price_asc" => query.OrderBy(p => p.Price),
+                "price_desc" => query.OrderByDescending(p => p.Price),
+                "name_asc" => query.OrderBy(p => p.Name),
+                "name_desc" => query.OrderByDescending(p => p.Name),
+                "newest" => query.OrderByDescending(p => p.CreatedDate),
+                "oldest" => query.OrderBy(p => p.CreatedDate),
+                _ => query.OrderByDescending(p => p.Id)
+            };
+
+            return await query.ToListAsync();
+        }
+
+        public async Task<IEnumerable<Product>> SearchAsync(string query)
+        {
+            return await _context.Products
+                .Include(p => p.Category)
+                .Where(p => p.Name.Contains(query) || p.Description.Contains(query))
+                .Take(10)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Product>> GetRelatedAsync(int productId, int take = 4)
+        {
+            var product = await GetByIdAsync(productId);
+            if (product == null)
+                return new List<Product>();
+            return await _context.Products
+                .Include(p => p.Category)
+                .Where(p => p.CategoryId == product.CategoryId && p.Id != productId)
+                .Take(take)
+                .ToListAsync();
+        }
+
+        public async Task UpdateStockAsync(int productId, int quantity)
+        {
+            var product = await _context.Products.FindAsync(productId);
+            if (product != null)
+            {
+                product.StockQuantity += quantity;
+                await SaveChangesAsync();
+            }
+        }
+
+        public async Task AddProductAsync(Product product)
         {
             await _context.Products.AddAsync(product);
-            await _context.SaveChangesAsync();
         }
 
-        public async Task UpdateAsync(Product product)
+        public async Task SaveChangesAsync()
         {
-            _context.Products.Update(product);
-            await _context.SaveChangesAsync();
-        }
-
-        public async Task DeleteAsync(Product product)
-        {
-            _context.Products.Remove(product);
             await _context.SaveChangesAsync();
         }
     }

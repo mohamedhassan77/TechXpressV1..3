@@ -1,12 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using TechXpress_application.Interfaces;
 using TechXpress_domain.Entities;
+using TechXpress_domain.Interfaces.Repositories;
 using TechXpress_infrastructure.Data;
 
-namespace TechXpress.Data.Repositories
+namespace TechXpress_infrastructure.Repositories
 {
     public class UserProfileRepository : IUserProfileRepository
     {
@@ -19,89 +18,54 @@ namespace TechXpress.Data.Repositories
 
         public async Task<IEnumerable<UserProfile>> GetAllAsync()
         {
-            try
-            {
-                return await _context.UserProfiles.ToListAsync();
-            }
-            catch (Exception ex)
-            {
-                throw new ApplicationException("An error occurred while retrieving user profiles.", ex);
-            }
+            return await _context.UserProfiles
+                .Include(up => up.Addresses)
+                .ToListAsync();
         }
 
-        public async Task<UserProfile> GetByIdAsync(string id)
+        public async Task<UserProfile?> GetByIdAsync(string applicationUserId)
         {
-            try
-            {
-                return await _context.UserProfiles.FindAsync(id);
-            }
-            catch (Exception ex)
-            {
-                throw new ApplicationException($"An error occurred while retrieving the user profile with ID {id}.", ex);
-            }
+            return await _context.UserProfiles
+                .Include(up => up.Addresses)
+                .FirstOrDefaultAsync(up => up.ApplicationUserId == applicationUserId);
         }
 
         public async Task AddAsync(UserProfile userProfile)
         {
-            try
+            if (userProfile.Addresses == null)
             {
-                await _context.UserProfiles.AddAsync(userProfile);
-                await _context.SaveChangesAsync();
+                userProfile.Addresses = new List<Address>();
             }
-            catch (Exception ex)
-            {
-                throw new ApplicationException("An error occurred while adding the user profile.", ex);
-            }
+            await _context.UserProfiles.AddAsync(userProfile);
+            await _context.SaveChangesAsync();
         }
 
         public async Task UpdateAsync(UserProfile userProfile)
         {
-            try
-            {
-                _context.UserProfiles.Update(userProfile);
-                await _context.SaveChangesAsync();
-            }
-            catch (Exception ex)
-            {
-                throw new ApplicationException("An error occurred while updating the user profile.", ex);
-            }
+            _context.UserProfiles.Update(userProfile);
+            await _context.SaveChangesAsync();
         }
 
-        public async Task DeleteAsync(UserProfile userProfile)
+        public async Task DeleteAsync(string applicationUserId)
         {
-            try
+            var userProfile = await GetByIdAsync(applicationUserId);
+            if (userProfile == null)
             {
-                _context.UserProfiles.Remove(userProfile);
-                await _context.SaveChangesAsync();
+                throw new KeyNotFoundException($"UserProfile with ID {applicationUserId} not found.");
             }
-            catch (Exception ex)
-            {
-                throw new ApplicationException("An error occurred while deleting the user profile.", ex);
-            }
+
+            _context.UserProfiles.Remove(userProfile);
+            await _context.SaveChangesAsync();
         }
 
-        public async Task<bool> ExistsAsync(string id)
+        public async Task<bool> ExistsAsync(string applicationUserId)
         {
-            try
-            {
-                return await _context.UserProfiles.AnyAsync(e => e.Id == id);
-            }
-            catch (Exception ex)
-            {
-                throw new ApplicationException($"An error occurred while checking if the user profile with ID {id} exists.", ex);
-            }
+            return await _context.UserProfiles.FindAsync(applicationUserId) != null;
         }
 
         public async Task SaveChangesAsync()
         {
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (Exception ex)
-            {
-                throw new ApplicationException("An error occurred while saving changes to the database.", ex);
-            }
+            await _context.SaveChangesAsync();
         }
     }
 }

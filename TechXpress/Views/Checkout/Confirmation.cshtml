@@ -1,0 +1,203 @@
+@model OrderConfirmationViewModel
+
+@{
+    ViewData["Title"] = "Order Confirmation";
+}
+
+<div class="confirmation-container">
+    <div class="confirmation-card">
+        <div class="success-icon">
+            <i class="fas fa-check-circle"></i>
+        </div>
+        <h1>Thank You for Your Order!</h1>
+        <p class="order-number">Order #@Model.OrderNumber</p>
+        
+        <div class="order-details">
+            <div class="details-section">
+                <h3>Order Summary</h3>
+                <div class="order-items">
+                    @foreach (var item in Model.Items)
+                    {
+                        <div class="order-item">
+                            <img src="@item.Product.ImageUrl" alt="@item.Product.Name" />
+                            <div class="item-details">
+                                <h4>@item.Product.Name</h4>
+                                <p>Quantity: @item.Quantity</p>
+                                <p class="item-price">@((item.Subtotal * item.Quantity).ToString("C"))</p>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <div class="details-section">
+                <h3>Shipping Details</h3>
+                <div class="shipping-info">
+                    <p><strong>@Model.ShippingAddress.FullName</strong></p>
+                    <p>@Model.ShippingAddress</p>
+                    <p>@Model.ShippingAddress.City, @Model.ShippingAddress.PostalCode</p>
+                    <p>Phone: @Model.ShippingAddress.Phone</p>
+                </div>
+            </div>
+
+            <div class="details-section">
+                <h3>Payment Summary</h3>
+                <div class="payment-summary">
+                    <div class="summary-row">
+                        <span>Subtotal</span>
+                        <span>@Model.Subtotal.ToString("C")</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Shipping</span>
+                        <span>@Model.ShippingCost.ToString("C")</span>
+                    </div>
+                    @if (Model.DiscountAmount > 0)
+                    {
+                        <div class="summary-row discount">
+                            <span>Discount</span>
+                            <span>-@Model.DiscountAmount.ToString("C")</span>
+                        </div>
+                    }
+                    <div class="summary-row total">
+                        <span>Total</span>
+                        <span>@Model.Total.ToString("C")</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="confirmation-actions">
+            <a href="/" class="btn-continue-shopping">Continue Shopping</a>
+            <a href="/Account/Orders" class="btn-view-orders">View Orders</a>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        .confirmation-container {
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .confirmation-card {
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .success-icon {
+            font-size: 4rem;
+            color: #28a745;
+            margin-bottom: 20px;
+        }
+
+        .order-number {
+            color: #666;
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+        }
+
+        .order-details {
+            text-align: left;
+            margin: 40px 0;
+        }
+
+        .details-section {
+            margin-bottom: 30px;
+            padding-bottom: 30px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .details-section:last-child {
+            border-bottom: none;
+        }
+
+        .order-items {
+            display: grid;
+            gap: 20px;
+        }
+
+        .order-item {
+            display: flex;
+            gap: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .order-item img {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 5px;
+        }
+
+        .shipping-info p {
+            margin: 5px 0;
+        }
+
+        .payment-summary {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+        }
+
+        .summary-row.total {
+            border-top: 2px solid #ddd;
+            margin-top: 10px;
+            padding-top: 15px;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .confirmation-actions {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 40px;
+        }
+
+        .btn-continue-shopping,
+        .btn-view-orders {
+            padding: 12px 25px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: background-color 0.3s;
+        }
+
+        .btn-continue-shopping {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-continue-shopping:hover {
+            background: #5a6268;
+        }
+
+        .btn-view-orders {
+            background: #007bff;
+            color: white;
+        }
+
+        .btn-view-orders:hover {
+            background: #0056b3;
+        }
+
+        @@media (max-width: 768px) {
+            .confirmation-actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+}

@@ -1,5 +1,100 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@model TechXpress.Models.UnifiedProductViewModel
 @{
+	ViewData["Title"] = "Products";
+	Layout = "_Layout";
 }
+@section Styles {
+	
+}
+
+<div class="container mt-4">
+	<div class="row">
+		<!-- Sidebar: Filters -->
+		<div class="col-md-3">
+			<div class="card">
+				<div class="card-body">
+					<h5 class="card-title">Filters</h5>
+					<form id="filterForm" method="get">
+						<!-- Categories Filter -->
+						<div class="mb-3">
+							@if (Model.Categories != null && Model.Categories.Any())
+							{
+								foreach (var category in Model.Categories)
+								{
+									<div class="form-check">
+										<input class="form-check-input" type="radio" name="category" value="@category.Name" id="@category.Name"
+										@(Model.CurrentCategory == category.Name ? "checked" : "") />
+										<label class="form-check-label" for="@category.Name">
+											@category.Name
+										</label>
+									</div>
+								}
+							}
+						</div>
+						<!-- Sort Options -->
+						<div class="mb-3">
+							<label class="form-label">Sort By</label>
+
+							<select class="form-select" name="sortBy">
+								<option value="newest" @@(Model.Filter.SortBy= ="newest" ? "selected" : "" )>Newest First</option>
+								<option value="price_asc" @@(Model.Filter.SortBy= ="price_asc" ? "selected" : "" )>Price: Low to High</option>
+								<option value="price_desc" @@(Model.Filter.SortBy= ="price_desc" ? "selected" : "" )>Price: High to Low</option>
+								<option value="name_asc" @@(Model.Filter.SortBy= ="name_asc" ? "selected" : "" )>Name: A to Z</option>
+								<option value="name_desc" @@(Model.Filter.SortBy= ="name_desc" ? "selected" : "" )>Name: Z to A</option>
+							</select>
+
+						</div>
+						<button type="submit" class="btn btn-primary w-100">Apply Filters</button>
+					</form>
+				</div>
+			</div>
+		</div>
+		<!-- Main Content: Products List -->
+		<div class="col-md-9">
+			<div class="row row-cols-1 row-cols-md-3 g-4" id="productsGrid">
+				@foreach (var product in Model.Products)
+				{
+					@await Html.PartialAsync("_ProductCard", product)
+				}
+			</div>
+			<!-- Pagination -->
+			@if (Model.PaginationInfo.TotalPages > 1)
+			{
+				<nav aria-label="Page navigation" class="mt-4">
+					<ul class="pagination justify-content-center">
+						@for (int i = 1; i <= Model.PaginationInfo.TotalPages; i++)
+						{
+							<li class="page-item @(i == Model.PaginationInfo.CurrentPage ? "active" : "")">
+								<a class="page-link" href="@Url.Action("Index", new { page = i, category = Model.CurrentCategory, search = Model.Search, sortBy = Model.Filter?.SortBy })">@i</a>
+
+							</li>
+						}
+					</ul>
+				</nav>
+			}
+		</div>
+	
+
+	<div id="loadingSpinner" style="display: none; text-align: center; margin-top: 20px;">
+		<div class="spinner-border text-primary" role="status">
+			<span class="visually-hidden">Loading...</span>
+		</div>
+	</div>
+	</div>
+	</div>
+
+	@section Scripts {
+		<script>
+					$(document).ready(function () {
+				$('#filterForm select, #filterForm input[type="radio"]').change(function () {
+					$('#filterForm').submit();
+				});
+
+				$('#filterForm').submit(function () {
+					$('#productsGrid').hide();
+					$('#loadingSpinner').show();
+				});
+			});
+
+		</script>
+	}

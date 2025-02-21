@@ -31,13 +31,18 @@ namespace TechXpress.Models
         [Display(Name = "Last Name")]
         public string LastName { get; set; }
 
+        [Required(ErrorMessage = "Phone number is required.")]
         [Phone(ErrorMessage = "Invalid phone number format.")]
         [StringLength(12)]
-        [Display(Name = "Phone Number")]
-        public string PhoneNumber { get; set; }
+        [Display(Name = "Phone")]
+        public string Phone { get; set; }
 
         [Display(Name = "Date of Birth")]
         [DataType(DataType.Date)]
         public DateTime DateOfBirth { get; set; }
+
+        [Required(ErrorMessage = "You must accept the terms and conditions.")]
+        [Display(Name = "Accept Terms & Conditions")]
+        public bool AcceptTerms { get; set; }
     }
 }

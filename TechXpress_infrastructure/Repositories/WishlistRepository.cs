@@ -1,15 +1,11 @@
-﻿using TechXpress_domain.Entities;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Microsoft.EntityFrameworkCore;
+using TechXpress_domain.Entities;
+using TechXpress_domain.Interfaces.Repositories;
 using TechXpress_infrastructure.Data;
-using TechXpress_application.Interfaces;
 
-using Microsoft.EntityFrameworkCore;
-
-namespace TechXpress.Repositories
+namespace TechXpress_infrastructure.Repositories
 {
-       public class WishlistRepository : IWishlistRepository
+    public class WishlistRepository : IWishlistRepository
     {
         private readonly TechXpress_context _context;
 
@@ -18,10 +14,11 @@ namespace TechXpress.Repositories
             _context = context;
         }
 
-        public async Task<Wishlist> GetByUserIdAsync(string userId)
+        public async Task<Wishlist?> GetByUserIdAsync(string userId)
         {
             return await _context.Wishlists
-                .Include(w => w.Products)
+                .Include(w => w.WishlistItems)
+                .ThenInclude(wi => wi.Product)
                 .FirstOrDefaultAsync(w => w.UserId == userId);
         }
 
@@ -30,17 +27,17 @@ namespace TechXpress.Repositories
             var wishlist = await GetByUserIdAsync(userId);
             if (wishlist == null)
             {
-                wishlist = new Wishlist { Id = Guid.NewGuid().ToString(),UserId = userId };
+                wishlist = new Wishlist { UserId = userId };
                 _context.Wishlists.Add(wishlist);
+                await _context.SaveChangesAsync();
             }
 
-            var product = await _context.Products.FindAsync(productId);
-            if (product != null && !wishlist.Products.Contains(product))
+            var existingItem = wishlist.WishlistItems.FirstOrDefault(wi => wi.ProductId == productId);
+            if (existingItem == null)
             {
-                wishlist.Products.Add(product);
+                wishlist.WishlistItems.Add(new WishlistItem { WishlistId = wishlist.Id, ProductId = productId });
+                await _context.SaveChangesAsync();
             }
-
-            await _context.SaveChangesAsync();
         }
 
         public async Task RemoveProductFromWishlistAsync(string userId, int productId)
@@ -48,13 +45,18 @@ namespace TechXpress.Repositories
             var wishlist = await GetByUserIdAsync(userId);
             if (wishlist != null)
             {
-                var product = wishlist.Products.FirstOrDefault(p => p.Id == productId);
-                if (product != null)
+                var item = wishlist.WishlistItems.FirstOrDefault(wi => wi.ProductId == productId);
+                if (item != null)
                 {
-                    wishlist.Products.Remove(product);
+                    wishlist.WishlistItems.Remove(item);
                     await _context.SaveChangesAsync();
                 }
             }
+        }
+
+        public async Task SaveChangesAsync()
+        {
+            await _context.SaveChangesAsync();
         }
     }
 }

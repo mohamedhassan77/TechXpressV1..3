@@ -1,250 +1,229 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
+using Microsoft.EntityFrameworkCore;
+using System.Linq;
 using System.Threading.Tasks;
-using TechXpress_domain.Entities;
-using TechXpress_infrastructure.Repositories;
- using TechXpress_application.Interfaces;
-using Microsoft.AspNetCore.Identity;
-using TechXpress.Repositories;
+using TechXpress.Models;
+using TechXpress_domain.Interfaces.Services;
+
 namespace TechXpress.Controllers
 {
     public class ProductController : Controller
     {
-        private readonly ILogger<ProductController> _logger;
-        private readonly IProductRepository _productRepository;
-        private readonly IWishlistRepository _wishlistRepository;
-        private readonly ICartRepository _cartRepository;
-        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IProductService _productService;
+        private readonly ICategoryService _categoryService;
+        private readonly IWishlistService _wishlistService;
+        private readonly ICartService _cartService;
+        private readonly IReviewService _reviewService;
 
-
-        public ProductController(ILogger<ProductController> logger, IProductRepository productRepository,
-                                 IWishlistRepository wishlistRepository, ICartRepository cartRepository,
-                                 UserManager<ApplicationUser> userManager)
+        public ProductController(
+            IProductService productService,
+            ICategoryService categoryService,
+            IWishlistService wishlistService,
+            ICartService cartService,
+            IReviewService reviewService)
         {
-            _logger = logger;
-            _productRepository = productRepository;
-            _wishlistRepository = wishlistRepository;
-            _cartRepository = cartRepository;
-            _userManager = userManager;
+            _productService = productService;
+            _categoryService = categoryService;
+            _wishlistService = wishlistService;
+            _cartService = cartService;
+            _reviewService = reviewService;
         }
 
-        
-        // GET: Product/Index
-        public async Task<IActionResult> Index()
+        // List View Action
+        public async Task<IActionResult> Index(string category, string search, string sortBy, int page = 1)
         {
-            var products = await _productRepository.GetFeaturedProductsAsync();
-            return View(products);
+            int pageSize = 12;
+            // Get filtered products along with total count
+            var (products, totalCount) = await _productService.GetFilteredProductsAsync(category, search, page, pageSize);
+
+            // Get categories from the domain service and map them into view models
+            var domainCategories = await _categoryService.GetAllCategoriesAsync(1, 10, "name_asc");
+            var categoryViewModels = domainCategories.Select(c => new CategoryViewModel
+            {
+                Id = c.Id,
+                Name = c.Name,
+                ImageUrl = c.ImageUrl
+            });
+
+            var model = new UnifiedProductViewModel
+            {
+                Products = products.Select(p => new ProductViewModel
+                {
+                    Id = p.Id,
+                    Name = p.Name,
+                    Description = p.Description,
+                    Price = p.Price,
+                    DiscountPrice = p.DiscountPrice,
+                    ImageUrl = p.ImageUrl,
+                    IsFeatured = p.IsFeatured,
+                    CreatedDate = p.CreatedDate,
+                    UpdatedDate = p.UpdatedDate,
+                    Tag = p.Tag,
+                    Brand = p.Brand,
+                    CategoryId = p.CategoryId,
+                    StockQuantity = p.StockQuantity,
+                    SKU = p.SKU,
+                    Specifications = p.Specifications,
+                    OldPrice = p.OldPrice,
+                    ProductImages = p.ProductImages.ToList(),
+                    Category = new CategoryViewModel
+                    {
+                        Id = p.Category.Id,
+                        Name = p.Category.Name,
+                        ImageUrl = p.Category.ImageUrl
+                    }
+                }).ToList(),
+                PaginationInfo = new PaginationInfo
+                {
+                    CurrentPage = page,
+                    ItemsPerPage = pageSize,
+                    TotalItems = totalCount
+                },
+                Categories = categoryViewModels,
+                CurrentCategory = category,
+                Search = search,
+                Filter = new ProductFilterModel
+                {
+                    Category = category,
+                    SortBy = sortBy,
+                    Page = page,
+                    PageSize = pageSize
+                }
+            };
+
+            return View(model);
         }
 
-        // GET: Product/Details/5
+        // Details View Action
         public async Task<IActionResult> Details(int id)
         {
-            var product = await _productRepository.GetByIdAsync(id);
+            var product = await _productService.GetByIdAsync(id);
             if (product == null)
             {
                 return NotFound();
             }
 
-            var specifications = new List<string>
+            var relatedProducts = await _productService.GetRelatedProductsAsync(id);
+            bool isInWishlist = false;
+            if (User.Identity.IsAuthenticated)
             {
-                "Color: Red",
-                "Size: Medium",
-                "Weight: 1.5 kg"
-            };
-
-            var reviews = new List<string>
-            {
-                "Great product!",
-                "Highly recommend it.",
-                "Would buy again."
-            };
-
-            var rating = 4.5f; // Example rating
-
-            // Combine data into a view model 
-            var viewModel = new ProductDetailsViewModel
-            {
-                Product = product,
-                Specifications = string.Join("; ", specifications),
-                Rating = rating,
-                Reviews = string.Join(" | ", reviews)
-            };
-
-            return View(viewModel);
-        }
-
-
-        // GET: Product/GetProductDetails/5
-        // This action is used to show detailed info (e.g., specifications and reviews) for a product.
-        public async Task<IActionResult> GetProductDetails(int productId)
-        {
-            var product = await _productRepository.GetByIdAsync(productId);
-            if (product == null)
-            {
-                return NotFound();
-            }
-
-            // Example additional data; replace with actual service calls if needed.
-            var specifications = new List<string>
-            {
-                "Color: Red",
-                "Size: Medium",
-                "Weight: 1.5 kg"
-            };
-
-            var reviews = new List<string>
-            {
-                "Great product!",
-                "Highly recommend it.",
-                "Would buy again."
-            };
-
-            var rating = 4.5f; // Example rating
-
-            // Combine data into a view model 
-            var viewModel = new ProductDetailsViewModel
-            {
-                Product = product,
-                Specifications = string.Join("; ", specifications),
-                Rating = rating,
-                Reviews = string.Join(" | ", reviews)
-            };
-
-            return View(viewModel);
-        }
-
-        // GET: Product/Create
-        public IActionResult Create()
-        {
-            return View();
-        }
-
-        // POST: Product/Create
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Name,Description,Price")] Product product)
-        {
-            if (ModelState.IsValid)
-            {
-                await _productRepository.AddAsync(product);
-                return RedirectToAction(nameof(Index));
-            }
-            return View(product);
-        }
-
-        // GET: Product/Edit/5
-        public async Task<IActionResult> Edit(int id)
-        {
-            var product = await _productRepository.GetByIdAsync(id);
-            if (product == null)
-            {
-                return NotFound();
-            }
-            return View(product);
-        }
-
-        // POST: Product/Edit/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Description,Price")] Product product)
-        {
-            if (id != product.Id)
-            {
-                return NotFound();
-            }
-
-            if (ModelState.IsValid)
-            {
-                try
+                var wishlist = await _wishlistService.GetWishlistAsync(User.Identity.Name);
+                if (wishlist != null)
                 {
-                    await _productRepository.UpdateAsync(product);
+                    isInWishlist = wishlist.WishlistItems.Any(w => w.ProductId == id);
                 }
-                catch (Exception ex)
+            }
+
+            var model = new UnifiedProductViewModel
+            {
+                // Map the single product to the ProductDetails property.
+                ProductDetails = new ProductViewModel
                 {
-                    _logger.LogError(ex, $"Error updating product with ID {id}");
-                    // Optionally, you could add a ModelState error here and return the view.
-                    return View(product);
-                }
-                return RedirectToAction(nameof(Index));
-            }
-            return View(product);
+                    Id = product.Id,
+                    Name = product.Name,
+                    Description = product.Description,
+                    Price = product.Price,
+                    DiscountPrice = product.DiscountPrice,
+                    ImageUrl = product.ImageUrl,
+                    IsFeatured = product.IsFeatured,
+                    CreatedDate = product.CreatedDate,
+                    UpdatedDate = product.UpdatedDate,
+                    Tag = product.Tag,
+                    Brand = product.Brand,
+                    CategoryId = product.CategoryId,
+                    StockQuantity = product.StockQuantity,
+                    SKU = product.SKU,
+                    Specifications = product.Specifications,
+                    OldPrice = product.OldPrice,
+                    ProductImages = product.ProductImages.ToList(),
+                    Category = new CategoryViewModel
+                    {
+                        Id = product.Category.Id,
+                        Name = product.Category.Name,
+                        ImageUrl = product.Category.ImageUrl
+                    }
+                },
+                // Map related products
+                RelatedProducts = relatedProducts.Select(rp => new ProductViewModel
+                {
+                    Id = rp.Id,
+                    Name = rp.Name,
+                    Description = rp.Description,
+                    Price = rp.Price,
+                    DiscountPrice = rp.DiscountPrice,
+                    ImageUrl = rp.ImageUrl,
+                    IsFeatured = rp.IsFeatured,
+                    CreatedDate = rp.CreatedDate,
+                    UpdatedDate = rp.UpdatedDate,
+                    Tag = rp.Tag,
+                    Brand = rp.Brand,
+                    CategoryId = rp.CategoryId,
+                    StockQuantity = rp.StockQuantity,
+                    SKU = rp.SKU,
+                    Specifications = rp.Specifications,
+                    OldPrice = rp.OldPrice,
+                    ProductImages = rp.ProductImages.ToList(),
+                    Category = new CategoryViewModel
+                    {
+                        Id = rp.Category.Id,
+                        Name = rp.Category.Name,
+                        ImageUrl = rp.Category.ImageUrl
+                    }
+                }),
+                IsInWishlist = isInWishlist,
+                Reviews = product.Reviews
+            };
+
+            return View(model);
         }
 
-        // GET: Product/Delete/5
-        public async Task<IActionResult> Delete(int id)
+        [HttpGet]
+        public async Task<IActionResult> Search(string search)
         {
-            var product = await _productRepository.GetByIdAsync(id);
-            if (product == null)
+            if (string.IsNullOrWhiteSpace(search))
             {
-                return NotFound();
+                return View("Search", new UnifiedProductViewModel()); 
             }
-            return View(product);
-        }
 
-        // POST: Product/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            var product = await _productRepository.GetByIdAsync(id);
-            if (product != null)
-            {
-                await _productRepository.DeleteAsync(product);
-            }
-            return RedirectToAction(nameof(Index));
-        }
-        public async Task<IActionResult> Wishlist()
-        {
-            var userId = _userManager.GetUserId(User);
-            var wishlist = await _wishlistRepository.GetByUserIdAsync(userId);
-            var wishlistitems = wishlist?.Products ?? new List<Product>();
+            var products = await _productService.SearchProductsAsync(search);
 
-            var productViewModels = wishlistitems.Select(p => new ProductViewModel
+            // Convert Product -> ProductViewModel
+            var productViewModels = products.Select(p => new ProductViewModel
             {
                 Id = p.Id,
                 Name = p.Name,
+                Description = p.Description,
                 Price = p.Price,
-                Description = p.Description,   
+                DiscountPrice = p.DiscountPrice,
                 ImageUrl = p.ImageUrl,
                 IsFeatured = p.IsFeatured,
-                Tag = p.Tag,
                 CreatedDate = p.CreatedDate,
-                UpdatedDate = p.UpdatedDate
+                UpdatedDate = p.UpdatedDate,
+                Tag = p.Tag,
+                Brand = p.Brand,
+                CategoryId = p.CategoryId,
+                StockQuantity = p.StockQuantity,
+                SKU = p.SKU,
+                Specifications = p.Specifications,
+                OldPrice = p.OldPrice,
+                ProductImages = p.ProductImages?.ToList() ?? new List<string>(),
+                AverageRating = p.Reviews.Any() ? p.Reviews.Average(r => r.Rating) : 0,
+                ReviewCount = p.Reviews.Count,
             }).ToList();
-            return View(productViewModels);
+            var viewModel = new UnifiedProductViewModel
+            {
+                Products = productViewModels,
+                Search = search,
+                PaginationInfo = new PaginationInfo
+                {
+                    CurrentPage = 1,
+                    ItemsPerPage = productViewModels.Count,
+                    TotalItems = productViewModels.Count
+                }
+            };
 
+            return View(viewModel);
         }
 
-        public async Task<IActionResult> Cart()
-        {
-            var userId = _userManager.GetUserId(User);
-            var cart = await _cartRepository.GetByUserIdAsync(userId);
-            return View(cart?.CartItems ?? new List<CartItem>());
         }
-
-        [HttpPost]
-        public async Task<IActionResult> AddToWishlist(int productId)
-        {
-            var userId = _userManager.GetUserId(User);
-            await _wishlistRepository.AddProductToWishlistAsync(userId, productId);
-            return RedirectToAction("Index");
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> RemoveFromWishlist(int productId)
-        {
-            var userId = _userManager.GetUserId(User);
-            await _wishlistRepository.RemoveProductFromWishlistAsync(userId, productId);
-            return RedirectToAction("Index");
-        }
-
-    
-
-
- 
-    }
 }
-       
-     

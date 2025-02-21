@@ -1,58 +1,46 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using TechXpress_domain.Entities;
-using TechXpress_application.Interfaces;
 using System.Threading.Tasks;
-using System.Linq;
-using TechXpress.Repositories;
+using TechXpress.Models;
+using TechXpress_domain.Interfaces.Services;
+using TechXpress_domain.Entities;
 
 namespace TechXpress.Controllers
 {
     [Authorize]
     public class WishlistController : Controller
     {
-        private readonly IWishlistRepository _wishlistRepository;
-        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IWishlistService _wishlistService;
+        private readonly UserManager<TechXpress_domain.Entities.ApplicationUser> _userManager;
 
-        public WishlistController(IWishlistRepository wishlistRepository, UserManager<ApplicationUser> userManager)
+        public WishlistController(IWishlistService wishlistService, UserManager<TechXpress_domain.Entities.ApplicationUser> userManager)
         {
-            _wishlistRepository = wishlistRepository;
+            _wishlistService = wishlistService;
             _userManager = userManager;
         }
 
-        // GET: Wishlist
         public async Task<IActionResult> Index()
         {
             var userId = _userManager.GetUserId(User);
-            var wishlist = await _wishlistRepository.GetByUserIdAsync(userId);
-            var wishlistitems = wishlist?.Products ?? new List<Product>();
-
-            var productViewModels = wishlistitems.Select(p => new ProductViewModel
+            var wishlist = await _wishlistService.GetWishlistAsync(userId);
+            var viewModel = new WishlistViewModel
             {
-                Id = p.Id,
-                Name = p.Name,
-                Price = p.Price,
-                Description = p.Description,   // map additional properties as needed
-                ImageUrl = p.ImageUrl,
-                IsFeatured = p.IsFeatured,
-                Tag = p.Tag,
-                CreatedDate = p.CreatedDate,
-                UpdatedDate = p.UpdatedDate
-            }).ToList();
-            return View(productViewModels);
-         
+                UserId = userId,
+                WishlistItems = wishlist?.WishlistItems != null ? new System.Collections.Generic.List<WishlistItem>(wishlist.WishlistItems) : new System.Collections.Generic.List<WishlistItem>(),
+                TotalItems = wishlist?.WishlistItems?.Count ?? 0,
+                Items = wishlist?.WishlistItems != null ? new System.Collections.Generic.List<WishlistItem>(wishlist.WishlistItems) : new System.Collections.Generic.List<WishlistItem>()
+            };
+            return View(viewModel);
         }
 
-        // POST: Wishlist/AddToWishlist
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddToWishlist(int productId)
         {
             var userId = _userManager.GetUserId(User);
-            await _wishlistRepository.AddProductToWishlistAsync(userId, productId);
-            // Trigger wishlist updated event
-            TempData["ToastMessage"] = "Product added to wishlist!";
+            var message = await _wishlistService.AddToWishlistAsync(userId, productId);
+            TempData["ToastMessage"] = message;
             return RedirectToAction(nameof(Index));
         }
 
@@ -61,17 +49,17 @@ namespace TechXpress.Controllers
         public async Task<IActionResult> RemoveFromWishlist(int productId)
         {
             var userId = _userManager.GetUserId(User);
-            await _wishlistRepository.RemoveProductFromWishlistAsync(userId, productId);
-            // Trigger wishlist updated event
-            TempData["ToastMessage"] = "Product removed from wishlist!";
+            var message = await _wishlistService.RemoveFromWishlistAsync(userId, productId);
+            TempData["ToastMessage"] = message;
             return RedirectToAction(nameof(Index));
         }
+
         [HttpGet]
         public async Task<IActionResult> GetWishlistCount()
         {
             var userId = _userManager.GetUserId(User);
-            var wishlist = await _wishlistRepository.GetByUserIdAsync(userId);
-            var count = wishlist?.Products?.Count ?? 0;
+            var wishlist = await _wishlistService.GetWishlistAsync(userId);
+            int count = wishlist?.WishlistItems?.Count ?? 0;
             return Json(new { count });
         }
     }

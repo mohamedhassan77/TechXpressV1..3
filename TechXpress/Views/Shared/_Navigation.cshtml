@@ -1,0 +1,121 @@
+﻿@using Microsoft.AspNetCore.Identity
+@using TechXpress_application.Services
+@using TechXpress_domain.Entities
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+
+@{
+    ApplicationUser currentUser = null;
+    string firstName = "Guest";
+    string profileImageUrl = "https://www.pngarts.com/files/10/Default-Profile-Picture-Download-PNG-Image.png";
+    if (SignInManager.IsSignedIn(User))
+    {
+        currentUser = await UserManager.GetUserAsync(User);
+        if (currentUser != null)
+        {
+            firstName = !string.IsNullOrEmpty(currentUser.FirstName) ? currentUser.FirstName : currentUser.UserName;
+            if (currentUser.UserProfile != null && !string.IsNullOrEmpty(currentUser.UserProfile.ProfileImage))
+            {
+                profileImageUrl = currentUser.UserProfile.ProfileImage;
+            }
+        }
+    }
+}
+
+@section Scripts {
+    <script>
+      
+
+    </script>
+}
+<nav class="navbar navbar-expand-lg modern-nav">
+    <div class="nav-container">
+        <!-- Logo -->
+        <a class="logo" asp-controller="Home" asp-action="Index">
+            <i class="fas fa-bolt"></i> TechXpress
+        </a>
+
+        <!-- Search Form -->
+        <div class="mb-4">
+            <form class="d-flex flex-grow-1 mx-3" asp-controller="Product" asp-action="Search" method="get">
+                <input class="form-control me-2" type="search" placeholder="Search products..." name="search">
+                <button class="btn btn-outline-primary" type="submit">
+                    <i class="fas fa-search"></i>
+                </button>
+            </form>
+        </div>
+        <div class="row row-cols-1 row-cols-md-3 g-4" id="productsGrid">
+            @await Html.PartialAsync("_ProductGrid", (object)Model.Products)
+        </div>
+
+        <!-- Navigation Links -->
+        <ul class="navbar-nav d-none d-lg-flex">
+            <li class="nav-item">
+                <a class="nav-link" asp-controller="Home" asp-action="Index">Home</a>
+            </li>
+
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="categoryTrigger" aria-expanded="false">
+                    Categories <i class="fas fa-chevron-down"></i>
+                </a>
+             
+            </li>
+
+            <!-- Shop Now -->
+            <li class="nav-item">
+                <a class="nav-link" asp-controller="Product" asp-action="Index">Shop Now</a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="#contact">Contact</a>
+            </li>
+        </ul>
+
+        <!-- Cart and Wishlist -->
+        <ul class="navbar-nav d-none d-lg-flex">
+            <li class="nav-item">
+                <a class="nav-link" asp-controller="Cart" asp-action="Index">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span id="cart-counter" class="badge bg-primary">0</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" asp-controller="Wishlist" asp-action="Index">
+                    <i class="fas fa-heart"></i>
+                    <span id="wishlist-counter" class="badge bg-primary">0</span>
+                </a>
+            </li>
+        </ul>
+
+        <!-- User Account -->
+        <div class="dropdown">
+            @if (SignInManager.IsSignedIn(User))
+            {
+                <a class="d-flex align-items-center text-decoration-none" href="#" id="accountDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                    <img src="@profileImageUrl" alt="Profile Picture" class="rounded-circle" width="40" height="40">
+                    <span class="ms-2 text-dark">Hello, @firstName</span>
+                    <i class="fas fa-chevron-down ms-1"></i>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li><a class="dropdown-item" asp-controller="Account" asp-action="Profile">My Account</a></li>
+                    <li><hr class="dropdown-divider" /></li>
+                    <li>
+                        <form asp-controller="Account" asp-action="Logout" method="post">
+                            <button type="submit" class="dropdown-item">Logout</button>
+                        </form>
+                    </li>
+                </ul>
+            }
+            else
+            {
+                <a class="btn btn-outline-primary" asp-controller="Account" asp-action="Login">Login</a>
+            }
+        </div>
+    </div>
+    <!--  Dropdown -->
+    <div class="categories-dropdown" id="categoryDropdown">
+        @await Component.InvokeAsync("CategoryMenu")
+    </div>
+</nav>
+
+

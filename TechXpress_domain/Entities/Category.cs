@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace TechXpress_domain.Entities
@@ -7,14 +8,19 @@ namespace TechXpress_domain.Entities
     {
         public int Id { get; set; }
 
+        [Required, StringLength(100)]
+        public string Name { get; set; } = null!;
+
+        [Required, StringLength(255)]
+        public string Description { get; set; } = null!;
+
         [Required]
-        [StringLength(100, ErrorMessage = "Category name must be less than 100 characters.")]
-        public string Name { get; set; }
+        [Url(ErrorMessage = "Invalid URL format.")]
+        public string ImageUrl { get; set; } = null!;
 
-        [StringLength(500, ErrorMessage = "Description must be less than 500 characters.")]
-        public string Description { get; set; }
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
-        // Navigation property for products
-        public ICollection<Product> Products { get; set; } = new List<Product>();
+        public ICollection<Product> Products { get; set; } = new HashSet<Product>();
     }
 }

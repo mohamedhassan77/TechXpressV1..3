@@ -1,0 +1,10 @@
+@model IEnumerable<TechXpress_domain.Entities.Category>
+
+<div class="categories-dropdown-content">
+    @foreach (var category in Model)
+    {
+        <a class="category-item" asp-controller="Category" asp-action="Details" asp-route-id="@category.Id">
+            <i class="@category.ImageUrl"></i> @category.Name
+        </a>
+    }
+</div>

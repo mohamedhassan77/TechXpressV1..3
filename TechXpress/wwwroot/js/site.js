@@ -1,4 +1,4 @@
-﻿document.addEventListener("DOMContentLoaded", function () {
+﻿document.addEventListener("DOMContentLoaded", () => {
     // ----- Mobile Menu Toggle -----
     const mobileToggle = document.querySelector(".mobile-menu-toggle");
     const navMenu = document.querySelector(".nav-menu");
@@ -14,49 +14,36 @@
     const profileTrigger = document.getElementById("profileTrigger");
     const profileDropdown = document.getElementById("profileDropdown");
     if (profileTrigger && profileDropdown) {
-        profileTrigger.addEventListener("click", function (e) {
+        profileTrigger.addEventListener("click", (e) => {
             e.preventDefault();
             profileDropdown.classList.toggle("show");
         });
-        document.addEventListener("click", function (e) {
+        document.addEventListener("click", (e) => {
             if (!profileTrigger.contains(e.target) && !profileDropdown.contains(e.target)) {
                 profileDropdown.classList.remove("show");
             }
         });
     }
 
-    // ----- Categories Dropdown Toggle (Two-Column) -----
-    // Categories Dropdown Toggle
-    const categoriesDropdownTrigger = document.getElementById("categoriesDropdown");
-    const twoColumnDropdown = document.querySelector(".two-column-dropdown");
-    if (categoriesDropdownTrigger && twoColumnDropdown) {
-        categoriesDropdownTrigger.addEventListener("click", function (e) {
-            e.preventDefault();
-            twoColumnDropdown.classList.toggle("show");
-            const expanded = categoriesDropdownTrigger.getAttribute("aria-expanded") === "true";
-            categoriesDropdownTrigger.setAttribute("aria-expanded", !expanded);
-        });
-        document.addEventListener("click", function (e) {
-            if (!e.target.closest(".nav-item.dropdown")) {
-                twoColumnDropdown.classList.remove("show");
-                categoriesDropdownTrigger.setAttribute("aria-expanded", "false");
-            }
-        });
-    }
+  
+
 
     // ----- Smooth Scrolling for Anchor Links -----
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener("click", function (e) {
+        anchor.addEventListener("click", (e) => {
             e.preventDefault();
-            const target = document.querySelector(this.getAttribute("href"));
-            if (target) {
-                target.scrollIntoView({ behavior: "smooth", block: "start" });
+            const targetId = anchor.getAttribute("href");
+            if (targetId && targetId !== "#") { 
+                const target = document.querySelector(targetId);
+                if (target) {
+                    target.scrollIntoView({ behavior: "smooth", block: "start" });
+                }
             }
         });
     });
 
     // ----- Modal Functionality -----
-    window.openModal = function (name, description, price, imageUrl, productId) {
+    window.openModal = (name, description, price, imageUrl, productId) => {
         const modal = document.getElementById("productModal");
         modal.style.display = "flex";
         setTimeout(() => { modal.classList.add("active"); }, 10);
@@ -73,13 +60,13 @@
         document.getElementById("modalProductIdOrder").value = productId;
     };
 
-    window.closeModal = function () {
+    window.closeModal = () => {
         const modal = document.getElementById("productModal");
         modal.classList.remove("active");
         setTimeout(() => { modal.style.display = "none"; }, 300);
     };
 
-    window.updateQuantity = function (change) {
+    window.updateQuantity = (change) => {
         const quantityInput = document.getElementById("quantity");
         let currentValue = parseInt(quantityInput.value);
         let newValue = currentValue + change;
@@ -89,32 +76,81 @@
 
     const modalElement = document.getElementById("productModal");
     if (modalElement) {
-        modalElement.addEventListener("click", function (e) {
+        modalElement.addEventListener("click", (e) => {
             if (e.target === modalElement) {
                 window.closeModal();
             }
         });
-        document.addEventListener("keydown", function (e) {
+        document.addEventListener("keydown", (e) => {
             if (e.key === "Escape" && modalElement.style.display === "flex") {
                 window.closeModal();
             }
         });
     }
 
-    // ----- Update Cart and Wishlist Counters -----
-    async function updateCounters() {
-        try {
-            const cartResponse = await fetch('/Cart/GetCartCount');
-            const cartData = await cartResponse.json();
-            document.getElementById("cart-counter").textContent = cartData.count;
+   
+});
 
-            const wishlistResponse = await fetch('/Wishlist/GetWishlistCount');
-            const wishlistData = await wishlistResponse.json();
-            document.getElementById("wishlist-counter").textContent = wishlistData.count;
-        } catch (error) {
-            console.error("Error updating counters:", error);
-        }
+document.addEventListener("DOMContentLoaded", () => {
+    const catTrigger = document.getElementById("categoryTrigger");
+    const catDropdown = document.getElementById("categoryDropdown");
+
+    if (catTrigger && catDropdown) {
+        catTrigger.addEventListener("click", function (e) {
+            e.preventDefault();
+            const isExpanded = catDropdown.classList.toggle("show");
+            catTrigger.setAttribute("aria-expanded", isExpanded);
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener("click", function (e) {
+            if (!catTrigger.contains(e.target) && !catDropdown.contains(e.target)) {
+                catDropdown.classList.remove("show");
+                catTrigger.setAttribute("aria-expanded", "false");
+            }
+        });
     }
-    updateCounters();
-    setInterval(updateCounters, 10000);
+});
+
+
+document.addEventListener("DOMContentLoaded", () => {
+    const catDropdown = document.getElementById("categoryDropdown");
+    let scrollInterval;
+
+    const startScrolling = (direction) => {
+        stopScrolling(); // Clear any existing intervals
+        scrollInterval = setInterval(() => {
+            catDropdown.scrollBy({ left: direction * 50, behavior: 'auto' });
+        }, 20);
+    };
+
+    const stopScrolling = () => {
+        clearInterval(scrollInterval);
+    };
+
+    catDropdown.addEventListener('mouseover', (e) => {
+        const rect = catDropdown.getBoundingClientRect();
+        const mouseX = e.clientX - rect.left;
+
+        if (mouseX < 50) {
+            startScrolling(-1); // Scroll left
+        } else if (mouseX > rect.width - 50) {
+            startScrolling(1); // Scroll right
+        }
+    });
+
+    catDropdown.addEventListener('mousemove', (e) => {
+        const rect = catDropdown.getBoundingClientRect();
+        const mouseX = e.clientX - rect.left;
+
+        if (mouseX < 50) {
+            startScrolling(-1); // Scroll left
+        } else if (mouseX > rect.width - 50) {
+            startScrolling(1); // Scroll right
+        } else {
+            stopScrolling();
+        }
+    });
+
+    catDropdown.addEventListener('mouseleave', stopScrolling);
 });

@@ -1,45 +1,128 @@
-/* Global Resets */
+﻿/* ==========================================================================  
+   Global Resets & Theme Variables  
+   ========================================================================== */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
+#main-content {
+    padding-top: 80px;  
+}
 
-/* CSS Variables for Theme Colors */
 :root {
+    /* Theme Colors */
     --primary: #FF3366;
     --secondary: #6C63FF;
     --accent: #00F5A0;
     --dark: #1E1E2F;
     --light: #F8F9FA;
     --text: #333333;
+    /* Global Settings */
+    --transition-speed: 0.3s;
+    --border-radius: 4px;
 }
 
-/* Base Styles */
+/* ==========================================================================  
+   Base Styles & Typography  
+   ========================================================================== */
 body {
     font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     line-height: 1.6;
     color: var(--text);
     background-color: var(--light);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
 }
 
-/* Skip to Main Content Link */
-.skip-link {
-    position: absolute;
-    top: -40px;
-    left: 0;
-    background: var(--primary);
-    color: white;
-    padding: 0.8rem;
-    z-index: 9999;
-    transition: top 0.3s ease;
+a {
+    color: var(--primary);
+    text-decoration: none;
+    transition: color var(--transition-speed) ease;
 }
 
-    .skip-link:focus {
-        top: 0;
+    a:hover {
+        color: var(--secondary);
+        text-decoration: auto;
     }
 
-/* Navigation */
+
+
+
+/* ==========================================================================  
+   Utility Classes  
+   ========================================================================== */
+.text-center {
+    text-align: center;
+}
+
+.mt-1 {
+    margin-top: 1rem;
+}
+
+.mt-2 {
+    margin-top: 2rem;
+}
+
+.mb-1 {
+    margin-bottom: 1rem;
+}
+
+.mb-2 {
+    margin-bottom: 2rem;
+}
+
+.pt-1 {
+    padding-top: 1rem;
+}
+
+.pb-1 {
+    padding-bottom: 1rem;
+}
+
+.flex-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.text-uppercase {
+    text-transform: uppercase;
+}
+
+.text-muted {
+    color: #666;
+}
+
+/* ==========================================================================  
+   Containers & Layout  
+   ========================================================================== */
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 2rem;
+}
+
+/* Header Spacing (for fixed nav) */
+.header-spacing {
+    padding-top: 100px; /* Adjust if header height changes */
+}
+
+ 
+
+/* ==========================================================================  
+   Focus Styles  
+   ========================================================================== */
+*:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+    border-radius: 2px;
+}
+
+/* ==========================================================================  
+   Navigation  
+   ========================================================================== */
 .navbar {
     position: fixed;
     top: 0;
@@ -53,14 +136,12 @@ body {
 }
 
 .nav-container {
-    max-width: 1400px;
-    margin: 0 auto;
+    width: 100%; 
     padding: 0 2rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
-
 .logo {
     font-size: 1.8rem;
     font-weight: 800;
@@ -70,7 +151,7 @@ body {
     align-items: center;
     letter-spacing: -1px;
     gap: 0.5rem;
-    transition: opacity 0.3s ease;
+    transition: opacity var(--transition-speed) ease;
 }
 
     .logo:hover {
@@ -81,8 +162,6 @@ body {
     display: flex;
     gap: 2rem;
     list-style: none;
-    margin: 0;
-    padding: 0;
 }
 
 .nav-link {
@@ -91,7 +170,7 @@ body {
     font-weight: 500;
     position: relative;
     padding: 0.5rem 0;
-    transition: color 0.3s ease;
+    transition: color var(--transition-speed) ease;
 }
 
     .nav-link::after {
@@ -102,74 +181,50 @@ body {
         width: 0;
         height: 2px;
         background: var(--primary);
-        transition: width 0.3s ease;
+        transition: width var(--transition-speed) ease;
     }
 
     .nav-link:hover::after {
         width: 100%;
     }
 
+    /* Cart and Wishlist Icons */
+    .nav-link i {
+        font-size: 1.25rem;
+        transition: transform var(--transition-speed) ease;
+    }
 
+    .nav-link:hover i {
+        transform: scale(1.1);
+    }
 
-/* Cart and Wishlist Badge */
+/* Badge */
 .badge {
-    margin-left: 5px;
-    font-size: 0.8rem;
-    vertical-align: middle;
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 999px;
+    background: var(--accent);
 }
 
 /* Navigation Button */
 .nav-button {
     background: var(--primary);
-    color: white;
+    color: #fff;
     padding: 0.8rem 1.5rem;
     border-radius: 50px;
     text-decoration: none;
-    transition: all 0.3s ease;
+    transition: all var(--transition-speed) ease;
     display: inline-block;
 }
 
     .nav-button:hover {
         background: var(--secondary);
         transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(var(--primary-rgb), 0.2);
+        box-shadow: 0 5px 15px rgba(255, 51, 102, 0.2);
     }
-
-/* Dropdown Menu (General) */
-.dropdown-menu {
-    display: none;
-    position: absolute;
-    background-color: white;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    z-index: 1000;
-}
-
-    .dropdown-menu.show {
-        display: block;
-    }
-
-.dropdown-item {
-    padding: 0.5rem 1rem;
-    color: var(--dark);
-    text-decoration: none;
-    display: block;
-}
-
-    .dropdown-item:hover {
-        background-color: #f8f9fa;
-    }
-
-/* Main Content */
-#main-content {
-    padding-top: 100px;
-}
-
-/* Focus States */
-*:focus-visible {
-    outline: 2px solid var(--primary);
-    outline-offset: 2px;
-    border-radius: 2px;
-}
 
 /* Mobile Menu Enhancements */
 .mobile-menu-toggle {
@@ -210,10 +265,87 @@ body {
     }
 }
 
-/* Footer */
+.categories-dropdown {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100vw;
+    background-color: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px); 
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 1rem 2rem;
+    z-index: 1000;
+    opacity: 0;
+    transform: translateY(-10px);
+     white-space: nowrap;
+    overflow-x: auto;
+}
+
+    .categories-dropdown.show {
+        display: flex;
+        flex-wrap: nowrap;
+        justify-content: f;
+        gap: 50px;
+        opacity: 1;
+
+        transform: translateY(7);
+         overflow-x:  auto;
+    }
+
+.category-item {
+    color: #333;
+    text-decoration: none;
+    margin-block: 50px];
+    padding: 0.5rem 2rem;
+    display: block -moz-grid-group;
+    justify-content: space-evenly;
+    transition: background-color 0.3s ease, color 0.3s ease, transform 0.3s ease;
+}
+
+    .category-item:hover {
+        background-color: var(--secondary);
+        color: #fff;
+        transform: translateY(-3px);
+    }
+.categories-dropdown::-webkit-scrollbar {
+    display: none;
+}
+ 
+.categories-dropdown::before,
+.categories-dropdown::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    width: 50px; 
+    height: 100%;
+    z-index: 1001;
+}
+
+.categories-dropdown::before {
+    left: 0;
+}
+
+.categories-dropdown::after {
+    right: 0;
+}
+
+.categories-dropdown {
+    scrollbar-width: none; 
+}
+
+@media (max-width: 768px) {
+    .categories-dropdown {
+        padding: 10px;
+    }
+}
+
+    /* ==========================================================================  
+   Footer  
+   ========================================================================== */
 .footer {
     background: var(--dark);
-    color: white;
+    color: #fff;
     padding: 4rem 0 2rem;
     margin-top: auto;
 }
@@ -241,14 +373,10 @@ body {
     gap: 0.8rem;
 }
 
-    .footer-links li {
-        margin-bottom: 1rem;
-    }
-
 .footer a {
-    color: #FF3366;
+    color: var(--primary);
     text-decoration: none;
-    transition: color 0.3s ease;
+    transition: color var(--transition-speed) ease;
 }
 
     .footer a:hover {
@@ -262,13 +390,12 @@ body {
 }
 
     .social-icons a {
-        color: white;
+        color: #fff;
         font-size: 1.5rem;
-        transition: all 0.3s ease;
+        transition: transform var(--transition-speed) ease;
     }
 
         .social-icons a:hover {
-            color: var(--primary);
             transform: translateY(-3px);
         }
 
@@ -280,7 +407,9 @@ body {
     color: rgba(255, 255, 255, 0.7);
 }
 
-/* Extra Links */
+/* ==========================================================================  
+   Extra Links (if needed)  
+   ========================================================================== */
 .extra-links {
     margin: 1.5rem 0;
     display: flex;
@@ -295,7 +424,7 @@ body {
         font-size: 0.9rem;
         padding: 0.75rem 1rem;
         border-radius: 8px;
-        transition: all 0.3s ease;
+        transition: all var(--transition-speed) ease;
         display: flex;
         align-items: center;
         gap: 0.75rem;
@@ -314,7 +443,7 @@ body {
             height: 100%;
             background: linear-gradient(135deg, rgba(37, 99, 235, 0.05), rgba(37, 99, 235, 0.1));
             opacity: 0;
-            transition: opacity 0.3s ease;
+            transition: opacity var(--transition-speed) ease;
             z-index: -1;
         }
 
@@ -337,7 +466,7 @@ body {
             content: '?';
             opacity: 0;
             transform: translateX(-10px);
-            transition: all 0.3s ease;
+            transition: all var(--transition-speed) ease;
         }
 
         .extra-links a:hover::after {
@@ -345,7 +474,6 @@ body {
             transform: translateX(0);
         }
 
-        /* Icons for Extra Links (if used) */
         .extra-links a[asp-action="Register"]::before {
             content: "??";
             font-size: 1.2em;
@@ -358,7 +486,9 @@ body {
             margin-right: 0.5rem;
         }
 
-/* Profile Dropdown */
+/* ==========================================================================  
+   Profile Dropdown  
+   ========================================================================== */
 .profile-container {
     position: relative;
     display: flex;
@@ -369,7 +499,7 @@ body {
 .profile-name {
     font-weight: 600;
     font-size: 14px;
-    color: #333;
+    color: var(--text);
 }
 
 .profile-pic {
@@ -378,7 +508,7 @@ body {
     border-radius: 50%;
     object-fit: cover;
     border: 2px solid #ddd;
-    transition: border 0.3s ease-in-out;
+    transition: border var(--transition-speed) ease-in-out;
     cursor: pointer;
 }
 
@@ -399,7 +529,7 @@ body {
     z-index: 1000;
     opacity: 0;
     transform: translateY(-10px);
-    transition: opacity 0.3s ease, transform 0.3s ease;
+    transition: opacity var(--transition-speed) ease, transform var(--transition-speed) ease;
 }
 
     .profile-dropdown.show {
@@ -434,9 +564,9 @@ body {
     align-items: center;
     gap: 10px;
     font-size: 14px;
-    color: #333;
+    color: var(--text);
     text-decoration: none;
-    transition: background 0.3s ease;
+    transition: background var(--transition-speed) ease;
 }
 
     .profile-dropdown .dropdown-item:hover {
@@ -452,50 +582,10 @@ body {
     padding: 10px 15px;
     cursor: pointer;
     text-align: left;
-    transition: background 0.3s ease;
+    transition: background var(--transition-speed) ease;
 }
 
     .profile-dropdown button:hover {
         background: #ffebeb;
     }
 
-/* Two-Column Dropdown for Categories */
-.nav-item.dropdown {
-    position: relative;
-}
-.two-column-dropdown {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    width: 400px; 
-    background: #fff;
-    border-radius: 8px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    padding: 10px;
-    z-index: 1000;
-    gap: 20px;
-   
-    display: none;
-}
-
-    .two-column-dropdown.show {
-        display: flex;
-    }
-
-.dropdown-column {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.two-col-dropdown-item {
-    padding: 8px 12px;
-    color: #333;
-    text-decoration: none;
-    transition: background 0.3s ease;
-}
-
-    .two-col-dropdown-item:hover {
-        background: #f1f1f1;
-    }

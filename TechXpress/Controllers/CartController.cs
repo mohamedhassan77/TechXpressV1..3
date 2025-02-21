@@ -1,84 +1,178 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using TechXpress_domain.Entities;
-using TechXpress_application.Interfaces;
-using System.Threading.Tasks;
 using System.Linq;
+using System.Security.Claims;
+using System.Threading.Tasks;
+using TechXpress.Models;
+using TechXpress_domain.Entities;
+using TechXpress_domain.Interfaces.Services;
+using Microsoft.Extensions.Logging;
 
 namespace TechXpress.Controllers
 {
     [Authorize]
-
     public class CartController : Controller
     {
-        private readonly ICartRepository _cartRepository;
-        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly ICartService _cartService;
+        private readonly IProductService _productService;
+        private readonly ILogger<CartController> _logger;
 
-        public CartController(ICartRepository cartRepository, UserManager<ApplicationUser> userManager)
+        public CartController(ICartService cartService, IProductService productService, ILogger<CartController> logger)
         {
-            _cartRepository = cartRepository;
-            _userManager = userManager;
+            _cartService = cartService;
+            _productService = productService;
+            _logger = logger;
         }
 
-        // GET: Cart
         public async Task<IActionResult> Index()
         {
-            var userId = _userManager.GetUserId(User);
-            var cart = await _cartRepository.GetByUserIdAsync(userId);
-            if (cart == null)
+            try
             {
-                cart = new Cart
-                {
-                    UserId = userId,
-                    CartItems = new List<CartItem>()
-                };
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                var cart = await _cartService.GetCartByUserIdAsync(userId);
+                var viewModel = MapCartToViewModel(cart);
+                return View(viewModel);
             }
-            return View(cart?.CartItems);
+            catch (System.Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving cart");
+                TempData["ErrorMessage"] = "Failed to load cart";
+                return View(new CartViewModel());
+            }
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddToCart(int productId, int quantity = 1)
         {
-            var userId = _userManager.GetUserId(User);
-            await _cartRepository.AddProductToCartAsync(userId, productId, quantity);
-            if (string.IsNullOrEmpty(userId))
+            try
             {
-                return BadRequest("User ID is null or empty.");
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                var product = await _productService.GetByIdAsync(productId);
+                if (product == null)
+                    return NotFound();
+
+                if (quantity <= 0)
+                    return BadRequest("Invalid quantity");
+
+                var message = await _cartService.AddToCartAsync(userId, null, productId, quantity);
+                TempData["SuccessMessage"] = message;
+                return RedirectToAction(nameof(Index));
             }
-            // Trigger cart updated event
-            TempData["ToastMessage"] = "Product added to cart!";
-            return RedirectToAction(nameof(Index));
+            catch (System.Exception ex)
+            {
+                _logger.LogError(ex, "Error adding item to cart");
+                return Json(new { success = false, message = "Failed to add item to cart" });
+            }
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> RemoveFromCart(int productId)
+        public async Task<IActionResult> UpdateQuantity(int productId, int quantity)
         {
-            var userId = _userManager.GetUserId(User);
-            await _cartRepository.RemoveProductFromCartAsync(userId, productId);
-            // Trigger cart updated event
-            TempData["ToastMessage"] = "Product removed from cart!";
-            return RedirectToAction(nameof(Index));
-        }
-        // POST: Cart/UpdateCartItemQuantity
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> UpdateCartItemQuantity(int productId, int quantity)
-        {
-            var userId = _userManager.GetUserId(User);
-            await _cartRepository.UpdateCartItemQuantityAsync(userId, productId, quantity);
-            return RedirectToAction(nameof(Index));
+            try
+            {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                var message = await _cartService.UpdateCartQuantityAsync(userId, productId, quantity);
+                var cart = await _cartService.GetCartByUserIdAsync(userId);
+                var viewModel = MapCartToViewModel(cart);
+                return Json(new
+                {
+                    success = true,
+                    total = viewModel.Total,
+                    itemCount = viewModel.ItemCount
+                });
+            }
+            catch (System.Exception ex)
+            {
+                _logger.LogError(ex, "Error updating cart quantity");
+                return Json(new { success = false, message = "Failed to update quantity" });
+            }
         }
 
-        [HttpGet]
-        public async Task<IActionResult> GetCartCount()
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RemoveItem(int productId)
         {
-            var userId = _userManager.GetUserId(User);
-            var cart = await _cartRepository.GetByUserIdAsync(userId);
-            var count = cart?.CartItems?.Count ?? 0;
-            return Json(new { count });
+            try
+            {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                var message = await _cartService.RemoveFromCartAsync(userId, productId);
+                TempData["SuccessMessage"] = message;
+                return RedirectToAction(nameof(Index));
+            }
+            catch (System.Exception ex)
+            {
+                _logger.LogError(ex, "Error removing item from cart");
+                return Json(new { success = false, message = "Failed to remove item" });
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ClearCart()
+        {
+            try
+            {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                var message = await _cartService.ClearCartAsync(userId);
+                TempData["SuccessMessage"] = message;
+                return RedirectToAction(nameof(Index));
+            }
+            catch (System.Exception ex)
+            {
+                _logger.LogError(ex, "Error clearing cart");
+                TempData["ErrorMessage"] = "Failed to clear cart";
+                return RedirectToAction(nameof(Index));
+            }
+        }
+
+        private CartViewModel MapCartToViewModel(Cart cart)
+        {
+            return new CartViewModel
+            {
+                CartId = cart.Id,
+                UserId = cart.UserId,
+                Items = cart.CartItems.Select(ci => new CartItemViewModel
+                {
+                    // Since domain CartItem might not have its own Id, we can use ProductId as a surrogate key here.
+                    Id = ci.ProductId,
+                    Product = new ProductViewModel
+                    {
+                        Id = ci.Product.Id,
+                        Name = ci.Product.Name,
+                        Description = ci.Product.Description,
+                        Price = ci.Product.Price,
+                        DiscountPrice = ci.Product.DiscountPrice,
+                        ImageUrl = ci.Product.ImageUrl,
+                        IsFeatured = ci.Product.IsFeatured,
+                        CreatedDate = ci.Product.CreatedDate,
+                        UpdatedDate = ci.Product.UpdatedDate,
+                        Tag = ci.Product.Tag,
+                        Brand = ci.Product.Brand,
+                        CategoryId = ci.Product.CategoryId,
+                        StockQuantity = ci.Product.StockQuantity,
+                        SKU = ci.Product.SKU,
+                        Specifications = ci.Product.Specifications,
+                        OldPrice = ci.Product.OldPrice,
+                        ProductImages = ci.Product.ProductImages.ToList(),
+                        Category = new CategoryViewModel
+                        {
+                            Id = ci.Product.Category.Id,
+                            Name = ci.Product.Category.Name,
+                            Description = ci.Product.Category.Description,
+                            ImageUrl = ci.Product.Category.ImageUrl,
+                            CreatedAt = ci.Product.Category.CreatedAt,
+                            UpdatedAt = ci.Product.Category.UpdatedAt,
+                            IsFeatured = false
+                        }
+                    },
+                    Quantity = ci.Quantity,
+                    PriceAtPurchase = ci.Product.Price
+                }).ToList(),
+                ShippingCost = 0,
+                DiscountAmount = 0
+            };
         }
     }
 }
