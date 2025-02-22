@@ -17,14 +17,23 @@ namespace TechXpress_infrastructure.Repositories
             _context = context;
         }
 
-        public async Task<Cart> GetCartByUserIdAsync(string userId)
-        {
-            var cart = await _context.Carts
-                .Include(c => c.CartItems)
-                    .ThenInclude(ci => ci.Product)
-                .FirstOrDefaultAsync(c => c.UserId == userId);
-            return cart ?? new Cart { UserId = userId };
-        }
+       public async Task<Cart> GetCartByUserIdAsync(string userId)
+{
+    var cart = await _context.Carts
+        .Include(c => c.CartItems)
+            .ThenInclude(ci => ci.Product)
+                            .ThenInclude(p => p.Category)
+        .FirstOrDefaultAsync(c => c.UserId == userId);
+
+    if (cart == null)
+    {
+         cart = new Cart { UserId = userId, CartItems = new List<CartItem>() };
+        await _context.Carts.AddAsync(cart);
+        await _context.SaveChangesAsync();
+    }
+    return cart;
+    }
+
 
         public async Task<Cart> AddItemAsync(string userId, int productId, int quantity)
         {
@@ -97,7 +106,12 @@ namespace TechXpress_infrastructure.Repositories
             cart.UpdatedAt = DateTime.UtcNow;
             await SaveChangesAsync();
         }
-
+        public async Task CreateCartAsync(Cart cart)
+        {
+            // Logic to add cart to the database
+            _context.Carts.Add(cart);
+            await _context.SaveChangesAsync();
+        }
         public async Task SaveChangesAsync()
         {
             await _context.SaveChangesAsync();

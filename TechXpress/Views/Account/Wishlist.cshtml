@@ -4,15 +4,16 @@
     ViewData["Title"] = "Your Wishlist";
 }
 
-<div class="auth-container">
-    <div class="auth-card">
-        <h2 class="text-center">@ViewData["Title"]</h2>
+<div class="account-container wishlist-container">
+    <div class="account-card wishlist-card">
+        <h2 class="wishlist-title text-center">@ViewData["Title"]</h2>
         @if (Model.TotalItems == 0)
         {
-            <div class="empty-cart text-center">
-                <i class="fas fa-heart-broken"></i>
-                <h2>Your wishlist is empty</h2>
-                <p>Browse products and add your favorites!</p>
+            <div class="empty-wishlist text-center">
+                <i class="fas fa-heart-broken wishlist-icon"></i>
+                <h3>Your wishlist is empty</h3>
+                <p>Start exploring and add products to your wishlist.</p>
+                <a asp-controller="Product" asp-action="Index" class="btn btn-primary wishlist-btn">Shop Now</a>
             </div>
         }
         else
@@ -23,12 +24,12 @@
                     <div class="wishlist-item">
                         <img src="@item.Product.ImageUrl" alt="@item.Product.Name" class="wishlist-image" />
                         <div class="wishlist-content">
-                            <h3>@item.Product.Name</h3>
-                            <p>@item.Product.Price.ToString("C")</p>
+                            <h3 class="wishlist-product-name">@item.Product.Name</h3>
+                            <p class="wishlist-product-price">@item.Product.Price.ToString("C")</p>
                         </div>
-                        <form asp-action="RemoveFromWishlist" method="post">
+                        <form asp-action="RemoveFromWishlist" method="post" class="wishlist-remove-form">
                             <input type="hidden" name="productId" value="@item.ProductId" />
-                            <button type="submit" class="remove-wishlist">×</button>
+                            <button type="submit" class="wishlist-remove-btn" title="Remove from wishlist">×</button>
                         </form>
                     </div>
                 }
@@ -36,3 +37,126 @@
         }
     </div>
 </div>
+
+@section Styles {
+    <style>
+        /* Common container style */
+        .account-container {
+            max-width: 900px;
+            margin: 3rem auto;
+            padding: 2rem;
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Wishlist specific container (optional override) */
+        .wishlist-container {
+            background: #fdfdfd;
+        }
+
+        .account-card {
+            padding: 2rem;
+        }
+
+        /* Title */
+        .wishlist-title {
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            color: #2d3748;
+        }
+
+        /* Empty Wishlist */
+        .empty-wishlist {
+            padding: 3rem;
+        }
+
+        .wishlist-icon {
+            font-size: 4rem;
+            color: #fc8181;
+            margin-bottom: 1rem;
+        }
+
+        .wishlist-btn {
+            margin-top: 1rem;
+            padding: 0.75rem 1.5rem;
+            background: var(--primary, #FF3366);
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            text-decoration: none;
+            transition: background 0.3s ease, transform 0.3s ease;
+        }
+
+            .wishlist-btn:hover {
+                background: var(--secondary, #6C63FF);
+                transform: translateY(-2px);
+            }
+
+        /* Wishlist Grid */
+        .wishlist-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .wishlist-item {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+            .wishlist-item:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            }
+
+        .wishlist-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .wishlist-content {
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .wishlist-product-name {
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+            color: #2d3748;
+        }
+
+        .wishlist-product-price {
+            font-size: 1rem;
+            color: #4299e1;
+        }
+
+        .wishlist-remove-form {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+        }
+
+        .wishlist-remove-btn {
+            background: rgba(255, 51, 102, 0.8);
+            border: none;
+            border-radius: 50%;
+            color: #fff;
+            width: 32px;
+            height: 32px;
+            font-size: 1.25rem;
+            line-height: 1;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+            .wishlist-remove-btn:hover {
+                background: #ff3366;
+            }
+    </style>
+}

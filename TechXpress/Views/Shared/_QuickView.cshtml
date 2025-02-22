@@ -1,0 +1,85 @@
+@* _QuickView.cshtml - Shared Quick View Modal Partial *@
+<div id="productModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-product-name" style="display:none;">
+    <div class="modal-content">
+        <button class="close-button" onclick="closeModal()" aria-label="Close modal">
+            <i class="fas fa-times" aria-hidden="true"></i>
+        </button>
+        <div class="modal-grid">
+            <!-- Gallery Section -->
+            <div class="modal-gallery">
+                <div class="main-image-container">
+                    <img id="modal-product-image" src="" alt="" class="modal-product-image">
+                </div>
+                <div class="thumbnail-container">
+                    <div class="thumbnail active">
+                        <img id="modal-thumbnail-1" src="" alt="Thumbnail">
+                    </div>
+                    <div class="thumbnail">
+                        <img src="/api/placeholder/100/100" alt="Thumbnail">
+                    </div>
+                    <div class="thumbnail">
+                        <img src="/api/placeholder/100/100" alt="Thumbnail">
+                    </div>
+                </div>
+            </div>
+            <!-- Details Section -->
+            <div class="modal-details">
+                <div class="modal-header">
+                    <h2 id="modal-product-name"></h2>
+                    <div class="modal-rating" aria-label="Product rating">
+                        <div class="stars">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star-half-alt"></i>
+                        </div>
+                        <span>(4.5/5)</span>
+                    </div>
+                </div>
+                <div class="modal-price-container">
+                    <h3 id="modal-product-price"></h3>
+                    <span class="stock-status" id="stock-status">
+                        <!-- Stock status can be set dynamically if needed -->
+                    </span>
+                </div>
+                <p id="modal-product-description"></p>
+                <div class="modal-options">
+                    <div class="quantity-selector">
+                        <button class="quantity-btn" onclick="updateQuantity(-1)" aria-label="Decrease quantity">-</button>
+                        <input type="number" id="quantity" value="1" min="1" max="99">
+                        <button class="quantity-btn" onclick="updateQuantity(1)" aria-label="Increase quantity">+</button>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <form asp-controller="Cart" asp-action="AddToCart" method="post">
+                        <input type="hidden" id="modalProductId" name="productId" value="" />
+                        <button class="add-to-cart-button">
+                            <i class="fas fa-shopping-cart"></i> Add to Cart
+                        </button>
+                    </form>
+                    <form asp-controller="CheckOut" asp-action="PlaceOrder" method="post">
+                        <input type="hidden" id="modalProductIdOrder" name="productId" value="" />
+                        <button class="buy-now-button">
+                            <i class="fas fa-bolt"></i> Buy Now
+                        </button>
+                    </form>
+                </div>
+                <div class="product-meta">
+                    <div class="meta-item">
+                        <i class="fas fa-shipping-fast"></i>
+                        Free shipping on orders over $50
+                    </div>
+                    <div class="meta-item">
+                        <i class="fas fa-undo"></i>
+                        30-day return policy
+                    </div>
+                    <div class="meta-item">
+                        <i class="fas fa-shield-alt"></i>
+                        2-year warranty
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

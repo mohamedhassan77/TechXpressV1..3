@@ -6,22 +6,27 @@ using TechXpress.Models;
 using TechXpress_domain.Interfaces.Services;
 using Microsoft.Extensions.Logging;
 using TechXpress_domain.Entities;
+using Microsoft.AspNetCore.Identity;
 
 namespace TechXpress.Controllers
 {
+      
     public class AccountController : Controller
     {
         private readonly IAuthService _authService;
         private readonly IUserProfileService _userProfileService;
         private readonly IEmailService _emailService;
         private readonly ILogger<AccountController> _logger;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public AccountController(IAuthService authService, IUserProfileService userProfileService, IEmailService emailService, ILogger<AccountController> logger)
+        public AccountController(IAuthService authService, IUserProfileService userProfileService,
+            IEmailService emailService, ILogger<AccountController> logger ,UserManager<ApplicationUser> userManager )
         {
             _authService = authService;
             _userProfileService = userProfileService;
             _emailService = emailService;
             _logger = logger;
+            _userManager = userManager;
         }
 
         [HttpGet]
@@ -64,13 +69,13 @@ namespace TechXpress.Controllers
         {
             return View();
         }
-
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Register(RegisterViewModel model)
         {
-            if (!ModelState.IsValid) return View(model);
+            if (!ModelState.IsValid)
+                return View(model);
 
             var registerDto = new RegisterDto
             {
@@ -87,6 +92,32 @@ namespace TechXpress.Controllers
             if (result.Success)
             {
                 _logger.LogInformation("User registered successfully.");
+
+                var profile = new UserProfile
+                {
+                    ApplicationUserId = result.UserId, 
+                    ProfileImage = "https://www.pngarts.com/files/10/Default-Profile-Picture-Download-PNG-Image.png",
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow,
+                    Gender = GenderType.Male, 
+                    DateOfBirth = model.DateOfBirth,
+                    PhoneNumber = model.Phone,
+                    IsBlocked = false,
+                    Addresses = new List<Address>()
+                };
+
+                try
+                {
+                    await _userProfileService.AddUserProfileAsync(profile);
+                    _logger.LogInformation("User profile created successfully.");
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error creating user profile.");
+                    ModelState.AddModelError(string.Empty, "An error occurred while creating your profile. Please try again.");
+                    return View(model);
+                }
+
                 return RedirectToAction("Index", "Home");
             }
 
@@ -169,39 +200,144 @@ namespace TechXpress.Controllers
         {
             return View();
         }
-
         [HttpGet]
         [Authorize]
-        public async Task<IActionResult> Manage()
+        [HttpGet]
+        [Authorize]
+        public async Task<IActionResult> Profile()
         {
-            var userId = User.FindFirstValue(System.Security.Claims.ClaimTypes.NameIdentifier);
-            if (userId == null)
+            var user = await _userManager.GetUserAsync(User);
+            var userId = user?.Id;
+             if (string.IsNullOrEmpty(userId))
             {
                 return Unauthorized("User is not authenticated.");
             }
 
+            // Use the get-or-create method.
             var profile = await _userProfileService.GetUserProfileAsync(userId);
-            if (profile == null)
-            {
-                return NotFound("User profile not found.");
-            }
 
-            // Map domain profile to view model
             var viewModel = new UserProfileViewModel
             {
                 UserId = profile.ApplicationUserId,
-                FirstName = profile.ApplicationUser.FirstName,
-                LastName = profile.ApplicationUser.LastName,
-                Email = profile.ApplicationUser.Email,
+                FirstName = profile.ApplicationUser?.FirstName ?? "",
+                LastName = profile.ApplicationUser?.LastName ?? "",
+                Email = profile.ApplicationUser?.Email ?? "",
                 PhoneNumber = profile.PhoneNumber,
                 ProfilePictureUrl = profile.ProfileImage,
                 DateOfBirth = profile.DateOfBirth,
                 Gender = profile.Gender?.ToString(),
                 CreatedAt = profile.CreatedAt,
-                Addresses = profile.Addresses as List<Address> ?? new System.Collections.Generic.List<Address>()
+                Addresses = profile.Addresses as List<Address> ?? new List<Address>(),
+                NewsletterSubscribed = false
+ 
             };
 
             return View(viewModel);
+        }
+        [HttpGet]
+        [Authorize]
+        public async Task<IActionResult> Manage()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized("User is not authenticated.");
+            }
+
+            var userProfile = await _userProfileService.GetUserProfileAsync(userId);
+
+            if (userProfile == null)
+            {
+                return NotFound("User profile not found."); 
+            }
+
+            var viewModel = new UserProfileViewModel
+            {
+                UserId = userProfile.ApplicationUserId,
+                FirstName = userProfile.ApplicationUser?.FirstName ?? string.Empty, 
+                LastName = userProfile.ApplicationUser?.LastName ?? string.Empty,
+                Email = userProfile.ApplicationUser?.Email ?? string.Empty,
+                PhoneNumber = userProfile.PhoneNumber,
+                ProfilePictureUrl = userProfile.ProfileImage,
+                DateOfBirth = userProfile.DateOfBirth,
+                Gender = userProfile.Gender?.ToString(),
+                CreatedAt = userProfile.CreatedAt,
+                Addresses = userProfile.Addresses?.ToList() ?? new List<Address>(), 
+            };
+
+            return View(viewModel);
+        }
+
+        [HttpPost]
+        [Authorize]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(UserProfileViewModel model)
+        {
+            // Get the current user's identifier
+            var user = await _userManager.GetUserAsync(User);
+            var userId = user?.Id;
+
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized("User is not authenticated.");
+
+            // Retrieve the existing profile
+            var profile = await _userProfileService.GetUserProfileAsync(userId);
+            if (profile == null)
+                return NotFound("User profile not found.");
+
+            // Check if ApplicationUser is null
+            if (profile.ApplicationUser == null)
+            {
+                _logger.LogWarning($"ApplicationUser for profile {userId} is null.");
+                return NotFound("Associated user not found."); // Handle the case where ApplicationUser is missing
+            }
+
+            // Update ApplicationUser details
+            profile.ApplicationUser.UserName = model.Email;
+            profile.ApplicationUser.FirstName = model.FirstName;
+            profile.ApplicationUser.LastName = model.LastName;
+            profile.ApplicationUser.Email = model.Email;
+
+            // Update ProfileImage only if a new URL is provided.
+            // Otherwise, keep the existing value.
+            if (!string.IsNullOrWhiteSpace(model.ProfilePictureUrl))
+            {
+                profile.ApplicationUser.ProfileImage = await _userProfileService.UpdateProfilePictureURLAsync(userId, model.ProfilePictureUrl);
+            }
+            else
+            {
+                // Optionally, you can set a default value here if needed:
+                profile.ApplicationUser.ProfileImage = "https://www.pngarts.com/files/10/Default-Profile-Picture-Download-PNG-Image.png";
+            }
+
+            // Update profile details
+            profile.PhoneNumber = model.PhoneNumber;
+            profile.DateOfBirth = model.DateOfBirth;
+
+            if (!string.IsNullOrEmpty(model.Gender))
+            {
+                if (Enum.TryParse<GenderType>(model.Gender, out var gender))
+                {
+                    profile.Gender = gender;
+                }
+            }
+
+            // Update the profile in the database
+            try
+            {
+                await _userProfileService.UpdateUserProfileAsync(userId, profile);
+                _logger.LogInformation("Profile updated successfully.");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating user profile.");
+                ModelState.AddModelError(string.Empty, "An error occurred while updating the profile.");
+                return View(model); // Return the view with the model to show errors
+            }
+
+            // Redirect back to the Profile view
+            return RedirectToAction("Profile", "Account");
         }
     }
 }

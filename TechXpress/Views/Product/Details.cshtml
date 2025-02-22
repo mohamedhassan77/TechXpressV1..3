@@ -46,7 +46,7 @@
                 </form>
             </div>
             <div class="mb-3">
-                <form asp-controller="Wishlist" asp-action="@(Model.IsInWishlist ? "Remove" : "Add")" method="post">
+                <form asp-controller="Wishlist" asp-action="@(Model.IsInWishlist ? "RemoveFromWishlist" : "AddToWishlist")" method="post">
                     <input type="hidden" name="productId" value="@Model.ProductDetails.Id" />
                     <button type="submit" class="btn @(Model.IsInWishlist ? "btn-danger" : "btn-outline-primary")">
                         <i class="@(Model.IsInWishlist ? "bi bi-heart-fill" : "bi bi-heart")"></i>

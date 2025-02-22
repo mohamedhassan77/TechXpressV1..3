@@ -9,11 +9,12 @@ using TechXpress_infrastructure.Repositories;
 using Microsoft.AspNetCore.Authentication.Google;
 using TechXpress_services;
 using TechXpress_data.Repositories;
+using AutoMapper;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add console logging to help diagnose startup issues.
 builder.Logging.AddConsole();
+builder.Services.AddAutoMapper(typeof(Program)); 
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();

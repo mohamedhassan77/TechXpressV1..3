@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using TechXpress_domain.DTOs;
 using TechXpress_domain.Entities;
 
 namespace TechXpress_domain.Interfaces.Services
@@ -17,5 +18,14 @@ namespace TechXpress_domain.Interfaces.Services
         Task<bool> UpdateStockAsync(int productId, int quantity);
         Task<IEnumerable<Product>> GetFeaturedProductsAsync(int page, int pageSize);
         Task AddProductAsync(Product product);
+
+
+        /*-------------------------ADMIN--------*/
+
+        Task<ProductResponseDto> CreateProductAsync(ProductCreateDto dto);
+        Task<ProductResponseDto> UpdateProductAsync(int id, ProductUpdateDto dto);
+        Task DeleteProductAsync(int id);
+         Task<IEnumerable<ProductResponseDto>> GetAllProductsAsync();
+
     }
 }

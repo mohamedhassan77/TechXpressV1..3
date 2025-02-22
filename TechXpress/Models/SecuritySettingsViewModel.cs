@@ -7,6 +7,7 @@ namespace TechXpress.Models
 {
     public class SecuritySettingsViewModel
     {
+
         public string? UserId { get; set; }
 
         [Display(Name = "Two-Factor Authentication")]
@@ -53,5 +54,9 @@ namespace TechXpress.Models
 
         [Display(Name = "Active Sessions")]
         public List<ActiveSession> ActiveSessions { get; set; } = new List<ActiveSession>();
+
+
+
+       
     }
 }

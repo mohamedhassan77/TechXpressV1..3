@@ -7,6 +7,7 @@ using TechXpress.Models;
 using TechXpress_domain.Entities;
 using TechXpress_domain.Interfaces.Services;
 using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Identity;
 
 namespace TechXpress.Controllers
 {
@@ -16,24 +17,36 @@ namespace TechXpress.Controllers
         private readonly ICartService _cartService;
         private readonly IProductService _productService;
         private readonly ILogger<CartController> _logger;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public CartController(ICartService cartService, IProductService productService, ILogger<CartController> logger)
+
+        public CartController(ICartService cartService, IProductService productService, ILogger<CartController> logger, UserManager<ApplicationUser> userManager)
         {
             _cartService = cartService;
             _productService = productService;
             _logger = logger;
+                _userManager = userManager;
+
         }
 
         public async Task<IActionResult> Index()
         {
             try
             {
-                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                // Use UserManager to get the user
+                var user = await _userManager.GetUserAsync(User);
+                var userId = user?.Id;
+
+                if (userId == null)
+                {
+                    return View(new CartViewModel()); 
+                }
+
                 var cart = await _cartService.GetCartByUserIdAsync(userId);
                 var viewModel = MapCartToViewModel(cart);
                 return View(viewModel);
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
                 _logger.LogError(ex, "Error retrieving cart");
                 TempData["ErrorMessage"] = "Failed to load cart";
@@ -47,13 +60,23 @@ namespace TechXpress.Controllers
         {
             try
             {
-                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                var user = await _userManager.GetUserAsync(User);
+                var userId = user?.Id;
+                
                 var product = await _productService.GetByIdAsync(productId);
                 if (product == null)
-                    return NotFound();
+                    return NotFound("Product not found");
 
                 if (quantity <= 0)
                     return BadRequest("Invalid quantity");
+
+                // Check for existing cart
+                var cart = await _cartService.GetCartByUserIdAsync(userId);
+                if (cart == null)
+                {
+                    cart = new Cart { UserId = userId };
+                    await _cartService.CreateCartAsync(cart);
+                }
 
                 var message = await _cartService.AddToCartAsync(userId, null, productId, quantity);
                 TempData["SuccessMessage"] = message;
@@ -62,31 +85,45 @@ namespace TechXpress.Controllers
             catch (System.Exception ex)
             {
                 _logger.LogError(ex, "Error adding item to cart");
-                return Json(new { success = false, message = "Failed to add item to cart" });
+                return Json(new { success = false, message = "Failed to add item to cart: " + ex.Message });
             }
         }
 
+
+        [HttpGet]
+        public async Task<IActionResult> GetCartCount()
+        {
+            try
+            {
+                var user = await _userManager.GetUserAsync(User);
+                var userId = user?.Id;
+                int count = await _cartService.GetCartItemCountAsync(userId);
+                return Json(new { count });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving cart count");
+                return StatusCode(500, "An error occurred while getting the cart count.");
+            }
+        }
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> UpdateQuantity(int productId, int quantity)
         {
             try
             {
-                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                var user = await _userManager.GetUserAsync(User);
+                var userId = user?.Id; 
                 var message = await _cartService.UpdateCartQuantityAsync(userId, productId, quantity);
-                var cart = await _cartService.GetCartByUserIdAsync(userId);
-                var viewModel = MapCartToViewModel(cart);
-                return Json(new
-                {
-                    success = true,
-                    total = viewModel.Total,
-                    itemCount = viewModel.ItemCount
-                });
+
+                TempData["SuccessMessage"] = message;  
+                return RedirectToAction(nameof(Index));  
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
                 _logger.LogError(ex, "Error updating cart quantity");
-                return Json(new { success = false, message = "Failed to update quantity" });
+                TempData["ErrorMessage"] = "Failed to update quantity";
+                return RedirectToAction(nameof(Index)); // Redirect to the cart index on error
             }
         }
 
@@ -96,15 +133,17 @@ namespace TechXpress.Controllers
         {
             try
             {
-                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-                var message = await _cartService.RemoveFromCartAsync(userId, productId);
-                TempData["SuccessMessage"] = message;
-                return RedirectToAction(nameof(Index));
+                var user = await _userManager.GetUserAsync(User);
+                var userId = user?.Id;
+                await _cartService.RemoveFromCartAsync(userId, productId);
+                TempData["SuccessMessage"] = "Item removed from cart."; 
+                return RedirectToAction(nameof(Index));  
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
                 _logger.LogError(ex, "Error removing item from cart");
-                return Json(new { success = false, message = "Failed to remove item" });
+                TempData["ErrorMessage"] = "Failed to remove item";
+                return RedirectToAction(nameof(Index));  
             }
         }
 
@@ -114,10 +153,10 @@ namespace TechXpress.Controllers
         {
             try
             {
-                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-                var message = await _cartService.ClearCartAsync(userId);
-                TempData["SuccessMessage"] = message;
-                return RedirectToAction(nameof(Index));
+                var user = await _userManager.GetUserAsync(User);
+                var userId = user?.Id;
+                 await _cartService.ClearCartAsync(userId);
+                 return RedirectToAction(nameof(Index));
             }
             catch (System.Exception ex)
             {
@@ -135,8 +174,7 @@ namespace TechXpress.Controllers
                 UserId = cart.UserId,
                 Items = cart.CartItems.Select(ci => new CartItemViewModel
                 {
-                    // Since domain CartItem might not have its own Id, we can use ProductId as a surrogate key here.
-                    Id = ci.ProductId,
+                     Id = ci.ProductId,
                     Product = new ProductViewModel
                     {
                         Id = ci.Product.Id,
@@ -169,9 +207,9 @@ namespace TechXpress.Controllers
                     },
                     Quantity = ci.Quantity,
                     PriceAtPurchase = ci.Product.Price
-                }).ToList(),
-                ShippingCost = 0,
-                DiscountAmount = 0
+                }).ToList()?? new List<CartItemViewModel>(),
+                ShippingCost = cart.ShippingCost,
+                DiscountAmount = cart.DiscountAmount
             };
         }
     }

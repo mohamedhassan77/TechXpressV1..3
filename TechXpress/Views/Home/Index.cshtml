@@ -691,209 +691,126 @@
             }
         </style>
     }
+   </head>
 
-    
-</head>
-
-    <!-- Hero Section -->
-    <section class="hero" aria-label="Hero Section">
-        <div class="container text-center">
-            <div class="hero-text">
-                <h1>@Model.HeroText</h1>
-                <p>@Model.HeroDescription</p>
-                <a asp-controller="Product" asp-action="Index" class="cta-button btn btn-primary">
-                    Shop Now <i class="fas fa-arrow-right" aria-hidden="true"></i>
-                </a>
-            </div>
-            <!-- Sales Promotions Slider -->
-            <div class="sales-slider" id="salesSlider">
-                <div class="sales-slider-inner">
-                    @foreach (var sale in Model.SalesPromotions)
-                    {
-                        <div class="sale-item">
-                            <h4>@sale.Title</h4>
-                            <p>@sale.Description</p>
-                        </div>
-                    }
-                </div>
-            </div>
+<!-- Hero Section -->
+<section class="hero" aria-label="Hero Section">
+    <div class="container text-center">
+        <div class="hero-text">
+            <h1>@Model.HeroText</h1>
+            <p>@Model.HeroDescription</p>
+            <a asp-controller="Product" asp-action="Index" class="cta-button btn btn-primary">
+                Shop Now <i class="fas fa-arrow-right" aria-hidden="true"></i>
+            </a>
         </div>
-    </section>
-
-    <!-- Featured Products Section -->
-    <section id="featured-products" class="featured-products" aria-label="Featured Products">
-        <div class="container">
-            <h2 class="section-title text-center">Featured Products</h2>
-            <div class="products-grid">
-                @foreach (var product in Model.FeaturedProducts)
+        <!-- Sales Promotions Slider -->
+        <div class="sales-slider" id="salesSlider">
+            <div class="sales-slider-inner">
+                @foreach (var sale in Model.SalesPromotions)
                 {
-                    <div class="product-card" role="article">
-                        @if (!string.IsNullOrEmpty(product.Tag))
-                        {
-                            <div class="product-badge">@product.Tag</div>
-                        }
-                        <div class="product-image-container">
-                            <img src="@product.ImageUrl" alt="@product.Name" class="product-image" />
-                            <div class="product-overlay" aria-hidden="true">
-                                <div class="product-actions">
-                                    <form asp-controller="Wishlist" asp-action="AddToWishlist" method="post">
-                                        <input type="hidden" name="productId" value="@product.Id" />
-                                        <button type="submit" class="action-button" title="Add to Wishlist">
-                                            <i class="fas fa-heart" aria-hidden="true"></i>
-                                        </button>
-                                    </form>
-                                    <button type="button" class="action-button" onclick="openModal('@product.Name', '@product.Description', '@product.FinalPrice', '@product.ImageUrl', '@product.Id')" title="Quick View">
-                                        <i class="fas fa-eye" aria-hidden="true"></i>
-                                    </button>
-                                    <form asp-controller="Cart" asp-action="AddToCart" method="post">
-                                        <input type="hidden" name="productId" value="@product.Id" />
-                                        <button type="submit" class="action-button" title="Add to Cart">
-                                            <i class="fas fa-shopping-cart" aria-hidden="true"></i>
-                                        </button>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="product-content">
-                            <div class="product-category">@product.Category?.Name</div>
-                            <h3 class="product-title">
-                                <a asp-controller="Product" asp-action="Details" asp-route-id="@product.Id">
-                                    @product.Name
-                                </a>
-                            </h3>
-                            <div class="product-rating" aria-label="Product Rating">
-                                @{
-                                    var rating = product.AverageRating ;
-                                    for (int i = 1; i <= 5; i++)
-                                    {
-                                        <i class="fas fa-star @(i <= rating ? "active" : "")" aria-hidden="true"></i>;
-                                    }
-                                }
-                                <span class="rating-count">(@(product.ReviewCount) Reviews)</span>
-                            </div>
-                            <div class="product-price">@product.FinalPrice.ToString("C")</div>
-                        </div>
+                    <div class="sale-item">
+                        <h4>@sale.Title</h4>
+                        <p>@sale.Description</p>
                     </div>
                 }
-            </div>
-            <!-- Pagination Controls -->
-            <div class="pagination">
-                @if (Model.FeaturedProductsPage > 1)
-                {
-                    <a href="@Url.Action("Index", new { page = Model.FeaturedProductsPage - 1 })" class="btn btn-outline-primary">Previous</a>
-                }
-                <span>Page @Model.FeaturedProductsPage of @Model.FeaturedProductsTotalPages</span>
-                @if (Model.FeaturedProductsPage < Model.FeaturedProductsTotalPages)
-                {
-                    <a href="@Url.Action("Index", new { page = Model.FeaturedProductsPage + 1 })" class="btn btn-outline-primary">Next</a>
-                }
-            </div>
-        </div>
-    </section>
-
-    <!-- Shop by Category Section -->
-    <section id="categories" class="categories" aria-label="Shop by Category">
-        <div class="container">
-            <h2 class="section-title text-center">Shop by Category</h2>
-            <div class="categories-grid">
-                @foreach (var category in Model.Categories)
-                {
-                    <a class="category-card" asp-controller="Category" asp-action="Details" asp-route-id="@category.Id">
-                        <img src="@category.ImageUrl" alt="@category.Name" class="category-image" />
-                        <div class="category-overlay">
-                            <h3>@category.Name</h3>
-                        </div>
-                    </a>
-                }
-            </div>
-        </div>
-    </section>
-
-   
-
-    <!-- Quick View Modal -->
-    <div id="productModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-product-name">
-        <div class="modal-content">
-            <button class="close-button" onclick="closeModal()" aria-label="Close modal">
-                <i class="fas fa-times" aria-hidden="true"></i>
-            </button>
-            <div class="modal-grid">
-                <div class="modal-gallery">
-                    <div class="main-image-container">
-                        <img id="modal-product-image" src="" alt="" class="modal-product-image">
-                    </div>
-                    <div class="thumbnail-container">
-                        <div class="thumbnail active">
-                            <img id="modal-thumbnail-1" src="" alt="Thumbnail">
-                        </div>
-                        <div class="thumbnail">
-                            <img src="/api/placeholder/100/100" alt="Thumbnail">
-                        </div>
-                        <div class="thumbnail">
-                            <img src="/api/placeholder/100/100" alt="Thumbnail">
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-details">
-                    <div class="modal-header">
-                        <h2 id="modal-product-name"></h2>
-                        <div class="modal-rating" aria-label="Product rating">
-                            <div class="stars">
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star-half-alt"></i>
-                            </div>
-                            <span>(4.5/5)</span>
-                        </div>
-                    </div>
-                    <div class="modal-price-container">
-                        <h3 id="modal-product-price"></h3>
-                        <span class="stock-status in-stock">
-                            <i class="fas fa-check-circle"></i> In Stock
-                        </span>
-                    </div>
-                    <p id="modal-product-description"></p>
-                    <div class="modal-options">
-                        <div class="quantity-selector">
-                            <button class="quantity-btn" onclick="updateQuantity(-1)" aria-label="Decrease quantity">-</button>
-                            <input type="number" id="quantity" value="1" min="1" max="99">
-                            <button class="quantity-btn" onclick="updateQuantity(1)" aria-label="Increase quantity">+</button>
-                        </div>
-                    </div>
-                    <div class="modal-actions">
-                        <form asp-controller="Cart" asp-action="AddToCart" method="post">
-                            <input type="hidden" id="modalProductId" name="productId" value="" />
-                            <button class="add-to-cart-button">
-                                <i class="fas fa-shopping-cart"></i> Add to Cart
-                            </button>
-                        </form>
-                        <form asp-controller="CheckOut" asp-action="PlaceOrder" method="post">
-                            <input type="hidden" id="modalProductIdOrder" name="productId" value="" />
-                            <button class="buy-now-button">
-                                <i class="fas fa-bolt"></i> Buy Now
-                            </button>
-                        </form>
-                    </div>
-                    <div class="product-meta">
-                        <div class="meta-item">
-                            <i class="fas fa-shipping-fast"></i>
-                            Free shipping on orders over $50
-                        </div>
-                        <div class="meta-item">
-                            <i class="fas fa-undo"></i>
-                            30-day return policy
-                        </div>
-                        <div class="meta-item">
-                            <i class="fas fa-shield-alt"></i>
-                            2-year warranty
-                        </div>
-                    </div>
-                </div>
             </div>
         </div>
     </div>
+</section>
+
+<!-- Featured Products Section -->
+<section id="featured-products" class="featured-products" aria-label="Featured Products">
+    <div class="container">
+        <h2 class="section-title text-center">Featured Products</h2>
+        <div class="products-grid">
+            @foreach (var product in Model.FeaturedProducts)
+            {
+                <div class="product-card" role="article">
+                    @if (!string.IsNullOrEmpty(product.Tag))
+                    {
+                        <div class="product-badge">@product.Tag</div>
+                    }
+                    <div class="product-image-container">
+                        <img src="@product.ImageUrl" alt="@product.Name" class="product-image" />
+                        <div class="product-overlay" aria-hidden="true">
+                            <div class="product-actions">
+                                <form asp-controller="Wishlist" asp-action="AddToWishlist" method="post">
+                                    <input type="hidden" name="productId" value="@product.Id" />
+                                    <button type="submit" class="action-button" title="Add to Wishlist">
+                                        <i class="fas fa-heart" aria-hidden="true"></i>
+                                    </button>
+                                </form>
+                                <button type="button" class="action-button"
+                                        onclick="openModal('@product.Name', '@product.Description', '@product.FinalPrice', '@product.ImageUrl', '@product.Id')"
+                                        title="Quick View">
+                                    <i class="fas fa-eye" aria-hidden="true"></i>
+                                </button>
+                                <form asp-controller="Cart" asp-action="AddToCart" method="post">
+                                    <input type="hidden" name="productId" value="@product.Id" />
+                                    <button type="submit" class="action-button" title="Add to Cart">
+                                        <i class="fas fa-shopping-cart" aria-hidden="true"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="product-content">
+                        <div class="product-category">@product.Category?.Name</div>
+                        <h3 class="product-title">
+                            <a asp-controller="Product" asp-action="Details" asp-route-id="@product.Id">
+                                @product.Name
+                            </a>
+                        </h3>
+                        <div class="product-rating" aria-label="Product Rating">
+                            @{
+                                var rating = product.AverageRating;
+                                for (int i = 1; i <= 5; i++)
+                                {
+                                    <i class="fas fa-star @(i <= rating ? "active" : "")" aria-hidden="true"></i>;
+                                }
+                            }
+                            <span class="rating-count">(@(product.ReviewCount) Reviews)</span>
+                        </div>
+                        <div class="product-price">@product.FinalPrice.ToString("C")</div>
+                    </div>
+                </div>
+            }
+        </div>
+        <!-- Pagination Controls -->
+        <div class="pagination">
+            @if (Model.FeaturedProductsPage > 1)
+            {
+                <a href="@Url.Action("Index", new { page = Model.FeaturedProductsPage - 1 })" class="btn btn-outline-primary">Previous</a>
+            }
+            <span>Page @Model.FeaturedProductsPage of @Model.FeaturedProductsTotalPages</span>
+            @if (Model.FeaturedProductsPage < Model.FeaturedProductsTotalPages)
+            {
+                <a href="@Url.Action("Index", new { page = Model.FeaturedProductsPage + 1 })" class="btn btn-outline-primary">Next</a>
+            }
+        </div>
+    </div>
+</section>
+
+<!-- Shop by Category Section -->
+<section id="categories" class="categories" aria-label="Shop by Category">
+    <div class="container">
+        <h2 class="section-title text-center">Shop by Category</h2>
+        <div class="categories-grid">
+            @foreach (var category in Model.Categories)
+            {
+                <a class="category-card" asp-controller="Category" asp-action="Details" asp-route-id="@category.Id">
+                    <img src="@category.ImageUrl" alt="@category.Name" class="category-image" />
+                    <div class="category-overlay">
+                        <h3>@category.Name</h3>
+                    </div>
+                </a>
+            }
+        </div>
+    </div>
+</section>
+
+<!-- Single Quick View Modal (Shared Partial) -->
+@await Html.PartialAsync("_QuickView")
 
 @section Scripts {
     <script>
@@ -903,6 +820,7 @@
             return tokenInput ? tokenInput.value : '';
         };
 
+        // Open the modal and populate product details dynamically
         function openModal(name, description, price, imageUrl, productId) {
             const modal = document.getElementById('productModal');
             modal.style.display = 'flex';
@@ -919,13 +837,14 @@
             document.getElementById("modalProductIdOrder").value = productId;
         }
 
+        // Close the modal
         function closeModal() {
             const modal = document.getElementById('productModal');
             modal.classList.remove('active');
             setTimeout(() => { modal.style.display = 'none'; }, 300);
         }
 
-        // Close modal when clicking outside modal content or pressing Escape key
+        // Close modal when clicking outside the content or pressing Escape key
         document.addEventListener('DOMContentLoaded', () => {
             const modal = document.getElementById('productModal');
             modal.addEventListener('click', (event) => {
@@ -940,14 +859,15 @@
             });
         });
 
+        // Update quantity ensuring it stays between 1 and 99
         function updateQuantity(change) {
             const quantityInput = document.getElementById('quantity');
-            let currentValue = parseInt(quantityInput.value);
-            let newValue = currentValue + change;
-            newValue = Math.max(1, Math.min(newValue, 99));
+            let currentValue = parseInt(quantityInput.value) || 1;
+            let newValue = Math.max(1, Math.min(currentValue + change, 99));
             quantityInput.value = newValue;
         }
 
+        // Additional functions for AJAX cart/wishlist operations can be centralized here...
         async function addToCart(productId) {
             try {
                 const response = await fetch('/Cart/Add', {
@@ -1002,9 +922,7 @@
             setTimeout(() => toast.remove(), 3000);
         }
 
-        
-
-        // ----- Scroll Down Button Smooth Scroll -----
+        // Smooth scroll for any scroll down button (if present)
         document.addEventListener("DOMContentLoaded", () => {
             const scrollButton = document.getElementById("scrollDownButton");
             if (scrollButton) {
@@ -1015,7 +933,7 @@
             }
         });
 
-        // ----- Auto Slide Sales Promotions in Hero -----
+        // Auto slide for Sales Promotions in Hero
         document.addEventListener("DOMContentLoaded", () => {
             const slider = document.querySelector(".sales-slider .sales-slider-inner");
             if (slider) {
@@ -1033,21 +951,6 @@
             }
         });
 
-        // ----- Update Cart and Wishlist Counters -----
-        const updateCounters = async () => {
-            try {
-                const cartResponse = await fetch('/Cart/GetCartCount');
-                const cartData = await cartResponse.json();
-                document.getElementById("cart-counter").textContent = cartData.count;
-
-                const wishlistResponse = await fetch('/Wishlist/GetWishlistCount');
-                const wishlistData = await wishlistResponse.json();
-                document.getElementById("wishlist-counter").textContent = wishlistData.count;
-            } catch (error) {
-                console.error("Error updating counters:", error);
-            }
-        };
-        updateCounters();
-        setInterval(updateCounters, 10000);
+      
     </script>
 }

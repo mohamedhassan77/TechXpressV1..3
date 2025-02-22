@@ -12,6 +12,8 @@ namespace TechXpress_domain.Interfaces.Repositories
         Task UpdateAsync(UserProfile userProfile);
         Task DeleteAsync(string applicationUserId);
         Task<bool> ExistsAsync(string applicationUserId);
+        Task<UserProfile?> GetByEmailAsync(string email);
+
         Task SaveChangesAsync();
     }
 }

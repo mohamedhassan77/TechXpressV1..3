@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace TechXpress_infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class FixWishlistRelationship : Migration
+    public partial class initialijj : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -94,6 +94,28 @@ namespace TechXpress_infrastructure.Migrations
                         name: "FK_AspNetRoleClaims_AspNetRoles_RoleId",
                         column: x => x.RoleId,
                         principalTable: "AspNetRoles",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ActiveSessions",
+                columns: table => new
+                {
+                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    DeviceType = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Location = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    LastActive = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    IsCurrentSession = table.Column<bool>(type: "bit", nullable: false),
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ActiveSessions", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ActiveSessions_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -191,7 +213,9 @@ namespace TechXpress_infrastructure.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ShippingCost = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    DiscountAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -205,7 +229,7 @@ namespace TechXpress_infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "LoginHistory",
+                name: "LoginHistoryEntries",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -220,9 +244,9 @@ namespace TechXpress_infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_LoginHistory", x => x.Id);
+                    table.PrimaryKey("PK_LoginHistoryEntries", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_LoginHistory_AspNetUsers_UserId",
+                        name: "FK_LoginHistoryEntries_AspNetUsers_UserId",
                         column: x => x.UserId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
@@ -514,6 +538,11 @@ namespace TechXpress_infrastructure.Migrations
                 });
 
             migrationBuilder.CreateIndex(
+                name: "IX_ActiveSessions_UserId",
+                table: "ActiveSessions",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Addresses_ApplicationUserId",
                 table: "Addresses",
                 column: "ApplicationUserId");
@@ -584,8 +613,8 @@ namespace TechXpress_infrastructure.Migrations
                 column: "Name");
 
             migrationBuilder.CreateIndex(
-                name: "IX_LoginHistory_UserId",
-                table: "LoginHistory",
+                name: "IX_LoginHistoryEntries_UserId",
+                table: "LoginHistoryEntries",
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
@@ -655,6 +684,9 @@ namespace TechXpress_infrastructure.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
+                name: "ActiveSessions");
+
+            migrationBuilder.DropTable(
                 name: "Addresses");
 
             migrationBuilder.DropTable(
@@ -676,7 +708,7 @@ namespace TechXpress_infrastructure.Migrations
                 name: "CartItems");
 
             migrationBuilder.DropTable(
-                name: "LoginHistory");
+                name: "LoginHistoryEntries");
 
             migrationBuilder.DropTable(
                 name: "OrderItems");

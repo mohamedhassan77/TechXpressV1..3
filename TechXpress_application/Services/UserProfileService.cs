@@ -25,7 +25,7 @@ namespace TechXpress_application.Services
         {
             var profile = await _userProfileRepository.GetByIdAsync(userId);
             if (profile == null)
-                throw new KeyNotFoundException($"UserProfile for user {userId} not found.");
+                return new UserProfile { ApplicationUserId = userId };
             return profile;
         }
 
@@ -40,6 +40,21 @@ namespace TechXpress_application.Services
             profile.ProfileImage = updatedProfile.ProfileImage;
             await _userProfileRepository.UpdateAsync(profile);
             return profile;
+        }
+        public async Task<string> UpdateProfilePictureURLAsync(string userId, string pictureUrl)
+        {
+            if (pictureUrl == null || pictureUrl.Length == 0)
+                return "Invalid URL.";
+
+               var profile = await _userProfileRepository.GetByIdAsync(userId);
+            if (profile != null)
+            {
+                // Set the new image URL
+                profile.ProfileImage = pictureUrl;
+                await _userProfileRepository.UpdateAsync(profile);
+            }
+
+            return "Profile image uploaded successfully.";
         }
 
         public async Task<string> UpdateProfilePictureAsync(string userId, IFormFile picture)
@@ -61,6 +76,7 @@ namespace TechXpress_application.Services
             var profile = await _userProfileRepository.GetByIdAsync(userId);
             if (profile != null)
             {
+                // Set the new image URL
                 profile.ProfileImage = $"/uploads/profile-images/{fileName}";
                 await _userProfileRepository.UpdateAsync(profile);
             }
@@ -68,11 +84,13 @@ namespace TechXpress_application.Services
             return "Profile image uploaded successfully.";
         }
 
+        // Modified DeleteProfilePictureAsync to set a default image instead of null.
         public async Task<bool> DeleteProfilePictureAsync(string userId)
         {
             var profile = await _userProfileRepository.GetByIdAsync(userId);
             if (profile != null && !string.IsNullOrEmpty(profile.ProfileImage))
             {
+                // Set to a default non-null image URL rather than null.
                 profile.ProfileImage = "https://www.pngarts.com/files/10/Default-Profile-Picture-Download-PNG-Image.png";
                 await _userProfileRepository.UpdateAsync(profile);
                 return true;
@@ -189,6 +207,11 @@ namespace TechXpress_application.Services
         {
             var user = await _userManager.FindByIdAsync(userId);
             return user?.Email;
+        }
+
+        public async Task<UserProfile?> GetUserProfileByEmailAsync(string email)
+        {
+            return await _userProfileRepository.GetByEmailAsync(email);
         }
 
         public async Task<UserProfile?> GetUserProfileByIdAsync(string applicationUserId)

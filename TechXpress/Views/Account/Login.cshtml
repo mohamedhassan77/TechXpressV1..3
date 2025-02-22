@@ -6,35 +6,313 @@
 
 <div class="auth-container">
     <div class="auth-card">
-        <h2 class="text-center">@ViewData["Title"]</h2>
+        <h2 class="auth-title text-center">@ViewData["Title"]</h2>
         <form asp-action="Login" method="post" novalidate>
-            <div asp-validation-summary="All" class="text-danger"></div>
+            <div asp-validation-summary="All" class="validation-summary text-danger"></div>
             <div class="form-group">
                 <label asp-for="Email" class="form-label">Email</label>
                 <input asp-for="Email" class="form-control" type="email" placeholder="you@example.com" />
-                <span asp-validation-for="Email" class="text-danger"></span>
+                <span asp-validation-for="Email" class="validation-error"></span>
             </div>
             <div class="form-group">
                 <label asp-for="Password" class="form-label">Password</label>
                 <input asp-for="Password" class="form-control" type="password" placeholder="Enter your password" />
-                <span asp-validation-for="Password" class="text-danger"></span>
+                <span asp-validation-for="Password" class="validation-error"></span>
             </div>
             <div class="form-group form-check">
                 <input asp-for="RememberMe" class="form-check-input" />
-                <label asp-for="RememberMe" class="form-check-label"></label>
+                <label asp-for="RememberMe" class="form-check-label">Remember Me</label>
             </div>
-            <button type="submit" class="btn-reset">Login</button>
+            <button type="submit" class="btn-login">Login</button>
         </form>
-        <div class="auth-footer text-center mt-3">
-            <a asp-action="ForgotPassword" class="back-to-login">Forgot your password?</a>
+        <div class="auth-footer text-center">
+            <a asp-action="ForgotPassword" class="auth-link">Forgot your password?</a>
             <span> | </span>
-            <a asp-action="Register" class="back-to-login">Register as a new user</a>
+            <a asp-action="Register" class="auth-link">Register as a new user</a>
         </div>
     </div>
 </div>
 
 @section Styles {
+    
+    
     <style>
-        /* Reuse container/card styles from ForgotPassword */
+         div[asp-validation-summary="All"] {
+            display: none;
+        }
+
+             div[asp-validation-summary="All"].validation-summary-errors {
+                display: block;
+                background: rgba(231, 76, 60, 0.1);
+                border-left: 4px solid #e74c3c;
+                border-radius: 8px;
+                padding: 1rem;
+                margin-bottom: 2rem;
+                animation: fadeIn 0.3s ease;
+            }
+
+         span[asp-validation-for] {
+            display: none;
+        }
+
+             span[asp-validation-for].field-validation-error {
+                display: block;
+                color: #e74c3c;
+                font-size: 0.875rem;
+                margin-top: 0.5rem;
+                animation: fadeIn 0.3s ease;
+            }
+
+        /* Animation for showing validation messages */
+        @@keyframes fadeIn {
+            from
+
+        {
+            opacity: 0;
+            transform: translateY(-5px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        }
+
+         body {
+            background: url('~/IMG/CoP.jpg') no-repeat center center fixed;
+            background-size: cover;
+            font-family: 'Poppins', sans-serif;
+        }
+
+
+        .auth-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 2rem;
+            position: relative;
+        }
+
+        .auth-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.95));
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            padding: 3.5rem 3rem;
+            max-width: 480px;
+            width: 100%;
+            position: relative;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @@keyframes float {
+            0%
+
+        {
+            transform: translateY(0px);
+        }
+
+        50% {
+            transform: translateY(-10px);
+        }
+
+        100% {
+            transform: translateY(0px);
+        }
+
+        }
+
+        .auth-title {
+            margin-bottom: 2.5rem;
+            font-size: 2.75rem;
+            font-weight: 600;
+            background: linear-gradient(45deg, #2c3e50, #3498db);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.75rem;
+            font-weight: 500;
+            color: #2c3e50;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 1rem 1.25rem;
+            background: rgba(255, 255, 255, 0.8);
+            border: 2px solid rgba(44, 62, 80, 0.1);
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+            .form-control:focus {
+                background: rgba(255, 255, 255, 0.95);
+                border-color: #3498db;
+                box-shadow: 0 5px 15px rgba(52, 152, 219, 0.2);
+                transform: translateY(-2px);
+            }
+
+            .form-control::placeholder {
+                color: #95a5a6;
+            }
+
+         .validation-summary {
+            display: none;
+              border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 2rem;
+        }
+
+             .validation-summary:not(:empty) {
+                display: block;
+                animation: fadeIn 0.3s ease-in;
+            }
+
+         .validation-error {
+            display: none;
+            margin-top: 0.5rem;
+            font-size: 0.875rem;
+            color: #e74c3c;
+        }
+
+             .validation-error:not(:empty) {
+                display: block;
+                animation: fadeIn 0.3s ease-in;
+            }
+
+        @@keyframes fadeIn {
+            from
+
+        {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        }
+
+        .form-check {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 2rem;
+            padding: 0.5rem 0;
+        }
+
+        .form-check-input {
+            width: 1.25rem;
+            height: 1.25rem;
+            border-radius: 6px;
+            border: 2px solid #bdc3c7;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+            .form-check-input:checked {
+                background-color: #3498db;
+                border-color: #3498db;
+            }
+
+        .form-check-label {
+            font-size: 0.95rem;
+            color: #34495e;
+            cursor: pointer;
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 1rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #fff;
+            background: linear-gradient(45deg, #3498db, #2980b9);
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+        }
+
+            .btn-login:hover {
+                background: linear-gradient(45deg, #2980b9, #2c3e50);
+                transform: translateY(-3px);
+                box-shadow: 0 6px 20px rgba(52, 152, 219, 0.4);
+            }
+
+            .btn-login:active {
+                transform: translateY(-1px);
+            }
+
+        .auth-footer {
+            margin-top: 2.5rem;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(189, 195, 199, 0.3);
+            text-align: center;
+            font-size: 0.95rem;
+        }
+
+        .auth-link {
+            color: #3498db;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+            .auth-link:hover {
+                color: #2980b9;
+            }
+
+            .auth-link::after {
+                content: '';
+                position: absolute;
+                width: 100%;
+                height: 2px;
+                bottom: -2px;
+                left: 0;
+                background: linear-gradient(45deg, #3498db, #2980b9);
+                transform: scaleX(0);
+                transition: transform 0.3s ease;
+            }
+
+            .auth-link:hover::after {
+                transform: scaleX(1);
+            }
+
+        @@media (max-width: 640px) {
+            .auth-card
+
+        {
+            padding: 2.5rem 1.5rem;
+            margin: 1rem;
+        }
+
+        .auth-title {
+            font-size: 2.25rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        }
     </style>
 }

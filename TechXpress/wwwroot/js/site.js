@@ -10,6 +10,39 @@
         });
     }
 
+    async function updateCartAndWishlistCounts() {
+        try {
+            // Fetch cart count (ensure your CartController has a similar endpoint)
+            const cartResponse = await fetch('/Cart/GetCartCount');
+            if (cartResponse.ok) {
+                const cartData = await cartResponse.json();
+                const cartCounter = document.getElementById("cart-counter");
+                if (cartCounter) {
+                    cartCounter.innerText = cartData.count;
+                }
+            } else {
+                console.error("Failed to fetch cart count");
+            }
+
+            // Fetch wishlist count
+            const wishlistResponse = await fetch('/Wishlist/GetWishlistCount');
+            if (wishlistResponse.ok) {
+                const wishlistData = await wishlistResponse.json();
+                const wishlistCounter = document.getElementById("wishlist-counter");
+                if (wishlistCounter) {
+                    wishlistCounter.innerText = wishlistData.count;
+                }
+            } else {
+                console.error("Failed to fetch wishlist count");
+            }
+        } catch (error) {
+            console.error("Error updating counts:", error);
+        }
+    }
+
+    updateCartAndWishlistCounts();
+    setInterval(updateCartAndWishlistCounts, 10000); // Update every 10 second
+
     // ----- Profile Dropdown Toggle -----
     const profileTrigger = document.getElementById("profileTrigger");
     const profileDropdown = document.getElementById("profileDropdown");
@@ -25,15 +58,12 @@
         });
     }
 
-  
-
-
     // ----- Smooth Scrolling for Anchor Links -----
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         anchor.addEventListener("click", (e) => {
             e.preventDefault();
             const targetId = anchor.getAttribute("href");
-            if (targetId && targetId !== "#") { 
+            if (targetId && targetId !== "#") {
                 const target = document.querySelector(targetId);
                 if (target) {
                     target.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -70,7 +100,7 @@
         const quantityInput = document.getElementById("quantity");
         let currentValue = parseInt(quantityInput.value);
         let newValue = currentValue + change;
-        newValue = Math.max(1, Math.min(newValue, 99));
+        newValue = Math.max(1, Math.min(newValue, 99)); // Limit quantity between 1 and 99
         quantityInput.value = newValue;
     };
 
@@ -88,10 +118,7 @@
         });
     }
 
-   
-});
-
-document.addEventListener("DOMContentLoaded", () => {
+    // ----- Category Dropdown Toggle -----
     const catTrigger = document.getElementById("categoryTrigger");
     const catDropdown = document.getElementById("categoryDropdown");
 
@@ -110,11 +137,8 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
     }
-});
 
-
-document.addEventListener("DOMContentLoaded", () => {
-    const catDropdown = document.getElementById("categoryDropdown");
+    // ----- Continuous Scrolling for Category Dropdown -----
     let scrollInterval;
 
     const startScrolling = (direction) => {

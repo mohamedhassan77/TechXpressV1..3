@@ -53,18 +53,22 @@ namespace TechXpress_application.Services
             };
 
             var result = await _userManager.CreateAsync(user, model.Password);
-            if (!result.Succeeded)
+            if (result.Succeeded)
             {
+                await _userManager.AddToRoleAsync(user, "User"); 
                 return new AuthResult
                 {
-                    Success = false,
-                    Message = string.Join(", ", result.Errors.Select(e => e.Description))
+                    Success = true,
+                    Message = "Registration successful.",
+                    UserId = user.Id 
                 };
             }
 
-            await _userManager.AddToRoleAsync(user, "User");
-
-            return new AuthResult { Success = true, Message = "Registration successful." };
+            return new AuthResult
+            {
+                Success = false,
+                Message = string.Join(", ", result.Errors.Select(e => e.Description))
+            };
         }
 
         //  Forgot Password  
@@ -102,5 +106,7 @@ namespace TechXpress_application.Services
 
             return new AuthResult { Success = true, Message = "Password reset successfully." };
         }
+
+
     }
 }

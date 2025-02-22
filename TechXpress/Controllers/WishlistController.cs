@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using TechXpress.Models;
 using TechXpress_domain.Interfaces.Services;
 using TechXpress_domain.Entities;
+using System.Security.Claims;
 
 namespace TechXpress.Controllers
 {
@@ -55,12 +56,13 @@ namespace TechXpress.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetWishlistCount()
+       public async Task<IActionResult> GetWishlistCount()
         {
             var userId = _userManager.GetUserId(User);
-            var wishlist = await _wishlistService.GetWishlistAsync(userId);
-            int count = wishlist?.WishlistItems?.Count ?? 0;
-            return Json(new { count });
+
+            
+            var wishList = await _wishlistService.GetWishlistAsync(userId);
+            return Json(new { wishList.WishlistItems.Count });
         }
     }
 }

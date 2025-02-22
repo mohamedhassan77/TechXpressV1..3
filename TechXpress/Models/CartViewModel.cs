@@ -9,7 +9,7 @@ namespace TechXpress.Models
         public int CartId { get; set; }
         public string? UserId { get; set; }
         public string? SessionId { get; set; }
-        public ICollection<CartItemViewModel> Items { get; set; } = new List<CartItemViewModel>();
+        public ICollection<CartItemViewModel> Items { get; set; }
         public decimal Subtotal => Items?.Sum(item => item.Product.Price * item.Quantity) ?? 0;
         public decimal ShippingCost { get; set; }
         public decimal DiscountAmount { get; set; }

@@ -10,42 +10,7 @@
         <p>Update your personal information</p>
     </div>
 
-    <form asp-action="Edit" method="post" enctype="multipart/form-data" class="edit-form">
-        <div class="form-grid">
-            <div class="form-section">
-                <h2>Basic Information</h2>
-                <div class="profile-image-upload">
-                    <img src="@Model.ProfilePictureUrl" alt="Current Profile Image" id="profilePreview">
-                    <div class="upload-controls">
-                        <label for="profileImage" class="btn-upload">
-                            <i class="fas fa-camera"></i> Change Photo
-                        </label>
-                        <input type="file" id="profileImage" name="ProfileImage" accept="image/*" class="hidden">
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label asp-for="DateOfBirth">Date of Birth</label>
-                    <input asp-for="DateOfBirth" type="date" class="form-control">
-                </div>
-
-                <div class="form-group">
-                    <label asp-for="Gender">Gender</label>
-                    <select asp-for="Gender" class="form-control">
-                        <option value="">Select Gender</option>
-                        <option value="Male">Male</option>
-                        <option value="Female">Female</option>
-                        <option value="Other">Other</option>
-                    </select>
-                </div>
-            </div>
-        </div>
-
-        <div class="form-actions">
-            <button type="submit" class="btn-primary">Save Changes</button>
-            <a asp-action="Details" asp-route-id="@Model.UserId" class="btn-outline">Cancel</a>
-        </div>
-    </form>
+  
 </div>
 
 @section Styles {

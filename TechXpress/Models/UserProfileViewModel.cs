@@ -50,5 +50,7 @@ namespace TechXpress.Models
         public bool NewsletterSubscribed { get; set; }
 
         public List<Address> Addresses { get; set; } = new List<Address>();
+
+
     }
 }

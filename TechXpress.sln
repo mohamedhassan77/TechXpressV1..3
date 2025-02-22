@@ -11,6 +11,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TechXpress_application", "T
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TechXpress_infrastructure", "TechXpress_infrastructure\TechXpress_infrastructure.csproj", "{A45A2771-E74A-467E-B007-6FD94C3CD981}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "AdminPanel", "AdminPanel", "{05722360-6209-4004-801E-134BBD1B74DE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TechXpress_Admin_API", "TechXpress_Admin_API\TechXpress_Admin_API.csproj", "{71230D2A-09F2-4772-8243-E0D48F75C141}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,8 +37,15 @@ Global
 		{A45A2771-E74A-467E-B007-6FD94C3CD981}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A45A2771-E74A-467E-B007-6FD94C3CD981}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A45A2771-E74A-467E-B007-6FD94C3CD981}.Release|Any CPU.Build.0 = Release|Any CPU
+		{71230D2A-09F2-4772-8243-E0D48F75C141}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{71230D2A-09F2-4772-8243-E0D48F75C141}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{71230D2A-09F2-4772-8243-E0D48F75C141}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{71230D2A-09F2-4772-8243-E0D48F75C141}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{71230D2A-09F2-4772-8243-E0D48F75C141} = {05722360-6209-4004-801E-134BBD1B74DE}
 	EndGlobalSection
 EndGlobal

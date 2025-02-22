@@ -36,6 +36,7 @@
 		</PackageReference>
 	</ItemGroup>
 	<ItemGroup>
+		<ProjectReference Include="..\TechXpress_Admin_API\TechXpress_Admin_API.csproj" />
 		<ProjectReference Include="..\TechXpress_application\TechXpress_application.csproj" />
 		<ProjectReference Include="..\TechXpress_domain\TechXpress_domain.csproj" />
 		<ProjectReference Include="..\TechXpress_infrastructure\TechXpress_infrastructure.csproj" />

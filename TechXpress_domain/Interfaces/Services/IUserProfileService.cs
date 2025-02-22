@@ -18,6 +18,7 @@ namespace TechXpress_domain.Interfaces.Services
         Task<Address> GetDefaultShippingAddressAsync(string userId);
         Task<Address> SetDefaultShippingAddressAsync(string userId, int addressId);
 
+        Task<UserProfile?> GetUserProfileByEmailAsync(string email);
 
 
         // Additional methods required by controllers and admin service:
@@ -27,5 +28,8 @@ namespace TechXpress_domain.Interfaces.Services
         Task<bool> BlockUserAsync(string userId);
         Task<string?> GetUserEmailByIdAsync(string userId);
         Task<UserProfile?> GetUserProfileByIdAsync(string applicationUserId);
+        Task<string> UpdateProfilePictureURLAsync(string userId, string pictureUrl);
+
+
     }
 }

@@ -26,8 +26,20 @@ namespace TechXpress_infrastructure.Repositories
         public async Task<UserProfile?> GetByIdAsync(string applicationUserId)
         {
             return await _context.UserProfiles
-                .Include(up => up.Addresses)
+                .Include(up => up.ApplicationUser) 
+                .Include(up => up.Addresses)       
+                .Include(up => up.ApplicationUser.Cart)
+                .Include(up => up.ApplicationUser.Wishlist)
+                
                 .FirstOrDefaultAsync(up => up.ApplicationUserId == applicationUserId);
+        }
+
+        public async Task<UserProfile?> GetByEmailAsync(string email)
+        {
+            return await _context.UserProfiles
+                .Include(up => up.ApplicationUser)
+                .Include(up => up.Addresses)
+                .FirstOrDefaultAsync(up => up.ApplicationUser.Email == email);
         }
 
         public async Task AddAsync(UserProfile userProfile)
@@ -37,7 +49,7 @@ namespace TechXpress_infrastructure.Repositories
                 userProfile.Addresses = new List<Address>();
             }
             await _context.UserProfiles.AddAsync(userProfile);
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync();  
         }
 
         public async Task UpdateAsync(UserProfile userProfile)

@@ -16,6 +16,8 @@ namespace TechXpress_domain.Interfaces.Repositories
         Task<IEnumerable<Product>> GetRelatedAsync(int productId, int take = 4);
         Task UpdateStockAsync(int productId, int quantity);
         Task AddProductAsync(Product product);
+        Task DeleteAsync(int id);
+        Task UpdateAsync(Product product);
         Task SaveChangesAsync();
     }
 }

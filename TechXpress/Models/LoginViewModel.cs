@@ -17,4 +17,6 @@ namespace TechXpress.Models
 
         public string? ReturnUrl { get; set; }
     }
+
+
 }

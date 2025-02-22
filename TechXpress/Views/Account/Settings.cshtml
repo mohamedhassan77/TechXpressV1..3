@@ -4,8 +4,8 @@
     ViewData["Title"] = "User Settings";
 }
 
-<div class="auth-container">
-    <div class="auth-card">
+<div class="account-container">
+    <div class="account-card">
         <h2 class="text-center">@ViewData["Title"]</h2>
         <form asp-action="Settings" method="post" novalidate>
             <div asp-validation-summary="All" class="text-danger"></div>
@@ -30,7 +30,6 @@
                 <input asp-for="TwoFactorEnabled" class="form-check-input" />
                 <label asp-for="TwoFactorEnabled" class="form-check-label">Two-Factor Authentication</label>
             </div>
-
             <div class="form-group">
                 <label asp-for="LanguagePreference" class="form-label">Language Preference</label>
                 <select asp-for="LanguagePreference" class="form-control">
@@ -39,7 +38,6 @@
                     <!-- Add additional languages as needed -->
                 </select>
             </div>
-
             <div class="form-group">
                 <label asp-for="Theme" class="form-label">Theme</label>
                 <select asp-for="Theme" class="form-control">
@@ -47,12 +45,10 @@
                     <option value="dark">Dark</option>
                 </select>
             </div>
-
             <div class="form-group form-check">
                 <input asp-for="ProfileVisibility" class="form-check-input" />
                 <label asp-for="ProfileVisibility" class="form-check-label">Profile Visibility</label>
             </div>
-
             <div class="form-group">
                 <label asp-for="PreferredCurrency" class="form-label">Preferred Currency</label>
                 <select asp-for="PreferredCurrency" class="form-control">
@@ -61,8 +57,84 @@
                     <!-- Add more currencies as needed -->
                 </select>
             </div>
-
-            <button type="submit" class="btn-reset">Save Settings</button>
+            <button type="submit" class="btn btn-primary">Save Settings</button>
         </form>
     </div>
 </div>
+
+@section Styles {
+    <style>
+        .account-container {
+            max-width: 800px;
+            margin: 3rem auto;
+            padding: 2rem;
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .account-card {
+            padding: 2rem;
+        }
+
+            .account-card h2 {
+                font-size: 2rem;
+                margin-bottom: 1.5rem;
+                text-align: center;
+                color: #2d3748;
+            }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            transition: border-color 0.3s ease;
+        }
+
+            .form-control:focus {
+                border-color: var(--primary, #FF3366);
+                box-shadow: 0 0 5px rgba(255, 51, 102, 0.3);
+                outline: none;
+            }
+
+        .form-check {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .form-check-input {
+            width: 1.25rem;
+            height: 1.25rem;
+            margin-right: 0.5rem;
+        }
+
+        .btn.btn-primary {
+            width: 100%;
+            padding: 0.75rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            background: var(--primary, #FF3366);
+            border: none;
+            border-radius: 8px;
+            color: #fff;
+            transition: background 0.3s ease;
+            margin-top: 1rem;
+        }
+
+            .btn.btn-primary:hover {
+                background: var(--secondary, #6C63FF);
+            }
+    </style>
+}

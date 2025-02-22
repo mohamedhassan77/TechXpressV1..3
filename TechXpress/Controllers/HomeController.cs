@@ -26,7 +26,7 @@ namespace TechXpress.Controllers
         {
             try
             {
-                int pageSize = 10;
+                int pageSize = 12;
                 // Get featured products with paging (assumes the repository method handles filtering in the database)
                 var featuredProducts = await _productService.GetFeaturedProductsAsync(page, pageSize);
 

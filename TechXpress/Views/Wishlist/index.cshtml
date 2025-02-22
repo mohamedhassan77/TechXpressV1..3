@@ -1,248 +1,203 @@
-﻿@model WishlistViewModel
+﻿@model TechXpress.Models.WishlistViewModel
 
 @{
-    ViewData["Title"] = "My Wishlist";
+    ViewData["Title"] = "Your Wishlist";
 }
 
-<div class="wishlist-container">
-    <h1>My Wishlist</h1>
-
-    @if (!Model.Items.Any())
-    {
-        <div class="empty-wishlist">
-            <i class="fas fa-heart"></i>
-            <h2>Your wishlist is empty</h2>
-            <p>Save items you want to buy later</p>
-            <a href="/Product" class="btn-browse">Browse Products</a>
-        </div>
-    }
-    else
-    {
-        <div class="wishlist-grid">
-            @foreach (var item in Model.Items)
-            {
-                <div class="wishlist-item">
-                    <button class="remove-item" onclick="removeFromWishlist(@item.Product.Id)">
-                        <i class="fas fa-times"></i>
-                    </button>
-                    <div class="item-image">
-                        <img src="@item.Product.ImageUrl" alt="@item.Product.Name" />
-                    </div>
-                    <div class="item-info">
-                        <h3>@item.Product.Name</h3>
-                        <div class="item-price">
-                            @if (item.Product.OldPrice.HasValue && item.Product.OldPrice > item.Product.Price)
-                            {
-                                <span class="old-price">@item.Product.OldPrice.Value.ToString("C")</span>
-                            }
-                            <span class="current-price">@item.Product.Price.ToString("C")</span>
+<div class="wishlist-page">
+    <div class="wishlist-card">
+        <h2 class="wishlist-title text-center">@ViewData["Title"]</h2>
+        @if (Model.TotalItems == 0)
+        {
+            <div class="empty-wishlist text-center">
+                <i class="fas fa-heart-broken wishlist-icon"></i>
+                <h3>Your wishlist is empty</h3>
+                <p>Start exploring and add products to your wishlist.</p>
+                <a asp-controller="Product" asp-action="Index" class="btn wishlist-btn">Shop Now</a>
+            </div>
+        }
+        else
+        {
+            <div class="wishlist-grid">
+                @foreach (var item in Model.WishlistItems)
+                {
+                    <div class="wishlist-item">
+                        <div class="wishlist-image-container">
+                            <img src="@item.Product.ImageUrl" alt="@item.Product.Name" class="wishlist-image" />
+                            <div class="wishlist-overlay">
+                                <div class="overlay-content">
+                                    <h3>@item.Product.Name</h3>
+                                    <p>@item.Product.Price.ToString("C")</p>
+                                    <a asp-controller="Product" asp-action="Details" asp-route-id="@item.ProductId" class="btn btn-view">View Product</a>
+                                </div>
+                            </div>
                         </div>
-                        <div class="item-stock">
-                            @if (item.Product.StockQuantity > 0)
-                            {
-                                <span class="in-stock">In Stock</span>
-                            }
-                            else
-                            {
-                                <span class="out-of-stock">Out of Stock</span>
-                            }
-                        </div>
+                        <form asp-action="RemoveFromWishlist" method="post" class="wishlist-remove-form">
+                            <input type="hidden" name="productId" value="@item.ProductId" />
+                            <button type="submit" class="wishlist-remove-btn" title="Remove from wishlist">×</button>
+                        </form>
                     </div>
-                    <div class="item-actions">
-                        <button class="btn-add-to-cart" onclick="addToCart(@item.Product.Id)"
-                                @(item.Product.StockQuantity == 0 ? "disabled" : "")>
-                            Add to Cart
-                        </button>
-                    </div>
-                </div>
-            }
-        </div>
-    }
+                }
+            </div>
+        }
+    </div>
 </div>
 
 @section Styles {
     <style>
-        .wishlist-container {
+        /* Overall Wishlist Page */
+        .wishlist-page {
             max-width: 1200px;
-            margin: 40px auto;
-            padding: 0 20px;
+            margin: 3rem auto;
+            padding: 2rem;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
 
+        .wishlist-card {
+            padding: 2rem;
+        }
+
+        .wishlist-title {
+            font-size: 2rem;
+            margin-bottom: 2rem;
+            color: #2d3748;
+        }
+        /* Empty Wishlist */
         .empty-wishlist {
-            text-align: center;
-            padding: 60px 20px;
+            padding: 3rem;
         }
 
-        .empty-wishlist i {
+        .wishlist-icon {
             font-size: 4rem;
-            color: #ff6b6b;
-            margin-bottom: 20px;
+            color: #fc8181;
+            margin-bottom: 1rem;
         }
 
+        .wishlist-btn {
+            margin-top: 1rem;
+            padding: 0.75rem 1.5rem;
+            background: var(--primary, #FF3366);
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            text-decoration: none;
+            transition: background 0.3s ease, transform 0.3s ease;
+        }
+
+            .wishlist-btn:hover {
+                background: var(--secondary, #6C63FF);
+                transform: translateY(-2px);
+            }
+        /* Wishlist Grid */
         .wishlist-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 20px;
+            display: ruby;
+			justify-content: center;
+			width: 2rem;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
         }
-
+        /* Wishlist Item */
         .wishlist-item {
             position: relative;
-            background: white;
-            border-radius: 10px;
-            padding: 20px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s;
+            border-radius: 12px;
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
         }
 
-        .wishlist-item:hover {
-            transform: translateY(-5px);
-        }
-
-        .remove-item {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            width: 30px;
-            height: 30px;
-            border: none;
-            background: none;
-            color: #666;
-            cursor: pointer;
-            z-index: 1;
-        }
-
-        .item-image {
-            position: relative;
-            padding-top: 100%;
-            margin-bottom: 15px;
-        }
-
-        .item-image img {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            border-radius: 5px;
-        }
-
-        .item-info {
-            margin-bottom: 15px;
-        }
-
-        .item-info h3 {
-            margin-bottom: 10px;
-            font-size: 1.1rem;
-        }
-
-        .item-price {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 10px;
-        }
-
-        .old-price {
-            color: #999;
-            text-decoration: line-through;
-        }
-
-        .current-price {
-            color: #28a745;
-            font-weight: bold;
-        }
-
-        .item-stock {
-            margin-bottom: 15px;
-        }
-
-        .in-stock {
-            color: #28a745;
-        }
-
-        .out-of-stock {
-            color: #dc3545;
-        }
-
-        .btn-add-to-cart {
-            width: 100%;
-            padding: 12px;
-            background: #007bff;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-
-        .btn-add-to-cart:hover {
-            background: #0056b3;
-        }
-
-        .btn-add-to-cart:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-        }
-
-        .btn-browse {
-            display: inline-block;
-            padding: 12px 30px;
-            background: #007bff;
-            color: white;
-            text-decoration: none;
-            border-radius: 5px;
-            transition: background-color 0.3s;
-        }
-
-        .btn-browse:hover {
-            background: #0056b3;
-        }
-
-        @@media (max-width: 768px) {
-            .wishlist-grid {
-                grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            .wishlist-item:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(0,0,0,0.1);
             }
+
+        .wishlist-image-container {
+            position: relative;
+        }
+
+        .wishlist-image {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+            display: block;
+        }
+        /* Overlay for Product Details */
+        .wishlist-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.6);
+            opacity: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.3s ease;
+        }
+
+        .wishlist-item:hover .wishlist-overlay {
+            opacity: 1;
+        }
+
+        .overlay-content {
+            text-align: center;
+            color: #fff;
+        }
+
+            .overlay-content h3 {
+                font-size: 1.5rem;
+                margin-bottom: 0.5rem;
+            }
+
+            .overlay-content p {
+                font-size: 1rem;
+                margin-bottom: 1rem;
+            }
+
+        .btn-view {
+            padding: 0.5rem 1rem;
+            background: var(--primary, #FF3366);
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            text-decoration: none;
+            transition: background 0.3s ease;
+        }
+
+            .btn-view:hover {
+                background: var(--secondary, #6C63FF);
+            }
+        /* Remove Button */
+        .wishlist-remove-form {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+        }
+
+        .wishlist-remove-btn {
+            background: rgba(255, 51, 102, 0.8);
+            border: none;
+            border-radius: 50%;
+            color: #fff;
+            width: 32px;
+            height: 32px;
+            font-size: 1.25rem;
+            line-height: 1;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+            .wishlist-remove-btn:hover {
+                background: #ff3366;
+            }
+        /* Responsive Adjustments */
+        @@media (max-width: 768px) {
+            .wishlist-grid
+
+        {
+            grid-template-columns: 1fr;
+        }
+
         }
     </style>
-}
-
-@section Scripts {
-    <script>
-        function removeFromWishlist(productId) {
-            if (confirm('Are you sure you want to remove this item from your wishlist?')) {
-                fetch('/Wishlist/RemoveItem', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
-                    },
-                    body: JSON.stringify({ productId })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        location.reload();
-                    }
-                });
-            }
-        }
-
-        function addToCart(productId) {
-            fetch('/Cart/AddToCart', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
-                },
-                body: JSON.stringify({ productId })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert('Product added to cart!');
-                }
-            });
-        }
-    </script>
 }

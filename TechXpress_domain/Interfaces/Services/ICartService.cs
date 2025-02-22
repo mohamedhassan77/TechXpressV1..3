@@ -10,6 +10,9 @@ namespace TechXpress_domain.Interfaces.Services
         Task<string> ProcessCheckoutAsync(string userId);
         Task<Cart?> GetCartByUserIdAsync(string userId, string? sessionId = null);
         Task<string> RemoveFromCartAsync(string userId, int productId);
+        Task<int> GetCartItemCountAsync(string userId);
+        Task CreateCartAsync(Cart cart);
+
         Task<string> ClearCartAsync(string userId);
     }
 }

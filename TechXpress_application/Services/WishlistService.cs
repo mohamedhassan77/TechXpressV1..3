@@ -41,6 +41,7 @@ namespace TechXpress_application.Services
             await _wishlistRepository.RemoveProductFromWishlistAsync(userId, productId);
             return "Product removed from wishlist.";
         }
+        
 
         public async Task<string> MoveToCartAsync(string userId, int productId, int quantity)
         {
@@ -55,8 +56,7 @@ namespace TechXpress_application.Services
             // Remove from Wishlist
             await _wishlistRepository.RemoveProductFromWishlistAsync(userId, productId);
 
-            // Use the correct method name from ICartRepository (AddItemAsync) instead of AddToCartAsync
-            await _cartRepository.AddItemAsync(userId, productId, quantity);
+             await _cartRepository.AddItemAsync(userId, productId, quantity);
             await _cartRepository.SaveChangesAsync();
 
             return "Product moved from wishlist to cart.";

@@ -8,17 +8,17 @@
     <meta name="description" content="TechXpress - Your premier destination for cutting-edge technology and innovative gadgets" />
     <title>@ViewData["Title"] - TechXpress</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
     @RenderSection("Styles", required: false)
 </head>
+
 <body>
     <header>
         <partial name="_Navigation" />
     </header>
 
-    <main id="main-content"  role="main">
+    <main id="main-content" role="main">
         @RenderBody()
     </main>
 
@@ -27,7 +27,25 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js"></script>
-     @RenderSection("Scripts", required: false)
+    @RenderSection("Scripts", required: false)
 
+    <script>
+        // Update Cart and Wishlist counters periodically
+        const updateCounters = async () => {
+            try {
+                const cartResponse = await fetch('/Cart/GetCartCount');
+                const cartData = await cartResponse.json();
+                document.getElementById("cart-counter").textContent = cartData.count;
+
+                const wishlistResponse = await fetch('/Wishlist/GetWishlistCount');
+                const wishlistData = await wishlistResponse.json();
+                document.getElementById("wishlist-counter").textContent = wishlistData.count;
+            } catch (error) {
+                console.error("Error updating counters:", error);
+            }
+        };
+        updateCounters();
+        setInterval(updateCounters, 1000);
+    </script>
 </body>
 </html>

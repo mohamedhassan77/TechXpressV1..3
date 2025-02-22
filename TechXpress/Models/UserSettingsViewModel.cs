@@ -32,5 +32,9 @@ namespace TechXpress.Models
 
         [Display(Name = "Currency")]
         public string PreferredCurrency { get; set; } = "USD";
+
+        
+ 
+        
     }
 }

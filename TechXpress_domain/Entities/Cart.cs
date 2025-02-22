@@ -11,5 +11,7 @@ namespace TechXpress_domain.Entities
         public List<CartItem> CartItems { get; set; } = new List<CartItem>();
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+        public decimal ShippingCost { get; set; }
+        public decimal DiscountAmount { get; set; }
     }
 }

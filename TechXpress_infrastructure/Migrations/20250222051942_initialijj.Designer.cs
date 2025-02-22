@@ -12,8 +12,8 @@ using TechXpress_infrastructure.Data;
 namespace TechXpress_infrastructure.Migrations
 {
     [DbContext(typeof(TechXpress_context))]
-    [Migration("20250219200706_FixWishlistRelationship")]
-    partial class FixWishlistRelationship
+    [Migration("20250222051942_initialijj")]
+    partial class initialijj
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -156,6 +156,36 @@ namespace TechXpress_infrastructure.Migrations
                     b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("AspNetUserTokens", (string)null);
+                });
+
+            modelBuilder.Entity("TechXpress_domain.Entities.ActiveSession", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("DeviceType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsCurrentSession")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("LastActive")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Location")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("ActiveSessions");
                 });
 
             modelBuilder.Entity("TechXpress_domain.Entities.Address", b =>
@@ -333,6 +363,12 @@ namespace TechXpress_infrastructure.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<decimal>("DiscountAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("ShippingCost")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime2");
 
@@ -444,7 +480,7 @@ namespace TechXpress_infrastructure.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("LoginHistory");
+                    b.ToTable("LoginHistoryEntries");
                 });
 
             modelBuilder.Entity("TechXpress_domain.Entities.Order", b =>
@@ -817,6 +853,17 @@ namespace TechXpress_infrastructure.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("TechXpress_domain.Entities.ActiveSession", b =>
+                {
+                    b.HasOne("TechXpress_domain.Entities.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("TechXpress_domain.Entities.Address", b =>

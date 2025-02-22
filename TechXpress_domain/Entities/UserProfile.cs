@@ -22,7 +22,7 @@ namespace TechXpress_domain.Entities
         [StringLength(15)]
         public string? PhoneNumber { get; set; }
 
-        public string ProfileImage { get; set; } = "https://www.pngarts.com/files/10/Default-Profile-Picture-Download-PNG-Image.png";
+        public string ProfileImage { get; set; } 
 
         public ICollection<Address> Addresses { get; set; } = new List<Address>();
         public bool IsBlocked { get; set; }

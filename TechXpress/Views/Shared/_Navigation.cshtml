@@ -14,7 +14,7 @@
         if (currentUser != null)
         {
             firstName = !string.IsNullOrEmpty(currentUser.FirstName) ? currentUser.FirstName : currentUser.UserName;
-            if (currentUser.UserProfile != null && !string.IsNullOrEmpty(currentUser.UserProfile.ProfileImage))
+            if (currentUser.UserProfile != null && !string.IsNullOrEmpty(currentUser.ProfileImage)  )
             {
                 profileImageUrl = currentUser.UserProfile.ProfileImage;
             }
@@ -22,12 +22,6 @@
     }
 }
 
-@section Scripts {
-    <script>
-      
-
-    </script>
-}
 <nav class="navbar navbar-expand-lg modern-nav">
     <div class="nav-container">
         <!-- Logo -->
@@ -35,17 +29,14 @@
             <i class="fas fa-bolt"></i> TechXpress
         </a>
 
-        <!-- Search Form -->
-        <div class="mb-4">
-            <form class="d-flex flex-grow-1 mx-3" asp-controller="Product" asp-action="Search" method="get">
-                <input class="form-control me-2" type="search" placeholder="Search products..." name="search">
+       <!-- Search Container -->
+        <div class="search-container">
+            <form class="search-form d-flex align-items-stretch" asp-controller="Product" asp-action="Search" method="get">
+                <input class="form-control" type="search" placeholder="Search products..." name="search">
                 <button class="btn btn-outline-primary" type="submit">
                     <i class="fas fa-search"></i>
                 </button>
             </form>
-        </div>
-        <div class="row row-cols-1 row-cols-md-3 g-4" id="productsGrid">
-            @await Html.PartialAsync("_ProductGrid", (object)Model.Products)
         </div>
 
         <!-- Navigation Links -->

@@ -88,21 +88,24 @@ namespace TechXpress_infrastructure.Data
                 .HasForeignKey(wi => wi.ProductId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // 7️⃣ CartItem (Composite Key & Relationships)
+            // Configure composite key for CartItem if needed:
             modelBuilder.Entity<CartItem>()
                 .HasKey(ci => new { ci.CartId, ci.ProductId });
 
+            // Configure relationship between Cart and CartItem:
             modelBuilder.Entity<CartItem>()
                 .HasOne(ci => ci.Cart)
                 .WithMany(c => c.CartItems)
                 .HasForeignKey(ci => ci.CartId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            // Configure relationship between Product and CartItem:
             modelBuilder.Entity<CartItem>()
                 .HasOne(ci => ci.Product)
-                .WithMany()
+                .WithMany() // Assuming Product does not have a navigation property for CartItems.
                 .HasForeignKey(ci => ci.ProductId)
                 .OnDelete(DeleteBehavior.Restrict);
+
 
             // 8️⃣ Orders & ApplicationUser (One-to-Many)
             modelBuilder.Entity<Order>()
