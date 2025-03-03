@@ -6,8 +6,8 @@
     <title>@ViewData["Title"] - Admin Panel</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/admin.css" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
-    @await RenderSectionAsync("Styles", required: false)
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha384-..." crossorigin="anonymous" />
+    @RenderSection("Styles", required: false)
 </head>
 <body>
     <div class="admin-layout">
@@ -32,14 +32,23 @@
                         <i class="fas fa-shopping-cart"></i> Orders
                     </a>
                 </li>
+                <li>
+                    <a asp-controller="Admin" asp-action="Products" class="@(ViewContext.RouteData.Values["Action"].ToString() == "Products" ? "active" : "")">
+                        <i class="fas fa-box"></i> Products
+                    </a>
+                </li>
+                <li>
+                    <a asp-controller="Admin" asp-action="Categories" class="@(ViewContext.RouteData.Values["Action"].ToString() == "Categories" ? "active" : "")">
+                        <i class="fas fa-tags"></i> Categories
+                    </a>
+                </li>
             </ul>
         </nav>
-
         <main class="admin-main">
             <header class="admin-header">
                 <div class="header-search">
-                    <i class="fas fa-search"></i>
-                    <input type="text" placeholder="Search..." />
+                    <input type="text" placeholder="Search..." class="form-control" />
+                    <button class="btn btn-link"><i class="fas fa-search"></i></button>
                 </div>
                 <div class="header-actions">
                     <div class="notifications">
@@ -52,7 +61,6 @@
                     </div>
                 </div>
             </header>
-
             <div class="admin-content">
                 @if (TempData["SuccessMessage"] != null)
                 {
@@ -72,10 +80,8 @@
             </div>
         </main>
     </div>
-
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/admin.js"></script>
-    @await RenderSectionAsync("Scripts", required: false)
+    @RenderSection("Scripts", required: false)
 </body>
 </html>

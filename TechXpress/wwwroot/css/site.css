@@ -567,8 +567,7 @@ a {
    ========================================================================== */
 .profile-container {
     position: relative;
-    display: flex;
-    align-items: center;
+     align-items: center;
     gap: 8px;
 }
 

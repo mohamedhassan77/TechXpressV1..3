@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using TechXpress.Models;
 using TechXpress_domain.Interfaces.Services;
 
 namespace TechXpress.Controllers

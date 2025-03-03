@@ -8,7 +8,7 @@ namespace TechXpress_Admin_API.Controllers
 {
     [ApiController]
     [Route("api/admin/[controller]")]
-   //[Authorize(Policy = "AdminOnly")]
+   [Authorize(Policy = "AdminOnly")]
     public class ProductsController : ControllerBase
     {
         private readonly IProductService _productService;

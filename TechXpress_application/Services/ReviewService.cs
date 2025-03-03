@@ -23,6 +23,13 @@ namespace TechXpress_application.Services
             return await _reviewRepository.GetReviewsByProductIdAsync(productId);
         }
 
+        // NEW METHOD: Returns all reviews.
+        public async Task<IEnumerable<Review>> GetAllReviewsAsync()
+        {
+            // Assumes your repository has a GetAllAsync() method.
+            return await _reviewRepository.GetAllAsync();
+        }
+
         public async Task<Review?> GetReviewByIdAsync(int id)
         {
             return await _reviewRepository.GetReviewByIdAsync(id);
@@ -30,12 +37,10 @@ namespace TechXpress_application.Services
 
         public async Task<string> AddReviewAsync(string userId, int productId, string comment, int rating)
         {
-            // Check if the product exists.
             var product = await _productRepository.GetByIdAsync(productId);
             if (product == null)
                 return "Product not found.";
 
-            // Ensure the user hasn't already reviewed this product.
             if (await _reviewRepository.UserHasReviewedProductAsync(userId, productId))
                 return "You have already reviewed this product.";
 

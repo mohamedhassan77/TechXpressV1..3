@@ -1,0 +1,70 @@
+﻿@{
+    ViewData["Title"] = "Manage Categories";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<h2>Manage Categories</h2>
+<div id="categoriesContainer">
+    <!-- Dynamic category data will be loaded here -->
+</div>
+<button id="btnRefreshCategories" class="btn btn-primary mt-3">Refresh Categories</button>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            function loadCategories() {
+                $.ajax({
+                    url: 'https://localhost:7276/api/admin/categories', // Adjust URL if needed
+                    type: 'GET',
+                    success: function (data) {
+                        var html = '<table class="table table-bordered"><thead><tr><th>ID</th><th>Name</th><th>Description</th><th>Actions</th></tr></thead><tbody>';
+                        $.each(data, function (i, category) {
+                            html += '<tr>';
+                            html += '<td>' + category.id + '</td>';
+                            html += '<td>' + category.name + '</td>';
+                            html += '<td>' + (category.description || '') + '</td>';
+                            html += '<td>';
+                            html += '<button class="btn btn-warning btn-sm" onclick="editCategory(' + category.id + ')">Edit</button> ';
+                            html += '<button class="btn btn-danger btn-sm" onclick="deleteCategory(' + category.id + ')">Delete</button>';
+                            html += '</td>';
+                            html += '</tr>';
+                        });
+                        html += '</tbody></table>';
+                        $('#categoriesContainer').html(html);
+                    },
+                    error: function (xhr, status, error) {
+                        alert('Error loading categories: ' + error);
+                    }
+                });
+            }
+
+            $('#btnRefreshCategories').click(function () {
+                loadCategories();
+            });
+
+            loadCategories();
+        });
+
+        function editCategory(id) {
+            // Implement edit functionality (e.g., open modal with category details)
+            alert('Edit category ' + id);
+        }
+
+        function deleteCategory(id) {
+            if (confirm('Are you sure you want to delete category ' + id + '?')) {
+                $.ajax({
+                    url: 'https://localhost:7276/api/admin/categories/' + id,
+                    type: 'DELETE',
+                    success: function () {
+                        alert('Category deleted successfully.');
+                        location.reload();
+                    },
+                    error: function (xhr, status, error) {
+                        alert('Error deleting category: ' + error);
+                    }
+                });
+            }
+        }
+    </script>
+}

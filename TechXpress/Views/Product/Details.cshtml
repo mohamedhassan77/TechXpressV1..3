@@ -3,112 +3,127 @@
     ViewData["Title"] = Model.ProductDetails?.Name ?? "Product Details";
     Layout = "_Layout";
 }
-
-<div class="container mt-4">
-    <div class="row">
+<div class="container py-4">
+    <div class="row g-4">
         <!-- Product Image -->
-        <div class="col-md-6">
-            <div class="product-image">
-                <img src="@Model.ProductDetails.ImageUrl" class="img-fluid" alt="@Model.ProductDetails.Name" />
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm">
+                <img src="@Model.ProductDetails.ImageUrl" class="card-img-top img-fluid" alt="@Model.ProductDetails.Name" />
             </div>
         </div>
-        <!-- Product Details -->
-        <div class="col-md-6">
-            <h2>@Model.ProductDetails.Name</h2>
-            <div class="mb-3">
-                <span class="h3 text-primary">$@Model.ProductDetails.Price.ToString("N2")</span>
-                @if (Model.ProductDetails.OldPrice.HasValue)
-                {
-                    <span class="text-muted text-decoration-line-through ms-2">
-                        $@Model.ProductDetails.OldPrice.Value.ToString("N2")
-                    </span>
-                }
-            </div>
-            <div class="mb-3 d-flex align-items-center">
-                <div class="ratings me-2">
-                    @for (int i = 1; i <= 5; i++)
-                    {
-                        <i class="@(i <= Model.ProductDetails.AverageRating ? "bi bi-star-fill" : "bi bi-star")" style="color: #ffd700;"></i>
-                    }
-                </div>
-                <span>(@Model.ReviewCount Reviews)</span>
-            </div>
-            <p>@Model.ProductDetails.Description</p>
-            <div class="mb-3">
-                <form asp-controller="Cart" asp-action="AddToCart" method="post" class="d-flex align-items-center">
-                    <input type="hidden" name="productId" value="@Model.ProductDetails.Id" />
-                    <div class="input-group me-3" style="width: 130px;">
-                        <button class="btn btn-outline-secondary" type="button" onclick="decrementQuantity()">-</button>
-                        <input type="number" class="form-control text-center" id="quantity" name="quantity" value="1" min="1" />
-                        <button class="btn btn-outline-secondary" type="button" onclick="incrementQuantity()">+</button>
+        <!-- Product Information -->
+        <div class="col-lg-6">
+            <div class="card border-0">
+                <div class="card-body">
+                    <h2 class="card-title">@Model.ProductDetails.Name</h2>
+                    <div class="mb-3">
+                        <span class="h3 text-primary">@Model.ProductDetails.FinalPrice.ToString("C")</span>
+                        @if (Model.ProductDetails.Price!=0)
+                        {
+                            <span class="text-muted text-decoration-line-through ms-2 fs-5">
+                                @Model.ProductDetails.Price.ToString("C")
+                            </span>
+                        }
                     </div>
-                    <button type="submit" class="btn btn-primary">Add to Cart</button>
-                </form>
-            </div>
-            <div class="mb-3">
-                <form asp-controller="Wishlist" asp-action="@(Model.IsInWishlist ? "RemoveFromWishlist" : "AddToWishlist")" method="post">
-                    <input type="hidden" name="productId" value="@Model.ProductDetails.Id" />
-                    <button type="submit" class="btn @(Model.IsInWishlist ? "btn-danger" : "btn-outline-primary")">
-                        <i class="@(Model.IsInWishlist ? "bi bi-heart-fill" : "bi bi-heart")"></i>
-                        @(Model.IsInWishlist ? "Remove from Wishlist" : "Add to Wishlist")
-                    </button>
-                </form>
-            </div>
-            <div class="product-meta">
-                <p><strong>Category:</strong> @Model.ProductDetails.Category.Name</p>
-                <p><strong>SKU:</strong> @Model.ProductDetails.SKU</p>
-                <p>
-                    <strong>Availability:</strong>
-                    @if (Model.ProductDetails.StockQuantity > 0)
-                    {
-                        <span class="text-success">In Stock (@Model.ProductDetails.StockQuantity available)</span>
-                    }
-                    else
-                    {
-                        <span class="text-danger">Out of Stock</span>
-                    }
-                </p>
+                    <div class="mb-3">
+                        <div class="d-flex align-items-center">
+                            <div class="ratings me-2">
+                                @for (int i = 1; i <= 5; i++)
+                                {
+                                    <i class="@(i <= Model.ProductDetails.AverageRating ? "bi bi-star-fill text-warning" : "bi bi-star text-muted")"></i>
+                                }
+                            </div>
+                            <span class="fs-6 text-muted">(@Model.ReviewCount Reviews)</span>
+                        </div>
+                    </div>
+                    <p class="card-text">@Model.ProductDetails.Description</p>
+                    <div class="mb-3">
+                        <form asp-controller="Cart" asp-action="AddToCart" method="post" class="d-flex align-items-center">
+                            <input type="hidden" name="productId" value="@Model.ProductDetails.Id" />
+                            <div class="input-group me-3" style="max-width: 150px;">
+                                <button type="button" class="btn btn-outline-secondary" onclick="decrementQuantity()">-</button>
+                                <input type="number" class="form-control text-center" id="quantity" name="quantity" value="1" min="1" />
+                                <button type="button" class="btn btn-outline-secondary" onclick="incrementQuantity()">+</button>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Add to Cart</button>
+                        </form>
+                    </div>
+                    <div class="mb-3">
+                        <form asp-controller="Wishlist" asp-action="@(Model.IsInWishlist ? "RemoveFromWishlist" : "AddToWishlist")" method="post">
+                            <input type="hidden" name="productId" value="@Model.ProductDetails.Id" />
+                            <button type="submit" class="btn @(Model.IsInWishlist ? "btn-danger" : "btn-outline-primary")">
+                                <i class="@(Model.IsInWishlist ? "bi bi-heart-fill" : "bi bi-heart")"></i>
+                                @(Model.IsInWishlist ? "Remove from Wishlist" : "Add to Wishlist")
+                            </button>
+                        </form>
+                    </div>
+                    <div class="product-meta">
+                        <p><strong>Category:</strong> @Model.ProductDetails.Category.Name</p>
+                        <p><strong>SKU:</strong> @Model.ProductDetails.SKU</p>
+                        <p>
+                            <strong>Availability:</strong>
+                            @if (Model.ProductDetails.StockQuantity > 0)
+                            {
+                                <span class="text-success">In Stock (@Model.ProductDetails.StockQuantity available)</span>
+                            }
+                            else
+                            {
+                                <span class="text-danger">Out of Stock</span>
+                            }
+                        </p>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
-    <!-- Related Products -->
+
+    <!-- Related Products Section with Side Arrow Navigation -->
     @if (Model.RelatedProducts != null && Model.RelatedProducts.Any())
     {
-        <div class="row mt-5">
-            <h3 class="mb-4">Related Products</h3>
-            @foreach (var product in Model.RelatedProducts)
-            {
-                <div class="col-md-3">
-                    @await Html.PartialAsync("_ProductCard", product)
+        <div class="related-products mt-5">
+            <h3 class="mb-4 text-center">Related Products</h3>
+            <div class="related-products-wrapper position-relative">
+                <button class="related-prev"><i class="bi bi-chevron-left"></i></button>
+                <div class="related-products-container">
+                    @foreach (var product in Model.RelatedProducts)
+                    {
+                        @await Html.PartialAsync("_ProductCard", product)
+                    }
                 </div>
-            }
+                <button class="related-next"><i class="bi bi-chevron-right"></i></button>
+            </div>
         </div>
     }
+
     <!-- Reviews Section -->
-    <div class="row mt-5">
+    <div class="mt-5">
         <h3 class="mb-4">Customer Reviews</h3>
         @if (Model.Reviews != null && Model.Reviews.Any())
         {
-            foreach (var review in Model.Reviews)
+            @foreach (var review in Model.Reviews)
             {
-                <div class="mb-4">
-                    <div class="d-flex align-items-center mb-2">
-                        <div class="ratings me-2">
-                            @for (int i = 1; i <= 5; i++)
-                            {
-                                <i class="@(i <= review.Rating ? "bi bi-star-fill" : "bi bi-star")" style="color: #ffd700;"></i>
-                            }
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <strong>@review.ApplicationUser?.UserName</strong>
+                                <small class="text-muted ms-2">@review.CreatedAt.ToString("MMM dd, yyyy")</small>
+                            </div>
+                            <div>
+                                @for (int i = 1; i <= 5; i++)
+                                {
+                                    <i class="@(i <= review.Rating ? "bi bi-star-fill text-warning" : "bi bi-star text-muted")"></i>
+                                }
+                            </div>
                         </div>
-                        <span class="text-muted">@review.CreatedAt.ToString("MMM dd, yyyy")</span>
+                        <p class="card-text mt-2">@review.Comment</p>
                     </div>
-                    <p>@review.Comment</p>
-                    <small class="text-muted">By @review.ApplicationUser.UserName</small>
                 </div>
             }
         }
         else
         {
-            <p>No reviews yet. Be the first to review this product!</p>
+            <p class="text-muted">No reviews yet. Be the first to review this product!</p>
         }
     </div>
 </div>
@@ -126,5 +141,187 @@
                 input.value = value - 1;
             }
         }
+
+        // Arrow navigation for related products
+        document.addEventListener("DOMContentLoaded", function () {
+            const container = document.querySelector(".related-products-container");
+            const prevButton = document.querySelector(".related-prev");
+            const nextButton = document.querySelector(".related-next");
+
+            // Scroll container by 300px on button click
+            prevButton.addEventListener("click", function () {
+                container.scrollBy({ left: -300, behavior: "smooth" });
+            });
+            nextButton.addEventListener("click", function () {
+                container.scrollBy({ left: 300, behavior: "smooth" });
+            });
+        });
     </script>
+}
+
+@section Styles {
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+    <style>
+        /* Custom Slider Styling */
+        .ui-slider {
+            height: 6px;
+            background: #e9ecef;
+            border: none;
+            border-radius: 3px;
+        }
+
+            .ui-slider .ui-slider-range {
+                background: var(--bs-primary);
+                border-radius: 3px;
+            }
+
+            .ui-slider .ui-slider-handle {
+                width: 18px;
+                height: 18px;
+                background: white;
+                border: 2px solid var(--bs-primary);
+                border-radius: 50%;
+                cursor: pointer;
+                top: -6px;
+                outline: none;
+            }
+
+        /* Custom Product Card Styling (for _ProductCard partial) */
+        .product-card {
+            transition: all 0.3s ease;
+            border: none;
+            overflow: hidden;
+        }
+
+            .product-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            }
+
+            .product-card .card-img-top {
+                height: 220px;
+                object-fit: contain;
+                padding: 1rem;
+                background-color: #f8f9fa;
+                transition: all 0.3s ease;
+            }
+
+            .product-card:hover .card-img-top {
+                transform: scale(1.05);
+            }
+
+            .product-card .card-body {
+                padding: 1.5rem;
+            }
+
+            .product-card .product-title {
+                font-weight: 600;
+                height: 48px;
+                overflow: hidden;
+                display: -webkit-box;
+                -webkit-line-clamp: 2;
+                -webkit-box-orient: vertical;
+            }
+
+            .product-card .product-price {
+                font-weight: 700;
+                color: var(--bs-primary);
+            }
+
+            .product-card .product-rating {
+                color: #ffc107;
+            }
+
+        /* Related Products Section with Side Arrow Navigation */
+        .related-products {
+            margin-top: 2rem;
+        }
+
+            .related-products h3 {
+                font-size: 1.75rem;
+                color: #333;
+                margin-bottom: 1rem;
+                text-align: center;
+            }
+
+        .related-products-wrapper {
+            position: relative;
+        }
+
+        .related-products-container {
+            display: flex;
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+            gap: 1rem;
+            padding: 1rem 0;
+        }
+
+            .related-products-container .product-card {
+                flex: 0 0 auto;
+                width: 280px;
+                transition: transform 0.3s ease;
+            }
+
+                .related-products-container .product-card:hover {
+                    transform: scale(1.05);
+                }
+
+        .related-prev, .related-next {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0, 0, 0, 0.4);
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            cursor: pointer;
+        }
+
+        .related-prev {
+            left: 0;
+        }
+
+        .related-next {
+            right: 0;
+        }
+
+        /* Sticky Filter Panel */
+        @@media (min-width: 992px) {
+            .sticky-top
+
+        {
+            position: sticky;
+            top: 20px;
+            z-index: 1000;
+            max-height: calc(100vh - 40px);
+            overflow-y: auto;
+        }
+
+        }
+
+        /* Custom Pagination */
+        .pagination .page-link {
+            border: none;
+            color: #6c757d;
+            padding: 0.5rem 0.75rem;
+            margin: 0 0.25rem;
+        }
+
+        .pagination .page-item.active .page-link {
+            background-color: var(--bs-primary);
+            color: white;
+        }
+
+        .pagination .page-item:not(.active) .page-link:hover {
+            background-color: #f8f9fa;
+            color: var(--bs-primary);
+        }
+    </style>
 }

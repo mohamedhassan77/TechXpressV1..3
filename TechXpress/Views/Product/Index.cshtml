@@ -1,94 +1,297 @@
 ﻿@model TechXpress.Models.UnifiedProductViewModel
 @{
-	ViewData["Title"] = "Products";
-	Layout = "_Layout";
+    ViewData["Title"] = "Products";
+    Layout = "_Layout";
 }
+
+<div class="container-fluid py-5 product-index">
+    <div class="row g-4">
+        <!-- Sidebar: Filtering -->
+        <aside class="col-lg-3 col-md-4">
+            <div class="card filter-card shadow-sm border-0 rounded-3 sticky-top" style="top: 20px;">
+                <div class="card-header bg-white border-bottom-0 pt-4">
+                    <h5 class="fw-bold mb-0">Refine Products</h5>
+                </div>
+                <div class="card-body">
+                    <form method="get">
+                        <!-- Category Filter -->
+                        <div class="mb-4">
+                            <label for="categorySelect" class="form-label fw-medium text-secondary">Category</label>
+                            <select id="categorySelect" class="form-select border-0 bg-light rounded-3 py-3" name="category">
+                                <option value="">All Categories</option>
+                                @foreach (var cat in Model.Categories)
+                                {
+                                    <option value="@cat.Name" @@(Model.CurrentCategory == cat.Name ? "selected" : "")>
+                                        @cat.Name
+                                    </option>
+                                }
+                            </select>
+                        </div>
+                        
+                        <!-- Search -->
+                        <div class="mb-4">
+                            <label for="searchInput" class="form-label fw-medium text-secondary">Search</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-0">
+                                    <i class="bi bi-search"></i>
+                                </span>
+                                <input type="text" id="searchInput" class="form-control border-0 bg-light py-3" 
+                                    name="search" value="@Model.Search" placeholder="Search products..." />
+                            </div>
+                        </div>
+
+                        <!-- Price Range Slider -->
+                        <div class="mb-4">
+                            <label class="form-label fw-medium text-secondary">Price Range</label>
+                            <div id="priceSlider" class="mt-3"></div>
+                            <div id="priceRangeDisplay" class="price-range-display mt-3 text-primary fw-bold"></div>
+                            <input type="hidden" id="minPrice" name="minPrice" value="@Model.Filter.MinPrice" />
+                            <input type="hidden" id="maxPrice" name="maxPrice" value="@Model.Filter.MaxPrice" />
+                        </div>
+
+                        <!-- Sort Options -->
+                        <div class="mb-4">
+                            <label for="sortBySelect" class="form-label fw-medium text-secondary">Sort By</label>
+                            <select id="sortBySelect" class="form-select border-0 bg-light rounded-3 py-3" name="sortBy">
+                                <option value="newest" @@(Model.Filter.SortBy == "newest" ? "selected" : "")>Newest First</option>
+                                <option value="price_asc" @@(Model.Filter.SortBy == "price_asc" ? "selected" : "")>Price: Low to High</option>
+                                <option value="price_desc" @@(Model.Filter.SortBy == "price_desc" ? "selected" : "")>Price: High to Low</option>
+                                <option value="name_asc" @@(Model.Filter.SortBy == "name_asc" ? "selected" : "")>Name: A to Z</option>
+                                <option value="name_desc" @@(Model.Filter.SortBy == "name_desc" ? "selected" : "")>Name: Z to A</option>
+                            </select>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary w-100 py-3 rounded-3 fw-medium">
+                            <i class="bi bi-filter me-2"></i> Apply Filters
+                        </button>
+                        
+                        <button type="reset" class="btn btn-outline-secondary w-100 py-3 rounded-3 fw-medium mt-2">
+                            <i class="bi bi-arrow-counterclockwise me-2"></i> Reset Filters
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content: Products List -->
+        <main class="col-lg-9 col-md-8">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="fw-bold mb-0">
+                    @(string.IsNullOrEmpty(Model.CurrentCategory) ? "All Products" : Model.CurrentCategory)
+                    @if (!string.IsNullOrEmpty(Model.Search))
+                    {
+                        <span class="fs-6 ms-2 text-secondary fw-normal">Search results for: "@Model.Search"</span>
+                    }
+                </h2>
+                <span class="text-secondary">Showing @Model.Products.Count() of @Model.PaginationInfo.TotalItems products</span>
+            </div>
+
+            <div class="row g-4 product-list">
+                @foreach (var product in Model.Products)
+                {
+                    @await Html.PartialAsync("_ProductCard", product)
+                }
+            </div>
+
+            <!-- No Products Found -->
+            @if (!Model.Products.Any())
+            {
+                <div class="text-center py-5">
+                    <div class="mb-3">
+                        <i class="bi bi-search display-1 text-muted"></i>
+                    </div>
+                    <h3>No products found</h3>
+                    <p class="text-secondary">Try adjusting your search or filter criteria</p>
+                    <a href="@Url.Action("Index")" class="btn btn-outline-primary mt-3">View All Products</a>
+                </div>
+            }
+
+            <!-- Pagination -->
+            @if (Model.PaginationInfo.TotalPages > 1)
+            {
+                <nav aria-label="Page navigation" class="mt-5">
+                    <ul class="pagination justify-content-center">
+                        <!-- Previous Button -->
+                        <li class="page-item @(Model.PaginationInfo.CurrentPage == 1 ? "disabled" : "")">
+                            <a class="page-link rounded-start" href="@Url.Action("Index", new { page = Model.PaginationInfo.CurrentPage - 1, category = Model.CurrentCategory, search = Model.Search, sortBy = Model.Filter.SortBy, minPrice = Model.Filter.MinPrice, maxPrice = Model.Filter.MaxPrice })" aria-label="Previous">
+                                <i class="bi bi-chevron-left"></i>
+                            </a>
+                        </li>
+                        
+                        @for (int i = 1; i <= Model.PaginationInfo.TotalPages; i++)
+                        {
+                            <li class="page-item @(i == Model.PaginationInfo.CurrentPage ? "active" : "")">
+                                <a class="page-link" href="@Url.Action("Index", new { page = i, category = Model.CurrentCategory, search = Model.Search, sortBy = Model.Filter.SortBy, minPrice = Model.Filter.MinPrice, maxPrice = Model.Filter.MaxPrice })">
+                                    @i
+                                </a>
+                            </li>
+                        }
+                        
+                        <!-- Next Button -->
+                        <li class="page-item @(Model.PaginationInfo.CurrentPage == Model.PaginationInfo.TotalPages ? "disabled" : "")">
+                            <a class="page-link rounded-end" href="@Url.Action("Index", new { page = Model.PaginationInfo.CurrentPage + 1, category = Model.CurrentCategory, search = Model.Search, sortBy = Model.Filter.SortBy, minPrice = Model.Filter.MinPrice, maxPrice = Model.Filter.MaxPrice })" aria-label="Next">
+                                <i class="bi bi-chevron-right"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            }
+        </main>
+    </div>
+</div>
+
+@* Render Quick View modal partial (pre-rendered) *@
+@await Html.PartialAsync("_QuickView", Model.ProductDetails)
+
 @section Styles {
-	
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+    <style>
+        /* Custom Slider Styling */
+        .ui-slider {
+            height: 6px;
+            background: #e9ecef;
+            border: none;
+            border-radius: 3px;
+        }
+        
+        .ui-slider .ui-slider-range {
+            background: var(--bs-primary);
+            border-radius: 3px;
+        }
+        
+        .ui-slider .ui-slider-handle {
+            width: 18px;
+            height: 18px;
+            background: white;
+            border: 2px solid var(--bs-primary);
+            border-radius: 50%;
+            cursor: pointer;
+            top: -6px;
+            outline: none;
+        }
+        
+        /* Custom Product Card Styling */
+        .product-card {
+            transition: all 0.3s ease;
+            border: none;
+            overflow: hidden;
+        }
+        
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        
+        .product-card .card-img-top {
+            height: 220px;
+            object-fit: contain;
+            padding: 1rem;
+            background-color: #f8f9fa;
+            transition: all 0.3s ease;
+        }
+        
+        .product-card:hover .card-img-top {
+            transform: scale(1.05);
+        }
+        
+        .product-card .card-body {
+            padding: 1.5rem;
+        }
+        
+        .product-card .product-title {
+            font-weight: 600;
+            height: 48px;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+        
+        .product-card .product-price {
+            font-weight: 700;
+            color: var(--bs-primary);
+        }
+        
+        .product-card .product-rating {
+            color: #ffc107;
+        }
+        
+        /* Sticky Filter Panel */
+        @@media (min-width: 992px) {
+            .sticky-top {
+                position: sticky;
+                top: 20px;
+                z-index: 1000;
+                max-height: calc(100vh - 40px);
+                overflow-y: auto;
+            }
+        }
+        
+        /* Custom Pagination */
+        .pagination .page-link {
+            border: none;
+            color: #6c757d;
+            padding: 0.5rem 0.75rem;
+            margin: 0 0.25rem;
+        }
+        
+        .pagination .page-item.active .page-link {
+            background-color: var(--bs-primary);
+            color: white;
+        }
+        
+        .pagination .page-item:not(.active) .page-link:hover {
+            background-color: #f8f9fa;
+            color: var(--bs-primary);
+        }
+    </style>
 }
 
-<div class="container mt-4">
-	<div class="row">
-		<!-- Sidebar: Filters -->
-		<div class="col-md-3">
-			<div class="card">
-				<div class="card-body">
-					<h5 class="card-title">Filters</h5>
-					<form id="filterForm" method="get">
-						<!-- Categories Filter -->
-						<div class="mb-3">
-							@if (Model.Categories != null && Model.Categories.Any())
-							{
-								foreach (var category in Model.Categories)
-								{
-									<div class="form-check">
-										<input class="form-check-input" type="radio" name="category" value="@category.Name" id="@category.Name"
-										@(Model.CurrentCategory == category.Name ? "checked" : "") />
-										<label class="form-check-label" for="@category.Name">
-											@category.Name
-										</label>
-									</div>
-								}
-							}
-						</div>
-						<!-- Sort Options -->
-						<div class="mb-3">
-							<label class="form-label">Sort By</label>
-
-							<select class="form-select" name="sortBy">
-								<option value="newest" @@(Model.Filter.SortBy= ="newest" ? "selected" : "" )>Newest First</option>
-								<option value="price_asc" @@(Model.Filter.SortBy= ="price_asc" ? "selected" : "" )>Price: Low to High</option>
-								<option value="price_desc" @@(Model.Filter.SortBy= ="price_desc" ? "selected" : "" )>Price: High to Low</option>
-								<option value="name_asc" @@(Model.Filter.SortBy= ="name_asc" ? "selected" : "" )>Name: A to Z</option>
-								<option value="name_desc" @@(Model.Filter.SortBy= ="name_desc" ? "selected" : "" )>Name: Z to A</option>
-							</select>
-
-						</div>
-						<button type="submit" class="btn btn-primary w-100">Apply Filters</button>
-					</form>
-				</div>
-			</div>
-		</div>
-		<!-- Main Content: Products List -->
-		<div class="col-md-9">
-			<div class="row row-cols-1 row-cols-md-3 g-4" id="productsGrid">
-				@foreach (var product in Model.Products)
-				{
-					@await Html.PartialAsync("_ProductCard", product)
-				}
-			</div>
-			<!-- Pagination -->
-			@if (Model.PaginationInfo.TotalPages > 1)
-			{
-				<nav aria-label="Page navigation" class="mt-4">
-					<ul class="pagination justify-content-center">
-						@for (int i = 1; i <= Model.PaginationInfo.TotalPages; i++)
-						{
-							<li class="page-item @(i == Model.PaginationInfo.CurrentPage ? "active" : "")">
-								<a class="page-link" href="@Url.Action("Index", new { page = i, category = Model.CurrentCategory, search = Model.Search, sortBy = Model.Filter?.SortBy })">@i</a>
-
-							</li>
-						}
-					</ul>
-				</nav>
-			}
-		</div>
-	
-
-	</div>
-
-	@section Scripts {
-		<script>
-					$(document).ready(function () {
-				$('#filterForm select, #filterForm input[type="radio"]').change(function () {
-					$('#filterForm').submit();
-				});
-
-				$('#filterForm').submit(function () {
-					$('#productsGrid').hide();
-					$('#loadingSpinner').show();
-				});
-			});
-
-		</script>
-	}
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+    <script>
+        $(function () {
+            // Initialize price slider
+            var initialMin = parseInt($("#minPrice").val()) || 0;
+            var initialMax = parseInt($("#maxPrice").val()) || 1000;
+            
+            $("#priceSlider").slider({
+                range: true,
+                min: 0,
+                max: 1000,
+                values: [initialMin, initialMax],
+                slide: function (event, ui) {
+                    $("#priceRangeDisplay").text("$" + ui.values[0] + " - $" + ui.values[1]);
+                    $("#minPrice").val(ui.values[0]);
+                    $("#maxPrice").val(ui.values[1]);
+                }
+            });
+            
+            $("#priceRangeDisplay").text("$" + $("#priceSlider").slider("values", 0) + " - $" + $("#priceSlider").slider("values", 1));
+            
+            // Reset button functionality
+            $("button[type='reset']").click(function(e) {
+                e.preventDefault();
+                // Reset form inputs
+                $("form")[0].reset();
+                // Reset hidden price values
+                $("#minPrice").val(0);
+                $("#maxPrice").val(1000);
+                // Reset slider
+                $("#priceSlider").slider("values", [0, 1000]);
+                $("#priceRangeDisplay").text("$0 - $1000");
+                // Submit the form to apply reset filters
+                $("form").submit();
+            });
+            
+            // Quick view functionality
+            $(".quick-view-btn").click(function() {
+                var productId = $(this).data("product-id");
+                // Fetch product details through AJAX or use pre-rendered modal
+                $("#quickViewModal").modal("show");
+            });
+        });
+    </script>
+}

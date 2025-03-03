@@ -29,14 +29,39 @@ namespace TechXpress.Controllers
             _reviewService = reviewService;
         }
 
-        // List View Action
-        public async Task<IActionResult> Index(string category, string search, string sortBy, int page = 1)
+         public async Task<IActionResult> Index(string category, string search, string sortBy, int page = 1, int minPrice = 0, int maxPrice = 1000)
         {
             int pageSize = 12;
-            // Get filtered products along with total count
+
+            // Get filtered products along with total count (assumed service returns a tuple).
             var (products, totalCount) = await _productService.GetFilteredProductsAsync(category, search, page, pageSize);
 
-            // Get categories from the domain service and map them into view models
+            // Filter by price.
+            var filteredProducts = products.Where(p => p.Price >= minPrice && p.Price <= maxPrice).ToList();
+
+            // Apply name sorting if requested.
+            if (sortBy == "name_asc")
+            {
+                filteredProducts = filteredProducts.OrderBy(p => p.Name).ToList();
+            }
+            else if (sortBy == "name_desc")
+            {
+                filteredProducts = filteredProducts.OrderByDescending(p => p.Name).ToList();
+            }
+            else if (sortBy == "price_asc")
+            {
+                filteredProducts = filteredProducts.OrderBy(p => p.Price).ToList();
+            }
+            else if (sortBy == "price_desc")
+            {
+                filteredProducts = filteredProducts.OrderByDescending(p => p.Price).ToList();
+            }
+             
+
+            // Update totalCount after filtering.
+            totalCount = filteredProducts.Count;
+
+            // Get categories for the sidebar.
             var domainCategories = await _categoryService.GetAllCategoriesAsync(1, 10, "name_asc");
             var categoryViewModels = domainCategories.Select(c => new CategoryViewModel
             {
@@ -45,39 +70,45 @@ namespace TechXpress.Controllers
                 ImageUrl = c.ImageUrl
             });
 
+            // Map products to ProductViewModel.
+            var productViewModels = filteredProducts.Select(p => new ProductViewModel
+            {
+                Id = p.Id,
+                Name = p.Name,
+                Description = p.Description,
+                Price = p.Price,
+                DiscountPrice = p.DiscountPrice,
+                ImageUrl = p.ImageUrl,
+                IsFeatured = p.IsFeatured,
+                CreatedDate = p.CreatedDate,
+                UpdatedDate = p.UpdatedDate,
+                Tag = p.Tag,
+                Brand = p.Brand,
+                CategoryId = p.CategoryId,
+                // For category name, calling async method synchronously is not ideal; consider caching or using a lookup.
+                CategoryName = _categoryService.GetCategoryByIdAsync(p.CategoryId).Result?.Name ?? "",
+                StockQuantity = p.StockQuantity,
+                SKU = p.SKU,
+                Specifications = p.Specifications,
+                OldPrice = p.OldPrice,
+                ProductImages = p.ProductImages.ToList(),
+                Category = new CategoryViewModel
+                {
+                    Id = p.Category.Id,
+                    Name = p.Category.Name,
+                    ImageUrl = p.Category.ImageUrl
+                }
+            }).ToList();
+
             var model = new UnifiedProductViewModel
             {
-                Products = products.Select(p => new ProductViewModel
-                {
-                    Id = p.Id,
-                    Name = p.Name,
-                    Description = p.Description,
-                    Price = p.Price,
-                    DiscountPrice = p.DiscountPrice,
-                    ImageUrl = p.ImageUrl,
-                    IsFeatured = p.IsFeatured,
-                    CreatedDate = p.CreatedDate,
-                    UpdatedDate = p.UpdatedDate,
-                    Tag = p.Tag,
-                    Brand = p.Brand,
-                    CategoryId = p.CategoryId,
-                    StockQuantity = p.StockQuantity,
-                    SKU = p.SKU,
-                    Specifications = p.Specifications,
-                    OldPrice = p.OldPrice,
-                    ProductImages = p.ProductImages.ToList(),
-                    Category = new CategoryViewModel
-                    {
-                        Id = p.Category.Id,
-                        Name = p.Category.Name,
-                        ImageUrl = p.Category.ImageUrl
-                    }
-                }).ToList(),
+                Products = productViewModels,
                 PaginationInfo = new PaginationInfo
                 {
                     CurrentPage = page,
                     ItemsPerPage = pageSize,
-                    TotalItems = totalCount
+                    TotalItems = totalCount,
+                    // Optionally, compute TotalPages if needed.
                 },
                 Categories = categoryViewModels,
                 CurrentCategory = category,
@@ -87,14 +118,16 @@ namespace TechXpress.Controllers
                     Category = category,
                     SortBy = sortBy,
                     Page = page,
-                    PageSize = pageSize
+                    PageSize = pageSize,
+                    MinPrice = minPrice,
+                    MaxPrice = maxPrice
                 }
             };
 
             return View(model);
         }
 
-        // Details View Action
+        // Details and other actions remain unchanged.
         public async Task<IActionResult> Details(int id)
         {
             var product = await _productService.GetByIdAsync(id);
@@ -116,7 +149,6 @@ namespace TechXpress.Controllers
 
             var model = new UnifiedProductViewModel
             {
-                // Map the single product to the ProductDetails property.
                 ProductDetails = new ProductViewModel
                 {
                     Id = product.Id,
@@ -143,7 +175,6 @@ namespace TechXpress.Controllers
                         ImageUrl = product.Category.ImageUrl
                     }
                 },
-                // Map related products
                 RelatedProducts = relatedProducts.Select(rp => new ProductViewModel
                 {
                     Id = rp.Id,
@@ -182,12 +213,10 @@ namespace TechXpress.Controllers
         {
             if (string.IsNullOrWhiteSpace(search))
             {
-                return View("Search", new UnifiedProductViewModel()); 
+                return View("Search", new UnifiedProductViewModel());
             }
 
             var products = await _productService.SearchProductsAsync(search);
-
-            // Convert Product -> ProductViewModel
             var productViewModels = products.Select(p => new ProductViewModel
             {
                 Id = p.Id,
@@ -224,6 +253,5 @@ namespace TechXpress.Controllers
 
             return View(viewModel);
         }
-
-        }
+    }
 }

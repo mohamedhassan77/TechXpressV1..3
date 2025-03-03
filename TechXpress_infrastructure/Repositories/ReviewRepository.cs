@@ -60,5 +60,10 @@ namespace TechXpress_infrastructure.Repositories
         {
             await _context.SaveChangesAsync();
         }
+
+        public Task<IEnumerable<Review>> GetAllAsync()
+        {
+            return Task.FromResult(_context.Reviews.AsEnumerable());
+        }
     }
 }

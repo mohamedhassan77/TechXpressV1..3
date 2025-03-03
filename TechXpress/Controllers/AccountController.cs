@@ -7,6 +7,7 @@ using TechXpress_domain.Interfaces.Services;
 using Microsoft.Extensions.Logging;
 using TechXpress_domain.Entities;
 using Microsoft.AspNetCore.Identity;
+using static TechXpress_Admin_API.Controllers.AuthController;
 
 namespace TechXpress.Controllers
 {
@@ -18,15 +19,21 @@ namespace TechXpress.Controllers
         private readonly IEmailService _emailService;
         private readonly ILogger<AccountController> _logger;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IConfiguration _configuration;
 
-        public AccountController(IAuthService authService, IUserProfileService userProfileService,
-            IEmailService emailService, ILogger<AccountController> logger ,UserManager<ApplicationUser> userManager )
+        public AccountController(IAuthService authService,
+                           IUserProfileService userProfileService,
+                           IEmailService emailService,
+                           ILogger<AccountController> logger,
+                           UserManager<ApplicationUser> userManager,
+                           IConfiguration configuration)
         {
             _authService = authService;
             _userProfileService = userProfileService;
             _emailService = emailService;
             _logger = logger;
             _userManager = userManager;
+            _configuration = configuration;
         }
 
         [HttpGet]
@@ -41,18 +48,62 @@ namespace TechXpress.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(LoginViewModel model)
         {
-            if (!ModelState.IsValid) return View(model);
+            if (!ModelState.IsValid)
+                return View(model);
 
             var result = await _authService.LoginAsync(model.Email, model.Password, model.RememberMe);
             if (result.Success)
             {
                 _logger.LogInformation("User logged in.");
-                return RedirectToAction("Index", "Home");
+
+                var user = await _userManager.FindByEmailAsync(model.Email);
+                if (user != null)
+                {
+                    if (await _userManager.IsInRoleAsync(user, "Admin"))
+                    {
+                        // Call the API endpoint to generate a JWT token for admin.
+                        using (var client = new HttpClient())
+                        {
+                            // Read the API base URL from configuration
+                            var apiBaseUrl = _configuration["ApiSettings:BaseUrl"];
+                            _logger.LogInformation("API Base URL from configuration: {ApiBaseUrl}", apiBaseUrl);
+                            client.BaseAddress = new Uri(apiBaseUrl);
+
+
+                            var loginDto = new
+                            {
+                                Email = model.Email,
+                                Password = model.Password
+                            };
+
+                            var response = await client.PostAsJsonAsync("/api/auth/token", loginDto);
+                            if (response.IsSuccessStatusCode)
+                            {
+                                var tokenResponse = await response.Content.ReadFromJsonAsync<TokenResponse>();
+                                // Store the token securely (here in Session; ensure Session is enabled in Startup/Program).
+                                HttpContext.Session.SetString("AdminToken", tokenResponse.Token);
+                            }
+                            else
+                            {
+                                _logger.LogError("Failed to generate JWT token for admin.");
+                            }
+                        }
+
+                        // Redirect to the MVC Admin panel.
+                        return RedirectToAction("Index", "Admin");
+                    }
+                    else
+                    {
+                        return RedirectToAction("Index", "Home");
+                    }
+                }
             }
 
             ModelState.AddModelError(string.Empty, result.Message);
             return View(model);
         }
+
+
 
         [HttpPost]
         [ValidateAntiForgeryToken]

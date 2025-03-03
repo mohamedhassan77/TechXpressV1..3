@@ -1,5 +1,6 @@
-@* _QuickView.cshtml - Shared Quick View Modal Partial *@
-<div id="productModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-product-name" style="display:none;">
+@* _QuickView.cshtml - Updated Quick View Modal Partial *@
+<div id="productModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-product-name">
+    <div class="modal-overlay" onclick="closeModal()"></div>
     <div class="modal-content">
         <button class="close-button" onclick="closeModal()" aria-label="Close modal">
             <i class="fas fa-times" aria-hidden="true"></i>
@@ -8,7 +9,7 @@
             <!-- Gallery Section -->
             <div class="modal-gallery">
                 <div class="main-image-container">
-                    <img id="modal-product-image" src="" alt="" class="modal-product-image">
+                    <img id="modal-product-image" src="" alt="Product image" class="modal-product-image">
                 </div>
                 <div class="thumbnail-container">
                     <div class="thumbnail active">
@@ -39,9 +40,7 @@
                 </div>
                 <div class="modal-price-container">
                     <h3 id="modal-product-price"></h3>
-                    <span class="stock-status" id="stock-status">
-                        <!-- Stock status can be set dynamically if needed -->
-                    </span>
+                    <span class="stock-status" id="stock-status"><!-- Stock status set dynamically --></span>
                 </div>
                 <p id="modal-product-description"></p>
                 <div class="modal-options">

@@ -1,194 +1,33 @@
 @model IEnumerable<TechXpress_domain.Entities.Order>
 @{
     ViewData["Title"] = "Orders";
-    Layout = "_AdminLayout";
-    string filterStatus = ViewBag.FilterStatus as string ?? "";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
-<section class="orders-management">
-    <header class="page-header">
-        <h1>Orders</h1>
-        <div class="header-actions">
-            <input type="text" id="orderSearch" placeholder="Search orders..." class="form-control" style="max-width:250px;" />
-            <select id="statusFilter" class="status-select">
-                <option value="">All</option>
-                @if (filterStatus.Equals("Pending", StringComparison.OrdinalIgnoreCase))
-                {
-                    <option value="pending" selected="selected">Pending</option>
-                }
-                else
-                {
-                    <option value="pending">Pending</option>
-                }
-                @if (filterStatus.Equals("Paid", StringComparison.OrdinalIgnoreCase))
-                {
-                    <option value="paid" selected="selected">Paid</option>
-                }
-                else
-                {
-                    <option value="paid">Paid</option>
-                }
-                @if (filterStatus.Equals("Cancelled", StringComparison.OrdinalIgnoreCase))
-                {
-                    <option value="cancelled" selected="selected">Cancelled</option>
-                }
-                else
-                {
-                    <option value="cancelled">Cancelled</option>
-                }
-            </select>
-        </div>
-    </header>
-
-    <div class="orders-table">
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Order Number</th>
-                    <th>Order Date</th>
-                    <th>Status</th>
-                    <th>Total</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var order in Model)
-                {
-                    <tr data-status="@order.Status.ToString().ToLower()">
-                        <td>@order.OrderNumber</td>
-                        <td>@order.OrderDate.ToString("MMM dd, yyyy")</td>
-                        <td>
-                            <span class="status-badge @order.Status.ToString().ToLower()">
-                                @order.Status
-                            </span>
-                        </td>
-                        <td>@order.Total.ToString("C")</td>
-                        <td>
-                            <div class="action-buttons">
-                                <a asp-action="OrderDetails" asp-route-id="@order.Id" class="btn-action" title="View Details">
-                                    <i class="fas fa-eye"></i>
-                                </a>
-                                <button type="button" class="btn-action" onclick="printOrder(@order.Id)" title="Print Order">
-                                    <i class="fas fa-print"></i>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-    </div>
-</section>
-
-@section Scripts {
-    <script>
-        function printOrder(orderId) {
-            window.open(`@Url.Action("PrintOrder")?id=${orderId}`, '_blank');
-        }
-        function showToast(message, type) {
-            const toast = $(`<div class="toast ${type}">${message}</div>`);
-            $('body').append(toast);
-            setTimeout(() => toast.remove(), 3000);
-        }
-        $(document).ready(function () {
-            $('#orderSearch').on('input', filterOrders);
-            $('#statusFilter').on('change', filterOrders);
-            function filterOrders() {
-                const searchTerm = $('#orderSearch').val().toLowerCase();
-                const statusFilter = $('#statusFilter').val().toLowerCase();
-                $('tbody tr').each(function () {
-                    const row = $(this);
-                    const orderInfo = row.find('td:first').text().toLowerCase();
-                    const status = row.data('status');
-                    const matchesSearch = orderInfo.includes(searchTerm);
-                    const matchesStatus = !statusFilter || status === statusFilter;
-                    row.toggle(matchesSearch && matchesStatus);
-                });
-            }
-        });
-    </script>
-}
-
-@section Styles {
-    <style>
-        .orders-management {
-            padding: 2rem;
-        }
-
-        .page-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2rem;
-        }
-
-        .header-actions {
-            display: flex;
-            gap: 1rem;
-        }
-
-        .orders-table {
-            background: #fff;
-            border-radius: 10px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            overflow: hidden;
-        }
-
-        .table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-            .table th {
-                background: #f8f9fa;
-                padding: 1rem;
-                text-align: left;
-                font-weight: 600;
-            }
-
-            .table td {
-                padding: 1rem;
-                border-bottom: 1px solid #eee;
-                vertical-align: middle;
-            }
-
-        .action-buttons .btn-action {
-            padding: 0.5rem;
-            border: none;
-            background: none;
-            color: #666;
-            cursor: pointer;
-            transition: color 0.3s;
-        }
-
-            .action-buttons .btn-action:hover {
-                color: var(--primary);
-            }
-
-        .toast {
-            position: fixed;
-            bottom: 2rem;
-            right: 2rem;
-            padding: 1rem 2rem;
-            border-radius: 4px;
-            color: #fff;
-            z-index: 1000;
-        }
-
-            .toast.success {
-                background: #28a745;
-            }
-
-            .toast.error {
-                background: #dc3545;
-            }
-        @@media (max-width: 768px) {
-            .orders-table
-
+<h2>Orders</h2>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Order Number</th>
+            <th>Order Date</th>
+            <th>Status</th>
+            <th>Total</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var order in Model)
         {
-            overflow-x: auto;
+            <tr>
+                <td>@order.OrderNumber</td>
+                <td>@order.OrderDate.ToString("MMM dd, yyyy")</td>
+                <td>@order.Status</td>
+                <td>@order.Total.ToString("C")</td>
+                <td>
+                    <a asp-action="OrderDetails" asp-route-id="@order.Id" class="btn btn-sm btn-primary">Details</a>
+                    @* You can add print or other actions here *@
+                </td>
+            </tr>
         }
-
-        }
-    </style>
-}
+    </tbody>
+</table>

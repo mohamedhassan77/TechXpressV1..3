@@ -12,6 +12,8 @@ namespace TechXpress_domain.Interfaces.Repositories
         Task UpdateReviewAsync(Review review);
         Task DeleteReviewAsync(int id);
         Task<bool> UserHasReviewedProductAsync(string userId, int productId);
+        Task<IEnumerable<Review>> GetAllAsync();
+
         Task SaveChangesAsync();
     }
 }

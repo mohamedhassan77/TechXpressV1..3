@@ -70,6 +70,8 @@ namespace TechXpress.Models
 
         [Required(ErrorMessage = "Category is required.")]
         public int CategoryId { get; set; }
+        public string CategoryName { get; set; }
+       
 
         [Required(ErrorMessage = "Stock quantity is required.")]
         [Range(0, int.MaxValue, ErrorMessage = "Stock quantity must be a non-negative number.")]

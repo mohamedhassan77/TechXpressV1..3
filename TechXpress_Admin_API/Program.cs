@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using PayPalCheckoutSdk.Orders;
 using System.Text;
 using TechXpress_application.Services;
 using TechXpress_infrastructure.Data;
@@ -9,33 +8,28 @@ using TechXpress_domain.Interfaces.Services;
 using TechXpress_domain.Interfaces.Repositories;
 using TechXpress_infrastructure.Repositories;
 
-
-
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllers();
 
-
-
 // Configure your DbContext (assumes ApplicationDbContext exists)
 builder.Services.AddDbContext<TechXpress_context>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("AdminConnection")));
-
-
 
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAll", policy =>
+    options.AddPolicy("AllowMvcDomain", policy =>
     {
-        policy.AllowAnyOrigin()
-              .AllowAnyMethod()
-              .AllowAnyHeader();
+        policy.WithOrigins("http://localhost:5298", "https://localhost:7248")
+              .AllowAnyHeader()
+              .AllowAnyMethod();
     });
 });
+
 
 // Configure JWT authentication.
 var jwtKey = builder.Configuration["Jwt:Key"];
@@ -48,10 +42,10 @@ builder.Services.AddAuthentication(options =>
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
 })
-    .AddJwtBearer(options =>
+.AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
     {
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
         ValidateIssuer = true,
         ValidateAudience = true,
         ValidateIssuerSigningKey = true,
@@ -73,7 +67,6 @@ builder.Services.AddAuthorization(options =>
 
 // Optionally add Swagger/OpenAPI support.
 builder.Services.AddEndpointsApiExplorer();
-
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
@@ -84,8 +77,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-app.UseCors("AllowAll");
 
+app.UseCors("AllowMvcDomain");
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();

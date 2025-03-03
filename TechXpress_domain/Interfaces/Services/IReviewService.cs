@@ -11,5 +11,7 @@ namespace TechXpress_domain.Interfaces.Services
         Task<string> AddReviewAsync(string userId, int productId, string comment, int rating);
         Task<string> UpdateReviewAsync(int reviewId, string comment, int rating);
         Task<string> DeleteReviewAsync(int reviewId, string userId);
+        Task<IEnumerable<Review>> GetAllReviewsAsync();
+
     }
 }

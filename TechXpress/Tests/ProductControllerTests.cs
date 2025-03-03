@@ -1,11 +1,16 @@
 ﻿using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Moq;
 using TechXpress.Controllers;
 using TechXpress_domain.Entities;
 using TechXpress_domain.Interfaces.Services;
 using TechXpress.Models;
 using Xunit;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
+using System.Linq;
 
 namespace TechXpress.Tests
 {
@@ -28,7 +33,7 @@ namespace TechXpress.Tests
             _cartServiceMock = new Mock<ICartService>();
             _loggerMock = new Mock<ILogger<ProductController>>();
 
-            _controller = new  ProductController(
+            _controller = new ProductController(
                 _productServiceMock.Object,
                 _categoryServiceMock.Object,
                 _wishlistServiceMock.Object,
@@ -79,8 +84,8 @@ namespace TechXpress.Tests
         [Fact]
         public async Task Details_ReturnsNotFound_WhenProductNotFound()
         {
-            // Arrange: Setup service to return null for an unknown product id.
-            _productServiceMock.Setup(s => s.GetProductByIdAsync(It.IsAny<int>()))
+            // Arrange
+            _productServiceMock.Setup(s => s.GetByIdAsync(It.IsAny<int>()))
                 .ReturnsAsync((Product)null);
 
             // Act
@@ -103,7 +108,7 @@ namespace TechXpress.Tests
                 Reviews = new List<Review>()
             };
 
-            _productServiceMock.Setup(s => s.GetProductByIdAsync(1))
+            _productServiceMock.Setup(s => s.GetByIdAsync(1))
                 .ReturnsAsync(product);
             _productServiceMock.Setup(s => s.GetRelatedProductsAsync(1))
                 .ReturnsAsync(new List<Product>());
@@ -115,12 +120,11 @@ namespace TechXpress.Tests
 
             // Assert
             var viewResult = Assert.IsType<ViewResult>(result);
-            var viewModel = Assert.IsType<ProductViewModel>(viewResult.Model);
-            Assert.Equal(product.Id, viewModel.Id);
-            Assert.Equal("Test Product", viewModel.Name);
+            var model = Assert.IsType<UnifiedProductViewModel>(viewResult.Model);
+            Assert.Equal(product.Id, model.ProductDetails.Id);
+            Assert.Equal("Test Product", model.ProductDetails.Name);
         }
 
-     
-      
     }
+    
 }

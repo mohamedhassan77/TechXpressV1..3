@@ -13,7 +13,7 @@ namespace TechXpress_application.Services
             _categoryRepository = categoryRepository;
         }
 
-        public async Task<IEnumerable<Category>> GetAllCategoriesAsync(int pageNumber, int pageSize, string sortBy)
+        public async Task<IEnumerable<Category>> GetAllCategoriesAsync(int pageNumber = 1, int pageSize = 10, string sortBy = "name_asc")
         {
             return await _categoryRepository.GetAllAsync(pageNumber, pageSize, sortBy);
         }

@@ -1,219 +1,33 @@
 @model IEnumerable<TechXpress.Models.UserProfileViewModel>
 @{
     ViewData["Title"] = "User Management";
-    Layout = "_AdminLayout";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
-<section class="users-management">
-    <header class="page-header">
-        <h1>User Management</h1>
-        <div class="header-actions">
-            <div class="search-box">
-                <input type="text" id="userSearch" placeholder="Search users..." class="form-control" style="max-width:250px;" />
-                <i class="fas fa-search"></i>
+<h2>User Management</h2>
+<div class="users-grid">
+    @foreach (var user in Model)
+    {
+        <div class="user-card">
+            <div class="user-header">
+                <img src="@(string.IsNullOrEmpty(user.ProfilePictureUrl) ? "/images/default-avatar.png" : user.ProfilePictureUrl)" alt="Profile Image" class="user-avatar" />
+                <div class="user-status @(user.IsBlocked ? "blocked" : "active")">
+                    <span>@(user.IsBlocked ? "Blocked" : "Active")</span>
+                </div>
             </div>
-            <div class="filter-box">
-                <select id="statusFilter" class="status-select">
-                    <option value="">All Status</option>
-                    <option value="active">Active</option>
-                    <option value="blocked">Blocked</option>
-                </select>
+            <div class="user-info">
+                <h3>@user.FirstName @user.LastName</h3>
+                <p>@user.Email</p>
+                <p>Joined: @user.CreatedAt.ToString("MMM dd, yyyy")</p>
+            </div>
+            <div class="user-actions">
+                <a href="@Url.Action("Details", "UserProfile", new { id = user.UserId })" class="btn btn-sm btn-primary">View</a>
+                <a href="@Url.Action("Edit", "UserProfile", new { id = user.UserId })" class="btn btn-sm btn-warning">Edit</a>
+                <form asp-action="DeleteUser" method="post" class="d-inline">
+                    <input type="hidden" name="id" value="@user.UserId" />
+                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this user?');">Delete</button>
+                </form>
             </div>
         </div>
-    </header>
-
-    <div class="users-grid">
-        @foreach (var user in Model)
-        {
-            <div class="user-card" data-status="@(user.IsBlocked ? "blocked" : "active")">
-                <div class="user-header">
-                    <img src="@(string.IsNullOrEmpty(user.ProfilePictureUrl) ? "/images/default-avatar.png" : user.ProfilePictureUrl)" alt="Profile Image" class="user-avatar" />
-                    <div class="user-status @(user.IsBlocked ? "blocked" : "active")">
-                        <span>@(user.IsBlocked ? "Blocked" : "Active")</span>
-                    </div>
-                </div>
-                <div class="user-info">
-                    <h3>@user.FirstName @user.LastName</h3>
-                    <p class="user-email">@user.Email</p>
-                    <p class="user-joined">Joined: @user.CreatedAt.ToString("MMM dd, yyyy")</p>
-                </div>
-                <div class="user-actions">
-                    <button type="button" class="btn-view" onclick="location.href='@Url.Action("Details", "UserProfile", new { id = user.UserId })'">
-                        <i class="fas fa-eye"></i> View Profile
-                    </button>
-                    <button type="button" class="btn-block" onclick="confirmBlockUser('@user.UserId', @(!user.IsBlocked).ToString().ToLower())">
-                        <i class="fas @(user.IsBlocked ? "fa-unlock" : "fa-ban")"></i>
-                        @(user.IsBlocked ? "Unblock" : "Block")
-                    </button>
-                    <button type="button" class="btn-delete" onclick="confirmDeleteUser('@user.UserId')">
-                        <i class="fas fa-trash"></i> Delete
-                    </button>
-                </div>
-            </div>
-        }
-    </div>
-</section>
-
-@section Scripts {
-    <script>
-        function confirmBlockUser(userId, block) {
-            const action = block ? 'block' : 'unblock';
-            if (confirm(`Are you sure you want to ${action} this user?`)) {
-                $.post('@Url.Action("BlockUser")', { id: userId })
-                    .done(function() {
-                        location.reload();
-                    })
-                    .fail(function() {
-                        alert('Failed to update user status');
-                    });
-            }
-        }
-
-        function confirmDeleteUser(userId) {
-            if (confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
-                $.post('@Url.Action("DeleteUser")', { id: userId })
-                    .done(function() {
-                        location.reload();
-                    })
-                    .fail(function() {
-                        alert('Failed to delete user');
-                    });
-            }
-        }
-
-        $(document).ready(function () {
-            $('#userSearch').on('input', filterUsers);
-            $('#statusFilter').on('change', filterUsers);
-            function filterUsers() {
-                const searchTerm = $('#userSearch').val().toLowerCase();
-                const statusFilter = $('#statusFilter').val();
-                $('.user-card').each(function () {
-                    const card = $(this);
-                    const name = card.find('h3').text().toLowerCase();
-                    const email = card.find('.user-email').text().toLowerCase();
-                    const status = card.data('status');
-                    const matchesSearch = name.includes(searchTerm) || email.includes(searchTerm);
-                    const matchesStatus = !statusFilter || status === statusFilter;
-                    card.toggle(matchesSearch && matchesStatus);
-                });
-            }
-        });
-    </script>
-}
-
-@section Styles {
-    <style>
-        .users-management {
-            padding: 2rem;
-        }
-
-        .page-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2rem;
-        }
-
-        .header-actions {
-            display: flex;
-            gap: 1rem;
-        }
-
-        .search-box, .filter-box {
-            position: relative;
-        }
-
-            .search-box input, .filter-box select {
-                padding: 0.5rem 1rem;
-                border: 1px solid #ddd;
-                border-radius: 6px;
-                min-width: 200px;
-            }
-
-        .users-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 1.5rem;
-        }
-
-        .user-card {
-            background: #fff;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .user-header {
-            position: relative;
-            padding: 1.5rem;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            text-align: center;
-        }
-
-        .user-avatar {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            border: 3px solid #fff;
-            object-fit: cover;
-        }
-
-        .user-status {
-            position: absolute;
-            top: 1rem;
-            right: 1rem;
-            padding: 0.25rem 0.75rem;
-            border-radius: 20px;
-            font-size: 0.85rem;
-        }
-
-            .user-status.active {
-                background: #e8f5e9;
-                color: #2e7d32;
-            }
-
-            .user-status.blocked {
-                background: #ffebee;
-                color: #c62828;
-            }
-
-        .user-info {
-            padding: 1.5rem;
-            text-align: center;
-        }
-
-        .user-actions {
-            padding: 1rem;
-            display: flex;
-            gap: 0.5rem;
-            border-top: 1px solid #eee;
-        }
-
-            .user-actions button {
-                flex: 1;
-                padding: 0.5rem;
-                border: none;
-                border-radius: 4px;
-                cursor: pointer;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                gap: 0.5rem;
-            }
-
-        .btn-view {
-            background: var(--primary);
-            color: #fff;
-        }
-
-        .btn-block {
-            background: #f8f9fa;
-            color: #dc3545;
-        }
-
-        .btn-delete {
-            background: #dc3545;
-            color: #fff;
-        }
-    </style>
-}
+    }
+</div>

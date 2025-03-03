@@ -1,0 +1,88 @@
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
+using Microsoft.Extensions.Configuration;
+using System;
+using System.Threading.Tasks;
+using TechXpress_domain.Entities;
+using Microsoft.AspNetCore.Identity;
+using TechXpress_domain.Interfaces.Services;    
+
+namespace TechXpress_Admin_API.Controllers
+{
+    [ApiController]
+    [Route("api/auth")]
+    public class AuthController : ControllerBase
+    {
+        private readonly IConfiguration _configuration;
+        private readonly IAuthService _authService;
+        private readonly UserManager<ApplicationUser> _userManager;
+
+        public AuthController(IConfiguration configuration, IAuthService authService, UserManager<ApplicationUser> userManager)
+        {
+            _configuration = configuration;
+            _authService = authService;
+            _userManager = userManager;
+        }
+
+        // DTO for login request.
+        public class LoginDto
+        {
+            public string Email { get; set; }
+            public string Password { get; set; }
+        }
+
+        // DTO for token response.
+        public class TokenResponse
+        {
+            public string Token { get; set; }
+        }
+
+        [HttpPost("token")]
+        public async Task<IActionResult> GenerateToken([FromBody] LoginDto model)
+        {
+            // Use your AuthService to verify credentials.
+            var authResult = await _authService.LoginAsync(model.Email, model.Password, false);
+            if (!authResult.Success)
+            {
+                return Unauthorized(new { message = "Invalid credentials." });
+            }
+
+            // Get the user object.
+            var user = await _userManager.FindByEmailAsync(model.Email);
+            if (user == null)
+            {
+                return Unauthorized(new { message = "User not found." });
+            }
+
+            // Check if the user is in the "Admin" role.
+            if (!await _userManager.IsInRoleAsync(user, "Admin"))
+            {
+                return Forbid(); // User is not authorized to get an admin token.
+            }
+
+            // Generate the JWT token.
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var key = Encoding.ASCII.GetBytes(_configuration["Jwt:Key"]);
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(new Claim[]
+                {
+                    new Claim(ClaimTypes.Name, model.Email),
+                    new Claim("role", "Admin")
+                }),
+                Expires = DateTime.UtcNow.AddHours(2),
+                Issuer = _configuration["Jwt:Issuer"],
+                Audience = _configuration["Jwt:Audience"],
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+            };
+
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+            var tokenString = tokenHandler.WriteToken(token);
+
+            return Ok(new TokenResponse { Token = tokenString });
+        }
+    }
+}
