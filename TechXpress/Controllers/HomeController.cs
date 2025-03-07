@@ -1,10 +1,10 @@
 using Microsoft.AspNetCore.Mvc;
-using System.Diagnostics;
+using Microsoft.Extensions.Logging;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using TechXpress.Models;
 using TechXpress_domain.Interfaces.Services;
-using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 
 namespace TechXpress.Controllers
@@ -27,10 +27,11 @@ namespace TechXpress.Controllers
             try
             {
                 int pageSize = 12;
-                // Get featured products with paging (assumes the repository method handles filtering in the database)
+
+                // Get featured products with paging.
                 var featuredProducts = await _productService.GetFeaturedProductsAsync(page, pageSize);
 
-                // Map to ProductViewModel (consider using AutoMapper for cleaner code)
+                // Map each product to a ProductViewModel safely.
                 var productViewModels = featuredProducts.Select(p => new ProductViewModel
                 {
                     Id = p.Id,
@@ -49,10 +50,10 @@ namespace TechXpress.Controllers
                     SKU = p.SKU,
                     Specifications = p.Specifications,
                     OldPrice = p.OldPrice,
-                    ProductImages = p.ProductImages.ToList(),
-                    AverageRating = p.Reviews.Any() ? p.Reviews.Average(r => r.Rating) : 0,
-                    ReviewCount = p.Reviews.Count(),
-                    Category = new CategoryViewModel
+                    ProductImages = p.ProductImages?.ToList() ?? new List<string>(),
+                    AverageRating = (p.Reviews != null && p.Reviews.Any()) ? p.Reviews.Average(r => r.Rating) : 0,
+                    ReviewCount = p.Reviews?.Count() ?? 0,
+                    Category = p.Category != null ? new CategoryViewModel
                     {
                         Id = p.Category.Id,
                         Name = p.Category.Name,
@@ -60,30 +61,40 @@ namespace TechXpress.Controllers
                         ImageUrl = p.Category.ImageUrl,
                         CreatedAt = p.Category.CreatedAt,
                         UpdatedAt = p.Category.UpdatedAt
-                    }
+                    } : new CategoryViewModel { Id = 0, Name = "Uncategorized" }
                 }).ToList();
 
-                // Get categories for navigation (if needed, you can load all or a paginated list)
+                // Get categories for navigation.
                 var categories = await _categoryService.GetAllCategoriesAsync(1, 10, "name_asc");
+                var categoryViewModels = categories.Select(c => new CategoryViewModel
+                {
+                    Id = c.Id,
+                    Name = c.Name,
+                    Description = c.Description,
+                    ImageUrl = c.ImageUrl,
+                    CreatedAt = c.CreatedAt,
+                    UpdatedAt = c.UpdatedAt
+                }).ToList();
 
+                // Build the unified view model.
                 var viewModel = new HomeViewModel
                 {
                     HeroText = "Welcome to TechXpress",
-                    HeroDescription = "Find the latest tech products here.",
+                    HeroDescription = "Discover a world where every gadget opens the door to a brighter future. Experience tech in a whole new way.",
                     FeaturedProducts = productViewModels,
-                    Categories = categories
+                    Categories = categoryViewModels
                 };
 
-                //  store categories in ViewData if used elsewhere
+                // Optionally, store categories in ViewData.
                 ViewData["Categories"] = categories;
                 return View(viewModel);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error loading Home page");
-                // redirect to an error page or return a friendly error view
                 return View("Error");
             }
         }
+
     }
 }

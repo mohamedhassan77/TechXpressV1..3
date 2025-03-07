@@ -1,4 +1,6 @@
 ﻿@using Microsoft.AspNetCore.Identity
+@using Microsoft.EntityFrameworkCore
+@using System.Security.Claims
 @using TechXpress_application.Services
 @using TechXpress_domain.Entities
 @inject SignInManager<ApplicationUser> SignInManager
@@ -8,16 +10,22 @@
     ApplicationUser currentUser = null;
     string firstName = "Guest";
     string profileImageUrl = "https://www.pngarts.com/files/10/Default-Profile-Picture-Download-PNG-Image.png";
+    bool isAdmin = false;
     if (SignInManager.IsSignedIn(User))
     {
-        currentUser = await UserManager.GetUserAsync(User);
+        // Load the user with the UserProfile included.
+        currentUser = await UserManager.Users
+            .Include(u => u.UserProfile)
+            .FirstOrDefaultAsync(u => u.Id == User.FindFirstValue(ClaimTypes.NameIdentifier));
+
         if (currentUser != null)
         {
             firstName = !string.IsNullOrEmpty(currentUser.FirstName) ? currentUser.FirstName : currentUser.UserName;
-            if (currentUser.UserProfile != null && !string.IsNullOrEmpty(currentUser.ProfileImage)  )
+            if (currentUser.UserProfile != null && !string.IsNullOrEmpty(currentUser.UserProfile.ProfileImage))
             {
                 profileImageUrl = currentUser.UserProfile.ProfileImage;
             }
+            isAdmin = await UserManager.IsInRoleAsync(currentUser, "Admin");
         }
     }
 }
@@ -29,7 +37,7 @@
             <i class="fas fa-bolt"></i> TechXpress
         </a>
 
-       <!-- Search Container -->
+        <!-- Search Container -->
         <div class="search-container">
             <form class="search-form d-flex align-items-stretch" asp-controller="Product" asp-action="Search" method="get">
                 <input class="form-control" type="search" placeholder="Search products..." name="search">
@@ -49,7 +57,6 @@
                 <a class="nav-link dropdown-toggle" href="#" id="categoryTrigger" aria-expanded="false">
                     Categories <i class="fas fa-chevron-down"></i>
                 </a>
-             
             </li>
 
             <!-- Shop Now -->
@@ -58,7 +65,7 @@
             </li>
 
             <li class="nav-item">
-                <a class="nav-link" href="#contact">Contact</a>
+                <a class="nav-link" href="#footer">Contact</a>
             </li>
         </ul>
 
@@ -89,6 +96,10 @@
                 </a>
                 <ul class="dropdown-menu dropdown-menu-end">
                     <li><a class="dropdown-item" asp-controller="Account" asp-action="Profile">My Account</a></li>
+                    @if (isAdmin)
+                    {
+                        <li><a class="dropdown-item" asp-controller="AdminDashboard" asp-action="Index">Dashboard</a></li>
+                    }
                     <li><hr class="dropdown-divider" /></li>
                     <li>
                         <form asp-controller="Account" asp-action="Logout" method="post">
@@ -103,10 +114,8 @@
             }
         </div>
     </div>
-    <!--  Dropdown -->
+    <!-- Dropdown for categories -->
     <div class="categories-dropdown" id="categoryDropdown">
         @await Component.InvokeAsync("CategoryMenu")
     </div>
 </nav>
-
-

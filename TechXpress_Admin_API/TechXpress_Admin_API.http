@@ -1,6 +1,6 @@
     @TechXpress_Admin_API_HostAddress = http://localhost:5160
 
-GET {{TechXpress_Admin_API_HostAddress}}/api/admin/products/
+GET {{TechXpress_Admin_API_HostAddress}}/api/admin/
 Accept: application/json
 
 ###

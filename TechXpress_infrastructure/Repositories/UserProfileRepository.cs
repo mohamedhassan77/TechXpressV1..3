@@ -13,14 +13,15 @@ namespace TechXpress_infrastructure.Repositories
 
         public UserProfileRepository(TechXpress_context context)
         {
-            _context = context;
+            _context = context; 
         }
 
         public async Task<IEnumerable<UserProfile>> GetAllAsync()
         {
-            return await _context.UserProfiles
+             return await _context.UserProfiles
                 .Include(up => up.Addresses)
-                .ToListAsync();
+                .Include(up => up.ApplicationUser)
+                   .ToListAsync();
         }
 
         public async Task<UserProfile?> GetByIdAsync(string applicationUserId)
@@ -30,7 +31,11 @@ namespace TechXpress_infrastructure.Repositories
                 .Include(up => up.Addresses)       
                 .Include(up => up.ApplicationUser.Cart)
                 .Include(up => up.ApplicationUser.Wishlist)
-                
+                .Include(up => up.ApplicationUser.Orders)
+                .Include(UserProfile => UserProfile.ApplicationUser.Addresses)
+
+                    
+
                 .FirstOrDefaultAsync(up => up.ApplicationUserId == applicationUserId);
         }
 

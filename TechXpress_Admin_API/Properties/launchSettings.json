@@ -1,20 +1,11 @@
 ﻿{
     "$schema": "https://json.schemastore.org/launchsettings.json",
     "profiles": {
-        "http": {
+        "TechXpress_Admin_API": {
             "commandName": "Project",
             "dotnetRunMessages": true,
-            "launchBrowser": false,
-            "applicationUrl": "http://localhost:5160",
-            "environmentVariables": {
-                "ASPNETCORE_ENVIRONMENT": "Development"
-            }
-        },
-        "https": {
-            "commandName": "Project",
-            "dotnetRunMessages": true,
-            "launchBrowser": false,
-            "applicationUrl": "https://localhost:7276;http://localhost:5160",
+            "launchBrowser": true,
+            "applicationUrl": "http://localhost:5160;https://localhost:7276",
             "environmentVariables": {
                 "ASPNETCORE_ENVIRONMENT": "Development"
             }

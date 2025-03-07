@@ -1,7 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using TechXpress_domain.Enums;
 
 namespace TechXpress_domain.Entities
 {
@@ -27,8 +26,8 @@ namespace TechXpress_domain.Entities
         public decimal Discount { get; set; }
 
         [Required]
-        [StringLength(50)]
-        public string Status { get; set; } = "Pending";
+        [Column(TypeName = "nvarchar(50)")] 
+        public OrderStatus Status { get; set; }
 
         [Required]
         [StringLength(100)]

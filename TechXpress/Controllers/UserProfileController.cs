@@ -1,9 +1,12 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using TechXpress.Models;
 using TechXpress_domain.Entities;
 using TechXpress_domain.Interfaces.Services;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace TechXpress.Controllers
 {
@@ -20,26 +23,22 @@ namespace TechXpress.Controllers
         public async Task<IActionResult> Index()
         {
             var profiles = await _profileService.GetAllUserProfilesAsync();
-            // Map each domain UserProfile to UserProfileViewModel if needed
-            var viewModels = new System.Collections.Generic.List<UserProfileViewModel>();
-            foreach (var profile in profiles)
+            var viewModels = profiles.Select(profile => new UserProfileViewModel
             {
-                viewModels.Add(new UserProfileViewModel
-                {
-                    UserId = profile.ApplicationUserId,
-                    FirstName = profile.ApplicationUser.FirstName,
-                    LastName = profile.ApplicationUser.LastName,
-                    Email = profile.ApplicationUser.Email,
-                    PhoneNumber = profile.PhoneNumber,
-                    ProfilePictureUrl = profile.ProfileImage,
-                    DateOfBirth = profile.DateOfBirth,
-                    Gender = profile.Gender?.ToString(),
-                    CreatedAt = profile.CreatedAt,
-                    NewsletterSubscribed = false,
-                    Addresses = profile.Addresses as System.Collections.Generic.List<Address> ?? new System.Collections.Generic.List<Address>(),
-                    Orders = new System.Collections.Generic.List<Order>()
-                });
-            }
+                UserId = profile.ApplicationUserId,
+                FirstName = profile.ApplicationUser.FirstName,
+                LastName = profile.ApplicationUser.LastName,
+                Email = profile.ApplicationUser.Email,
+                PhoneNumber = profile.PhoneNumber,
+                ProfilePictureUrl = profile.ProfileImage,
+                DateOfBirth = profile.DateOfBirth,
+                Gender = profile.Gender?.ToString(),
+                CreatedAt = profile.CreatedAt,
+                NewsletterSubscribed = false,
+                Addresses = profile.Addresses as List<Address> ?? new List<Address>(),
+                Orders = new List<Order>()
+            }).ToList();
+
             return View(viewModels);
         }
 
@@ -60,8 +59,8 @@ namespace TechXpress.Controllers
                 DateOfBirth = profile.DateOfBirth,
                 Gender = profile.Gender?.ToString(),
                 CreatedAt = profile.CreatedAt,
-                Addresses = profile.Addresses as System.Collections.Generic.List<Address> ?? new System.Collections.Generic.List<Address>(),
-                Orders = new System.Collections.Generic.List<Order>()
+                Addresses = profile.Addresses as List<Address> ?? new List<Address>(),
+                Orders = new List<Order>()
             };
             return View(viewModel);
         }
@@ -82,8 +81,33 @@ namespace TechXpress.Controllers
                     ApplicationUserId = viewModel.UserId,
                     DateOfBirth = viewModel.DateOfBirth,
                     PhoneNumber = viewModel.PhoneNumber,
-                    ProfileImage = viewModel.ProfilePictureUrl
-                    // Addresses can be added separately.
+                    ProfileImage = viewModel.ProfilePictureUrl,
+                    ShowBirthDate = true,
+                    EmailNotifications = true,
+                    MarketingEmails = true,
+                    SmsNotificationsEnabled = true,
+                    TwoFactorEnabled = true,
+                    LanguagePreference = "en",
+                    Theme = "light",
+                    ProfileVisibility = true,
+                    PreferredCurrency = "EGP",
+                    Addresses = new List<Address>(),
+                    IsBlocked = false,
+                     CreatedAt = DateTime.UtcNow,
+                    ApplicationUser = new ApplicationUser
+                    {
+                        Id = viewModel.UserId,
+                        FirstName = viewModel.FirstName,
+                        LastName = viewModel.LastName,
+                        Email = viewModel.Email,
+                        ProfileImage = viewModel.ProfilePictureUrl,
+                        Orders = new List<Order>(),
+                        Reviews = new List<Review>()
+                        
+                    }
+
+
+
                 };
                 await _profileService.AddUserProfileAsync(profile);
                 return RedirectToAction(nameof(Index));
@@ -107,8 +131,8 @@ namespace TechXpress.Controllers
                 DateOfBirth = profile.DateOfBirth,
                 Gender = profile.Gender?.ToString(),
                 CreatedAt = profile.CreatedAt,
-                Addresses = profile.Addresses as System.Collections.Generic.List<Address> ?? new System.Collections.Generic.List<Address>(),
-                Orders = new System.Collections.Generic.List<Order>()
+                Addresses = profile.Addresses as List<Address> ?? new List<Address>(),
+                Orders = new List<Order>()
             };
             return View(viewModel);
         }
@@ -122,13 +146,17 @@ namespace TechXpress.Controllers
 
             if (ModelState.IsValid)
             {
-                var profile = new UserProfile
-                {
-                    ApplicationUserId = viewModel.UserId,
-                    DateOfBirth = viewModel.DateOfBirth,
-                    PhoneNumber = viewModel.PhoneNumber,
-                    ProfileImage = viewModel.ProfilePictureUrl
-                };
+                var profile = await _profileService.GetUserProfileByIdAsync(id);
+                if (profile == null)
+                    return NotFound();
+
+                profile.DateOfBirth = viewModel.DateOfBirth;
+                profile.PhoneNumber = viewModel.PhoneNumber;
+                profile.ProfileImage = viewModel.ProfilePictureUrl;
+                profile.Addresses = viewModel.Addresses;
+                profile.UpdatedAt = DateTime.UtcNow;
+                
+
                 await _profileService.UpdateUserProfileAsync(id, profile);
                 return RedirectToAction(nameof(Index));
             }
@@ -151,7 +179,7 @@ namespace TechXpress.Controllers
                 DateOfBirth = profile.DateOfBirth,
                 Gender = profile.Gender?.ToString(),
                 CreatedAt = profile.CreatedAt,
-                Addresses = profile.Addresses as System.Collections.Generic.List<Address> ?? new System.Collections.Generic.List<Address>()
+                Addresses = profile.Addresses as List<Address> ?? new List<Address>()
             };
             return View(viewModel);
         }
@@ -163,5 +191,145 @@ namespace TechXpress.Controllers
             await _profileService.DeleteUserProfileAsync(id);
             return RedirectToAction(nameof(Index));
         }
+
+        #region Address Management
+
+        [HttpGet]
+        [Authorize]
+        public IActionResult AddAddress()
+        {
+            return View(new AddressViewModel());
+        }
+
+        [HttpPost]
+        [Authorize]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddAddress(AddressViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var address = new Address
+            {
+                FirstName = model.FirstName,
+                LastName = model.LastName,
+                Phone = model.Phone,
+                IsDefault = model.IsDefault,
+                
+                Street = model.Street,
+                City = model.City,
+                State = model.State,
+                Country = model.Country,
+                PostalCode = model.PostalCode,
+                ApplicationUserId = userId
+            };
+
+            await _profileService.AddAddressAsync(userId, address);
+            TempData["SuccessMessage"] = "Address added successfully.";
+            return RedirectToAction("Profile", "Account");
+        }
+        [HttpGet]
+        [Authorize]
+        public async Task<IActionResult> EditAddress(int id)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized("User is not authenticated.");
+            }
+
+            // Retrieve the user profile and then find the address by its ID.
+            var profile = await _profileService.GetUserProfileAsync(userId);
+            if (profile == null)
+            {
+                return NotFound("User profile not found.");
+            }
+
+            var address = _profileService. GetUserProfileAsync(userId).Result.Addresses.FirstOrDefault();
+            if (address == null)
+            {
+                return NotFound("Address not found.");
+            }
+
+            // Map the domain address to the view model.
+            var viewModel = new AddressViewModel
+            {
+                AddressId = address.Id,
+                FirstName = address.FirstName,
+                LastName = address.LastName,
+                Street = address.Street,
+                City = address.City,
+                State = address.State,
+                PostalCode = address.PostalCode,
+                Country = address.Country,
+                Phone = address.Phone,
+                IsDefault = address.IsDefault
+            };
+
+            return View(viewModel);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditAddress(AddressViewModel model, string action)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            // Retrieve the user's profile
+            var profile = await _profileService.GetUserProfileAsync(userId);
+            if (profile == null)
+                return NotFound("User profile not found.");
+
+            // Determine which action to perform
+            if (action == "delete")
+            {
+                // Delete the address from the profile
+                var addressToDelete = profile.Addresses.FirstOrDefault(a => a.Id == model.AddressId);
+                if (addressToDelete == null)
+                    return NotFound("Address not found.");
+
+                profile.Addresses.Remove(addressToDelete);
+                await _profileService.UpdateUserProfileAsync(userId, profile);
+                TempData["SuccessMessage"] = "Address deleted successfully.";
+                return RedirectToAction("Profile", "Account");
+            }
+            else if (action == "update")
+            {
+                var address = profile.Addresses.FirstOrDefault(a => a.Id == model.AddressId);
+                if (address == null)
+                    return NotFound("Address not found.");
+
+                // Update the address properties
+                address.FirstName = model.FirstName;
+                address.LastName = model.LastName;
+                address.Street = model.Street;
+                address.City = model.City;
+                address.State = model.State;
+                address.PostalCode = model.PostalCode;
+                address.Country = model.Country;
+                address.Phone = model.Phone;
+                address.IsDefault = model.IsDefault;
+
+                await _profileService.UpdateUserProfileAsync(userId, profile);
+                TempData["SuccessMessage"] = "Address updated successfully.";
+                return RedirectToAction("Profile", "Account");
+            }
+
+            // Fallback: if no valid action was provided, redisplay the form.
+            return View(model);
+        }
+
+
+
+
+        #endregion
+
     }
 }

@@ -74,6 +74,7 @@
         </aside>
 
         <!-- Main Content: Products List -->
+
         <main class="col-lg-9 col-md-8">
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h2 class="fw-bold mb-0">
@@ -83,7 +84,9 @@
                         <span class="fs-6 ms-2 text-secondary fw-normal">Search results for: "@Model.Search"</span>
                     }
                 </h2>
-                <span class="text-secondary">Showing @Model.Products.Count() of @Model.PaginationInfo.TotalItems products</span>
+                <span class="text-secondary">
+                    Showing @Model.Products.Count() of @Model.PaginationInfo.TotalItems products
+                </span>
             </div>
 
             <div class="row g-4 product-list">
@@ -113,7 +116,15 @@
                     <ul class="pagination justify-content-center">
                         <!-- Previous Button -->
                         <li class="page-item @(Model.PaginationInfo.CurrentPage == 1 ? "disabled" : "")">
-                            <a class="page-link rounded-start" href="@Url.Action("Index", new { page = Model.PaginationInfo.CurrentPage - 1, category = Model.CurrentCategory, search = Model.Search, sortBy = Model.Filter.SortBy, minPrice = Model.Filter.MinPrice, maxPrice = Model.Filter.MaxPrice })" aria-label="Previous">
+                            <a class="page-link rounded-start" 
+                               href="@Url.Action("Index", new { 
+                                    page = Model.PaginationInfo.CurrentPage - 1, 
+                                    category = Model.CurrentCategory, 
+                                    search = Model.Search, 
+                                    sortBy = Model.Filter.SortBy, 
+                                    minPrice = Model.Filter.MinPrice, 
+                                    maxPrice = Model.Filter.MaxPrice 
+                                })" aria-label="Previous">
                                 <i class="bi bi-chevron-left"></i>
                             </a>
                         </li>
@@ -121,7 +132,15 @@
                         @for (int i = 1; i <= Model.PaginationInfo.TotalPages; i++)
                         {
                             <li class="page-item @(i == Model.PaginationInfo.CurrentPage ? "active" : "")">
-                                <a class="page-link" href="@Url.Action("Index", new { page = i, category = Model.CurrentCategory, search = Model.Search, sortBy = Model.Filter.SortBy, minPrice = Model.Filter.MinPrice, maxPrice = Model.Filter.MaxPrice })">
+                                <a class="page-link" 
+                                   href="@Url.Action("Index", new { 
+                                        page = i, 
+                                        category = Model.CurrentCategory, 
+                                        search = Model.Search, 
+                                        sortBy = Model.Filter.SortBy, 
+                                        minPrice = Model.Filter.MinPrice, 
+                                        maxPrice = Model.Filter.MaxPrice 
+                                    })">
                                     @i
                                 </a>
                             </li>
@@ -129,7 +148,15 @@
                         
                         <!-- Next Button -->
                         <li class="page-item @(Model.PaginationInfo.CurrentPage == Model.PaginationInfo.TotalPages ? "disabled" : "")">
-                            <a class="page-link rounded-end" href="@Url.Action("Index", new { page = Model.PaginationInfo.CurrentPage + 1, category = Model.CurrentCategory, search = Model.Search, sortBy = Model.Filter.SortBy, minPrice = Model.Filter.MinPrice, maxPrice = Model.Filter.MaxPrice })" aria-label="Next">
+                            <a class="page-link rounded-end" 
+                               href="@Url.Action("Index", new { 
+                                    page = Model.PaginationInfo.CurrentPage + 1, 
+                                    category = Model.CurrentCategory, 
+                                    search = Model.Search, 
+                                    sortBy = Model.Filter.SortBy, 
+                                    minPrice = Model.Filter.MinPrice, 
+                                    maxPrice = Model.Filter.MaxPrice 
+                                })" aria-label="Next">
                                 <i class="bi bi-chevron-right"></i>
                             </a>
                         </li>
@@ -140,111 +167,31 @@
     </div>
 </div>
 
-@* Render Quick View modal partial (pre-rendered) *@
-@await Html.PartialAsync("_QuickView", Model.ProductDetails)
-
 @section Styles {
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
     <style>
         /* Custom Slider Styling */
-        .ui-slider {
-            height: 6px;
-            background: #e9ecef;
-            border: none;
-            border-radius: 3px;
-        }
-        
-        .ui-slider .ui-slider-range {
-            background: var(--bs-primary);
-            border-radius: 3px;
-        }
-        
-        .ui-slider .ui-slider-handle {
-            width: 18px;
-            height: 18px;
-            background: white;
-            border: 2px solid var(--bs-primary);
-            border-radius: 50%;
-            cursor: pointer;
-            top: -6px;
-            outline: none;
-        }
-        
+        .ui-slider { height: 6px; background: #e9ecef; border: none; border-radius: 3px; }
+        .ui-slider .ui-slider-range { background: var(--bs-primary); border-radius: 3px; }
+        .ui-slider .ui-slider-handle { width: 18px; height: 18px; background: white; border: 2px solid var(--bs-primary); border-radius: 50%; cursor: pointer; top: -6px; outline: none; }
         /* Custom Product Card Styling */
-        .product-card {
-            transition: all 0.3s ease;
-            border: none;
-            overflow: hidden;
-        }
-        
-        .product-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-        }
-        
-        .product-card .card-img-top {
-            height: 220px;
-            object-fit: contain;
-            padding: 1rem;
-            background-color: #f8f9fa;
-            transition: all 0.3s ease;
-        }
-        
-        .product-card:hover .card-img-top {
-            transform: scale(1.05);
-        }
-        
-        .product-card .card-body {
-            padding: 1.5rem;
-        }
-        
-        .product-card .product-title {
-            font-weight: 600;
-            height: 48px;
-            overflow: hidden;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-        }
-        
-        .product-card .product-price {
-            font-weight: 700;
-            color: var(--bs-primary);
-        }
-        
-        .product-card .product-rating {
-            color: #ffc107;
-        }
-        
+        .product-card { transition: all 0.3s ease; border: none; overflow: hidden; }
+        .product-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+        .product-card .card-img-top { height: 220px; object-fit: contain; padding: 1rem; background-color: #f8f9fa; transition: all 0.3s ease; }
+        .product-card:hover .card-img-top { transform: scale(1.05); }
+        .product-card .card-body { padding: 1.5rem; }
+        .product-card .product-title { font-weight: 600; height: 48px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+        .product-card .product-price { font-weight: 700; color: var(--bs-primary); }
+        .product-card .product-rating { color: #ffc107; }
         /* Sticky Filter Panel */
         @@media (min-width: 992px) {
-            .sticky-top {
-                position: sticky;
-                top: 20px;
-                z-index: 1000;
-                max-height: calc(100vh - 40px);
-                overflow-y: auto;
-            }
+            .sticky-top { position: sticky; top: 20px; z-index: 1000; max-height: calc(100vh - 40px); overflow-y: auto; }
         }
-        
         /* Custom Pagination */
-        .pagination .page-link {
-            border: none;
-            color: #6c757d;
-            padding: 0.5rem 0.75rem;
-            margin: 0 0.25rem;
-        }
-        
-        .pagination .page-item.active .page-link {
-            background-color: var(--bs-primary);
-            color: white;
-        }
-        
-        .pagination .page-item:not(.active) .page-link:hover {
-            background-color: #f8f9fa;
-            color: var(--bs-primary);
-        }
+        .pagination .page-link { border: none; color: #6c757d; padding: 0.5rem 0.75rem; margin: 0 0.25rem; }
+        .pagination .page-item.active .page-link { background-color: var(--bs-primary); color: white; }
+        .pagination .page-item:not(.active) .page-link:hover { background-color: #f8f9fa; color: var(--bs-primary); }
     </style>
 }
 
@@ -274,23 +221,12 @@
             // Reset button functionality
             $("button[type='reset']").click(function(e) {
                 e.preventDefault();
-                // Reset form inputs
                 $("form")[0].reset();
-                // Reset hidden price values
                 $("#minPrice").val(0);
                 $("#maxPrice").val(1000);
-                // Reset slider
                 $("#priceSlider").slider("values", [0, 1000]);
                 $("#priceRangeDisplay").text("$0 - $1000");
-                // Submit the form to apply reset filters
                 $("form").submit();
-            });
-            
-            // Quick view functionality
-            $(".quick-view-btn").click(function() {
-                var productId = $(this).data("product-id");
-                // Fetch product details through AJAX or use pre-rendered modal
-                $("#quickViewModal").modal("show");
             });
         });
     </script>

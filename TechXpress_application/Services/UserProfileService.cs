@@ -24,9 +24,7 @@ namespace TechXpress_application.Services
         public async Task<UserProfile> GetUserProfileAsync(string userId)
         {
             var profile = await _userProfileRepository.GetByIdAsync(userId);
-            if (profile == null)
-                return new UserProfile { ApplicationUserId = userId };
-            return profile;
+            return profile ?? new UserProfile { ApplicationUserId = userId };
         }
 
         public async Task<UserProfile> UpdateUserProfileAsync(string userId, UserProfile updatedProfile)
@@ -38,23 +36,27 @@ namespace TechXpress_application.Services
             profile.DateOfBirth = updatedProfile.DateOfBirth;
             profile.PhoneNumber = updatedProfile.PhoneNumber;
             profile.ProfileImage = updatedProfile.ProfileImage;
+            profile.ApplicationUser.FirstName = updatedProfile.ApplicationUser.FirstName;
+            profile.ApplicationUser.LastName = updatedProfile.ApplicationUser.LastName;
+            profile.ApplicationUser.Email = updatedProfile.ApplicationUser.Email;
+            profile.ApplicationUser.PhoneNumber = updatedProfile.ApplicationUser.PhoneNumber;
+
             await _userProfileRepository.UpdateAsync(profile);
             return profile;
         }
+
         public async Task<string> UpdateProfilePictureURLAsync(string userId, string pictureUrl)
         {
-            if (pictureUrl == null || pictureUrl.Length == 0)
+            if (string.IsNullOrEmpty(pictureUrl))
                 return "Invalid URL.";
 
-               var profile = await _userProfileRepository.GetByIdAsync(userId);
+            var profile = await _userProfileRepository.GetByIdAsync(userId);
             if (profile != null)
             {
-                // Set the new image URL
                 profile.ProfileImage = pictureUrl;
                 await _userProfileRepository.UpdateAsync(profile);
             }
-
-            return "Profile image uploaded successfully.";
+            return "Profile image updated successfully.";
         }
 
         public async Task<string> UpdateProfilePictureAsync(string userId, IFormFile picture)
@@ -64,7 +66,6 @@ namespace TechXpress_application.Services
 
             var uploadsPath = System.IO.Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "profile-images");
             Directory.CreateDirectory(uploadsPath);
-
             var fileName = $"{userId}_{picture.FileName}";
             var filePath = System.IO.Path.Combine(uploadsPath, fileName);
 
@@ -76,21 +77,17 @@ namespace TechXpress_application.Services
             var profile = await _userProfileRepository.GetByIdAsync(userId);
             if (profile != null)
             {
-                // Set the new image URL
                 profile.ProfileImage = $"/uploads/profile-images/{fileName}";
                 await _userProfileRepository.UpdateAsync(profile);
             }
-
             return "Profile image uploaded successfully.";
         }
 
-        // Modified DeleteProfilePictureAsync to set a default image instead of null.
         public async Task<bool> DeleteProfilePictureAsync(string userId)
         {
             var profile = await _userProfileRepository.GetByIdAsync(userId);
             if (profile != null && !string.IsNullOrEmpty(profile.ProfileImage))
             {
-                // Set to a default non-null image URL rather than null.
                 profile.ProfileImage = "https://www.pngarts.com/files/10/Default-Profile-Picture-Download-PNG-Image.png";
                 await _userProfileRepository.UpdateAsync(profile);
                 return true;
@@ -125,6 +122,7 @@ namespace TechXpress_application.Services
             if (existing == null)
                 throw new KeyNotFoundException($"Address with ID {addressId} not found.");
 
+            // Update address properties (assuming Address has these properties)
             existing.FirstName = address.FirstName;
             existing.LastName = address.LastName;
             existing.Street = address.Street;
@@ -217,6 +215,18 @@ namespace TechXpress_application.Services
         public async Task<UserProfile?> GetUserProfileByIdAsync(string applicationUserId)
         {
             return await _userProfileRepository.GetByIdAsync(applicationUserId);
+        }
+
+        // New: Settings management using the UserProfile entity
+        public async Task<UserProfile?> GetUserSettingsAsync(string userId)
+        {
+            // In this design, settings are stored within the UserProfile.
+            return await _userProfileRepository.GetByIdAsync(userId);
+        }
+
+        public async Task UpdateUserSettingsAsync(UserProfile settings)
+        {
+            await _userProfileRepository.UpdateAsync(settings);
         }
     }
 }

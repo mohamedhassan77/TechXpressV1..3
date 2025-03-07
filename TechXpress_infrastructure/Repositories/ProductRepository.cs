@@ -84,8 +84,10 @@ namespace TechXpress_infrastructure.Repositories
                                        .Skip(skip)
                                        .Take(take)
                                        .ToListAsync();
+
             return (products, totalCount);
         }
+
 
         public async Task<IEnumerable<Product>> GetFilteredAsync(string category, decimal? minPrice, decimal? maxPrice, string sortBy)
         {
@@ -119,7 +121,57 @@ namespace TechXpress_infrastructure.Repositories
 
             return await query.ToListAsync();
         }
+        public async Task<(IEnumerable<Product>, int)> GetFilteredAsync(    string category,  string search,  decimal? minPrice,  decimal? maxPrice,
+    string sortBy,    int skip,    int take)
+        {
+             var query = _context.Products
+                .Include(p => p.Category)
+                .AsQueryable();
 
+            // Apply category filter (case-insensitive).
+            if (!string.IsNullOrEmpty(category))
+            {
+                query = query.Where(p => p.Category.Name.ToLower() == category.ToLower());
+            }
+
+            // Apply search filter.
+            if (!string.IsNullOrEmpty(search))
+            {
+                query = query.Where(p => p.Name.Contains(search) || p.Description.Contains(search));
+            }
+
+            // Apply price range filters.
+            if (minPrice.HasValue)
+            {
+                query = query.Where(p => p.Price >= minPrice.Value);
+            }
+            if (maxPrice.HasValue)
+            {
+                query = query.Where(p => p.Price <= maxPrice.Value);
+            }
+
+            // Apply sorting based on the sortBy parameter.
+            query = sortBy?.ToLower() switch
+            {
+                "price_asc" => query.OrderBy(p => p.Price),
+                "price_desc" => query.OrderByDescending(p => p.Price),
+                "name_asc" => query.OrderBy(p => p.Name),
+                "name_desc" => query.OrderByDescending(p => p.Name),
+                "newest" => query.OrderByDescending(p => p.CreatedDate),
+                "oldest" => query.OrderBy(p => p.CreatedDate),
+                _ => query.OrderByDescending(p => p.Id)
+            };
+
+            // Get total count before pagination.
+            int totalCount = await query.CountAsync();
+
+            // Apply pagination.
+            var products = await query.Skip(skip)
+                                      .Take(take)
+                                      .ToListAsync();
+
+            return (products, totalCount);
+        }
         public async Task<IEnumerable<Product>> SearchAsync(string query)
         {
             return await _context.Products

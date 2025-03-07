@@ -17,9 +17,7 @@ namespace TechXpress_domain.Interfaces.Services
         Task<bool> DeleteAddressAsync(string userId, int addressId);
         Task<Address> GetDefaultShippingAddressAsync(string userId);
         Task<Address> SetDefaultShippingAddressAsync(string userId, int addressId);
-
         Task<UserProfile?> GetUserProfileByEmailAsync(string email);
-
 
         // Additional methods required by controllers and admin service:
         Task<IEnumerable<UserProfile>> GetAllUserProfilesAsync();
@@ -30,6 +28,8 @@ namespace TechXpress_domain.Interfaces.Services
         Task<UserProfile?> GetUserProfileByIdAsync(string applicationUserId);
         Task<string> UpdateProfilePictureURLAsync(string userId, string pictureUrl);
 
-
+        // NEW: Settings management using the domain entity
+        Task<UserProfile?> GetUserSettingsAsync(string userId);
+        Task UpdateUserSettingsAsync(UserProfile settings);
     }
 }

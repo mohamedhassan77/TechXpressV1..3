@@ -66,7 +66,7 @@ namespace TechXpress_application.Services
                 Discount = 0,
                 PaymentMethod = paymentMethod,
                 TransactionId = transaction,
-                Status = "Paid",
+                Status = TechXpress_domain.Enums.OrderStatus.Processing,
                 OrderItems = cart.CartItems.Select(ci => new OrderItem
                 {
                     ProductId = ci.ProductId,

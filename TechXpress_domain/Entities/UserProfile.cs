@@ -22,11 +22,21 @@ namespace TechXpress_domain.Entities
         [StringLength(15)]
         public string? PhoneNumber { get; set; }
 
-        public string ProfileImage { get; set; } 
+        public string ProfileImage { get; set; }
 
         public ICollection<Address> Addresses { get; set; } = new List<Address>();
         public bool IsBlocked { get; set; }
 
+        // Settings properties added directly to the entity:
+        public bool EmailNotifications { get; set; }
+        public bool MarketingEmails { get; set; }
+        public bool ShowBirthDate { get; set; }
+        public bool SmsNotificationsEnabled { get; set; }
+        public bool TwoFactorEnabled { get; set; }
+        public string LanguagePreference { get; set; } = "en";
+        public string Theme { get; set; } = "light";
+        public bool ProfileVisibility { get; set; } = true;
+        public string PreferredCurrency { get; set; } = "EGP";
     }
 
     public enum GenderType

@@ -1,140 +1,321 @@
-@model TechXpress.Models.UserSettingsViewModel
+﻿@model TechXpress.Models.UserSettingsViewModel
 
 @{
     ViewData["Title"] = "User Settings";
 }
 
-<div class="account-container">
-    <div class="account-card">
-        <h2 class="text-center">@ViewData["Title"]</h2>
-        <form asp-action="Settings" method="post" novalidate>
-            <div asp-validation-summary="All" class="text-danger"></div>
-
-            <div class="form-group form-check">
-                <input asp-for="EmailNotifications" class="form-check-input" />
-                <label asp-for="EmailNotifications" class="form-check-label">Email Notifications</label>
-            </div>
-            <div class="form-group form-check">
-                <input asp-for="MarketingEmails" class="form-check-input" />
-                <label asp-for="MarketingEmails" class="form-check-label">Marketing Emails</label>
-            </div>
-            <div class="form-group form-check">
-                <input asp-for="ShowBirthDate" class="form-check-input" />
-                <label asp-for="ShowBirthDate" class="form-check-label">Show Birth Date</label>
-            </div>
-            <div class="form-group form-check">
-                <input asp-for="SmsNotificationsEnabled" class="form-check-input" />
-                <label asp-for="SmsNotificationsEnabled" class="form-check-label">SMS Notifications</label>
-            </div>
-            <div class="form-group form-check">
-                <input asp-for="TwoFactorEnabled" class="form-check-input" />
-                <label asp-for="TwoFactorEnabled" class="form-check-label">Two-Factor Authentication</label>
-            </div>
-            <div class="form-group">
-                <label asp-for="LanguagePreference" class="form-label">Language Preference</label>
-                <select asp-for="LanguagePreference" class="form-control">
-                    <option value="en">English</option>
-                    <option value="es">Spanish</option>
-                    <!-- Add additional languages as needed -->
-                </select>
-            </div>
-            <div class="form-group">
-                <label asp-for="Theme" class="form-label">Theme</label>
-                <select asp-for="Theme" class="form-control">
-                    <option value="light">Light</option>
-                    <option value="dark">Dark</option>
-                </select>
-            </div>
-            <div class="form-group form-check">
-                <input asp-for="ProfileVisibility" class="form-check-input" />
-                <label asp-for="ProfileVisibility" class="form-check-label">Profile Visibility</label>
-            </div>
-            <div class="form-group">
-                <label asp-for="PreferredCurrency" class="form-label">Preferred Currency</label>
-                <select asp-for="PreferredCurrency" class="form-control">
-                    <option value="USD">USD</option>
-                    <option value="EUR">EUR</option>
-                    <!-- Add more currencies as needed -->
-                </select>
-            </div>
-            <button type="submit" class="btn btn-primary">Save Settings</button>
-        </form>
-    </div>
-</div>
-
-@section Styles {
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Settings</title>
     <style>
-        .account-container {
+        :root {
+            --primary-color: #FF3366;
+            --secondary-color: #6C63FF;
+            --background-light: #f4f7f6;
+            --text-dark: #2d3748;
+            --border-color: #e2e8f0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: var(--background-light);
+            line-height: 1.6;
+            color: var(--text-dark);
+        }
+
+        .settings-container {
             max-width: 800px;
-            margin: 3rem auto;
-            padding: 2rem;
-            background: #ffffff;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            margin: 2rem auto;
+            background-color: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
         }
 
-        .account-card {
-            padding: 2rem;
+        .settings-header {
+            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 1.5rem;
+            text-align: center;
         }
 
-            .account-card h2 {
-                font-size: 2rem;
-                margin-bottom: 1.5rem;
-                text-align: center;
-                color: #2d3748;
+            .settings-header h1 {
+                font-size: 1.8rem;
+                font-weight: 700;
             }
 
-        .form-group {
+        .settings-content {
+            padding: 2rem;
+        }
+
+        .settings-section {
+            margin-bottom: 2rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 1.5rem;
+        }
+
+            .settings-section:last-child {
+                border-bottom: none;
+            }
+
+        .settings-section-title {
+            font-size: 1.3rem;
             margin-bottom: 1rem;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
         }
 
-        .form-label {
-            font-weight: 600;
-            color: #2d3748;
-            margin-bottom: 0.5rem;
+            .settings-section-title i {
+                margin-right: 0.75rem;
+            }
+
+        .setting-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
         }
 
-        .form-control {
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #f9fafb;
+            padding: 1rem;
+            border-radius: 10px;
+            transition: background-color 0.3s ease;
+        }
+
+            .setting-item:hover {
+                background-color: #f1f3f5;
+            }
+
+        .setting-label {
+            display: flex;
+            align-items: center;
+        }
+
+            .setting-label i {
+                margin-right: 0.75rem;
+                color: var(--primary-color);
+            }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+
+            .toggle-switch input {
+                opacity: 0;
+                width: 0;
+                height: 0;
+            }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+            .toggle-slider:before {
+                position: absolute;
+                content: "";
+                height: 18px;
+                width: 18px;
+                left: 4px;
+                bottom: 3px;
+                background-color: white;
+                transition: .4s;
+                border-radius: 50%;
+            }
+
+        .toggle-switch input:checked + .toggle-slider {
+            background-color: var(--primary-color);
+        }
+
+            .toggle-switch input:checked + .toggle-slider:before {
+                transform: translateX(24px);
+            }
+
+        .select-input {
             width: 100%;
             padding: 0.75rem;
-            border: 1px solid #e2e8f0;
+            border: 1px solid var(--border-color);
             border-radius: 8px;
+            background-color: white;
+            font-size: 1rem;
             transition: border-color 0.3s ease;
         }
 
-            .form-control:focus {
-                border-color: var(--primary, #FF3366);
-                box-shadow: 0 0 5px rgba(255, 51, 102, 0.3);
+            .select-input:focus {
                 outline: none;
+                border-color: var(--primary-color);
+                box-shadow: 0 0 0 3px rgba(255, 51, 102, 0.1);
             }
 
-        .form-check {
-            display: flex;
-            align-items: center;
-            margin-bottom: 1rem;
-        }
-
-        .form-check-input {
-            width: 1.25rem;
-            height: 1.25rem;
-            margin-right: 0.5rem;
-        }
-
-        .btn.btn-primary {
+        .save-button {
             width: 100%;
-            padding: 0.75rem;
+            padding: 1rem;
+            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+            color: white;
+            border: none;
+            border-radius: 10px;
             font-size: 1.1rem;
             font-weight: 600;
-            background: var(--primary, #FF3366);
-            border: none;
-            border-radius: 8px;
-            color: #fff;
-            transition: background 0.3s ease;
-            margin-top: 1rem;
+            cursor: pointer;
+            transition: opacity 0.3s ease;
         }
 
-            .btn.btn-primary:hover {
-                background: var(--secondary, #6C63FF);
+            .save-button:hover {
+                opacity: 0.9;
             }
+
+        @@media (max-width: 600px) {
+            .setting-group
+
+        {
+            grid-template-columns: 1fr;
+        }
+
+        .settings-container {
+            margin: 0;
+            border-radius: 0;
+            min-height: 100vh;
+        }
+
+        }
     </style>
-}
+</head>
+<body>
+    <div class="settings-container">
+        <div class="settings-header">
+            <h1>User Settings</h1>
+        </div>
+
+        <div class="settings-content">
+            <!-- Notification Settings -->
+            <div class="settings-section">
+                <h2 class="settings-section-title">
+                    <i>🔔</i> Notification Preferences
+                </h2>
+                <div class="setting-group">
+                    <div class="setting-item">
+                        <div class="setting-label">
+                            <i>✉️</i>
+                            <span>Email Notifications</span>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="setting-item">
+                        <div class="setting-label">
+                            <i>📱</i>
+                            <span>SMS Notifications</span>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Privacy Settings -->
+            <div class="settings-section">
+                <h2 class="settings-section-title">
+                    <i>🔒</i> Privacy Controls
+                </h2>
+                <div class="setting-group">
+                    <div class="setting-item">
+                        <div class="setting-label">
+                            <i>👁️</i>
+                            <span>Profile Visibility</span>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="setting-item">
+                        <div class="setting-label">
+                            <i>📅</i>
+                            <span>Show Birth Date</span>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="setting-item">
+                        <div class="setting-label">
+                            <i>🛡️</i>
+                            <span>Two-Factor Authentication</span>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Personalization -->
+            <div class="settings-section">
+                <h2 class="settings-section-title">
+                    <i>🎨</i> Personalization
+                </h2>
+                <div class="setting-group">
+                    <div class="setting-item">
+                        <div class="setting-label">
+                            <i>🌐</i>
+                            <span>Language</span>
+                        </div>
+                        <select class="select-input">
+                            <option value="en">English</option>
+                            <option value="es">Spanish</option>
+                        </select>
+                    </div>
+                    <div class="setting-item">
+                        <div class="setting-label">
+                            <i>🌈</i>
+                            <span>Theme</span>
+                        </div>
+                        <select class="select-input">
+                            <option value="light">Light</option>
+                            <option value="dark">Dark</option>
+                        </select>
+                    </div>
+                    <div class="setting-item">
+                        <div class="setting-label">
+                            <i>💰</i>
+                            <span>Currency</span>
+                        </div>
+                        <select class="select-input">
+                            <option value="USD">USD</option>
+                            <option value="EUR">EUR</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <button class="save-button">Save Settings</button>
+        </div>
+    </div>
+</body>

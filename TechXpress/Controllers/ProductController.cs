@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using System.Threading.Tasks;
 using TechXpress.Models;
 using TechXpress_domain.Interfaces.Services;
+using System.Collections.Generic;
 
 namespace TechXpress.Controllers
 {
@@ -29,39 +29,15 @@ namespace TechXpress.Controllers
             _reviewService = reviewService;
         }
 
-         public async Task<IActionResult> Index(string category, string search, string sortBy, int page = 1, int minPrice = 0, int maxPrice = 1000)
+        // Displays a paginated list of products, with filtering and search.
+        public async Task<IActionResult> Index(string category, string search, string sortBy, int page = 1, int minPrice = 0, int maxPrice = 10000)
         {
             int pageSize = 12;
 
-            // Get filtered products along with total count (assumed service returns a tuple).
-            var (products, totalCount) = await _productService.GetFilteredProductsAsync(category, search, page, pageSize);
+            // Get filtered products (using a unified method from your service)
+            var (products, totalCount) = await _productService.GetFilteredProductsAsync(category, search, minPrice, maxPrice, sortBy, page, pageSize);
 
-            // Filter by price.
-            var filteredProducts = products.Where(p => p.Price >= minPrice && p.Price <= maxPrice).ToList();
-
-            // Apply name sorting if requested.
-            if (sortBy == "name_asc")
-            {
-                filteredProducts = filteredProducts.OrderBy(p => p.Name).ToList();
-            }
-            else if (sortBy == "name_desc")
-            {
-                filteredProducts = filteredProducts.OrderByDescending(p => p.Name).ToList();
-            }
-            else if (sortBy == "price_asc")
-            {
-                filteredProducts = filteredProducts.OrderBy(p => p.Price).ToList();
-            }
-            else if (sortBy == "price_desc")
-            {
-                filteredProducts = filteredProducts.OrderByDescending(p => p.Price).ToList();
-            }
-             
-
-            // Update totalCount after filtering.
-            totalCount = filteredProducts.Count;
-
-            // Get categories for the sidebar.
+            // Get categories for the sidebar
             var domainCategories = await _categoryService.GetAllCategoriesAsync(1, 10, "name_asc");
             var categoryViewModels = domainCategories.Select(c => new CategoryViewModel
             {
@@ -70,8 +46,8 @@ namespace TechXpress.Controllers
                 ImageUrl = c.ImageUrl
             });
 
-            // Map products to ProductViewModel.
-            var productViewModels = filteredProducts.Select(p => new ProductViewModel
+            // Map products from your domain model to your view model
+            var productViewModels = products.Select(p => new ProductViewModel
             {
                 Id = p.Id,
                 Name = p.Name,
@@ -85,8 +61,7 @@ namespace TechXpress.Controllers
                 Tag = p.Tag,
                 Brand = p.Brand,
                 CategoryId = p.CategoryId,
-                // For category name, calling async method synchronously is not ideal; consider caching or using a lookup.
-                CategoryName = _categoryService.GetCategoryByIdAsync(p.CategoryId).Result?.Name ?? "",
+                CategoryName = p.Category?.Name ?? "",
                 StockQuantity = p.StockQuantity,
                 SKU = p.SKU,
                 Specifications = p.Specifications,
@@ -107,8 +82,7 @@ namespace TechXpress.Controllers
                 {
                     CurrentPage = page,
                     ItemsPerPage = pageSize,
-                    TotalItems = totalCount,
-                    // Optionally, compute TotalPages if needed.
+                    TotalItems = totalCount
                 },
                 Categories = categoryViewModels,
                 CurrentCategory = category,
@@ -127,7 +101,7 @@ namespace TechXpress.Controllers
             return View(model);
         }
 
-        // Details and other actions remain unchanged.
+        // Displays detailed view of a single product.
         public async Task<IActionResult> Details(int id)
         {
             var product = await _productService.GetByIdAsync(id);
@@ -208,6 +182,7 @@ namespace TechXpress.Controllers
             return View(model);
         }
 
+        // Provides a search results view.
         [HttpGet]
         public async Task<IActionResult> Search(string search)
         {
@@ -239,6 +214,7 @@ namespace TechXpress.Controllers
                 AverageRating = p.Reviews.Any() ? p.Reviews.Average(r => r.Rating) : 0,
                 ReviewCount = p.Reviews.Count,
             }).ToList();
+
             var viewModel = new UnifiedProductViewModel
             {
                 Products = productViewModels,

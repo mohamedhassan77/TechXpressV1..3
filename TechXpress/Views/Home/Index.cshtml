@@ -36,13 +36,16 @@
                 }
 
             @@keyframes backgroundMove {
-                0% {
-                    transform: translate(-50%, -50%) rotate(0deg);
-                }
+                0%
 
-                100% {
-                    transform: translate(-50%, -50%) rotate(360deg);
-                }
+            {
+                transform: translate(-50%, -50%) rotate(0deg);
+            }
+
+            100% {
+                transform: translate(-50%, -50%) rotate(360deg);
+            }
+
             }
 
             .hero-content {
@@ -73,13 +76,16 @@
             }
 
             @@keyframes titleGlow {
-                0% {
-                    text-shadow: 0 0 20px rgba(255, 51, 102, 0.1);
-                }
+                0%
 
-                100% {
-                    text-shadow: 0 0 40px rgba(255, 51, 102, 0.3);
-                }
+            {
+                text-shadow: 0 0 20px rgba(255, 51, 102, 0.1);
+            }
+
+            100% {
+                text-shadow: 0 0 40px rgba(255, 51, 102, 0.3);
+            }
+
             }
 
             .hero-text p {
@@ -88,29 +94,53 @@
                 color: rgba(255, 255, 255, 0.8);
             }
 
-            .floating-elements {
+            /* Discounted Products Slider inside Hero Section */
+            .discounted-slider {
+                overflow: hidden;
+                position: relative;
+            }
+
+            .discounted-slider-inner {
+                display: flex;
+                gap: 1rem;
+                animation: slideDiscounts 20s linear infinite;
+            }
+
+            .discount-item {
+                min-width: 300px;
+                border-radius: 10px;
+                overflow: hidden;
+                position: relative;
+            }
+
+                .discount-item img {
+                    width: 100%;
+                    height: auto;
+                    object-fit: cover;
+                }
+
+            .discount-overlay {
                 position: absolute;
+                bottom: 0;
+                left: 0;
                 width: 100%;
-                height: 100%;
-                pointer-events: none;
+                background: rgba(0, 0, 0, 0.6);
+                color: #fff;
+                padding: 0.5rem;
+                text-align: center;
             }
 
-            .floating-element {
-                position: absolute;
-                background: linear-gradient(45deg, var(--primary), var(--secondary));
-                border-radius: 50%;
-                opacity: 0.1;
-                animation: float 6s ease-in-out infinite;
+            @@keyframes slideDiscounts {
+                0%
+
+            {
+                transform: translateX(0);
             }
 
-            @@keyframes float {
-                0%, 100% {
-                    transform: translateY(0);
-                }
+            100% {
+                transform: translateX(-50%);
+            }
 
-                50% {
-                    transform: translateY(-20px);
-                }
             }
 
             .device-mockup {
@@ -695,29 +725,33 @@
 
 <!-- Hero Section -->
 <section class="hero" aria-label="Hero Section">
-    <div class="container text-center">
-        <div class="hero-text">
-            <h1>@Model.HeroText</h1>
-            <p>@Model.HeroDescription</p>
-            <a asp-controller="Product" asp-action="Index" class="cta-button btn btn-primary">
-                Shop Now <i class="fas fa-arrow-right" aria-hidden="true"></i>
-            </a>
-        </div>
-        <!-- Sales Promotions Slider -->
-        <div class="sales-slider" id="salesSlider">
-            <div class="sales-slider-inner">
-                @foreach (var sale in Model.SalesPromotions)
-                {
-                    <div class="sale-item">
-                        <h4>@sale.Title</h4>
-                        <p>@sale.Description</p>
-                    </div>
-                }
+    <div class="container">
+        <div class="hero-grid">
+            <!-- Hero Text Column -->
+            <div class="hero-text">
+                <h1>@Model.HeroText</h1>
+                <p>@Model.HeroDescription</p>
+                <a asp-controller="Product" asp-action="Index" class="cta-button btn btn-primary">
+                    Shop Now <i class="fas fa-arrow-right" aria-hidden="true"></i>
+                </a>
+            </div>
+            <!-- Discounted Products Slider Column -->
+            <div class="discounted-slider">
+                <div class="discounted-slider-inner">
+                    @foreach (var product in Model.FeaturedProducts)
+                    {
+                        <div class="discount-item">
+                            <img src="@product.ImageUrl" alt="@product.ProductImages" />
+                            <div class="discount-overlay">
+                                <span class="discount-info">Save @((product.Price- (product.DiscountPrice ?? product.Price)).ToString("C"))</span>
+                            </div>
+                        </div>
+                    }
+                </div>
             </div>
         </div>
     </div>
 </section>
-
 <!-- Featured Products Section -->
 <section id="featured-products" class="featured-products" aria-label="Featured Products">
     <div class="container">

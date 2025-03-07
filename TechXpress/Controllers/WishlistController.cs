@@ -56,13 +56,21 @@ namespace TechXpress.Controllers
         }
 
         [HttpGet]
-       public async Task<IActionResult> GetWishlistCount()
+        public async Task<IActionResult> GetWishlistCount()
         {
             var userId = _userManager.GetUserId(User);
 
-            
+            // Check if user is authenticated
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized(new { Count = 0 });
+            }
+
             var wishList = await _wishlistService.GetWishlistAsync(userId);
-            return Json(new { wishList.WishlistItems.Count });
+
+             var count = wishList?.WishlistItems?.Count ?? 0;
+
+            return Json(new { Count = count });
         }
     }
 }

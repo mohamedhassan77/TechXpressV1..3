@@ -10,25 +10,33 @@ using Microsoft.AspNetCore.Authentication.Google;
 using TechXpress_services;
 using TechXpress_data.Repositories;
 using AutoMapper;
+using TechXpress_application.Mappings;
+using TechXpress.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Enable console logging.
 builder.Logging.AddConsole();
-builder.Services.AddAutoMapper(typeof(Program)); 
 
-// Add services to the container.
+// Register AutoMapper by scanning assemblies that contain your profiles.
+builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+
+// Register Distributed Memory Cache for session state.
+builder.Services.AddDistributedMemoryCache();
+
+// Add MVC services.
 builder.Services.AddControllersWithViews();
 
-// Configure the database context.
+// Configure the database context using the "DefaultConnection" connection string.
 builder.Services.AddDbContext<TechXpress_context>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Register Identity with roles.
+// Register ASP.NET Core Identity with role support.
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddEntityFrameworkStores<TechXpress_context>()
     .AddDefaultTokenProviders();
 
-// Configure external authentication.
+// Configure external authentication providers.
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = IdentityConstants.ApplicationScheme;
@@ -56,30 +64,42 @@ builder.Services.AddScoped<IShippingRepository, ShippingRepository>();
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 builder.Services.AddScoped<ISecurityRepository, SecurityRepository>();
 builder.Services.AddScoped<ILoginHistoryRepository, LoginHistoryRepository>();
+
 // Register application services.
 builder.Services.AddScoped<ILoginHistoryService, LoginHistoryService>();
-
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IAdminService, AdminService>();
 builder.Services.AddScoped<IUserProfileService, UserProfileService>();
-builder.Services.AddScoped<ICategoryService , CategoryService>();
+builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<ICartService, CartService>();
 builder.Services.AddScoped<IWishlistService, WishlistService>();
 builder.Services.AddScoped<IReviewService, ReviewService>();
 builder.Services.AddScoped<IShippingService, ShippingService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
-builder.Services.AddScoped<IPaymentService, PaymentService  >();
-builder.Services.AddScoped<IEmailService, EmailService  >();
-builder.Services.AddScoped<ICheckoutService, CheckoutService  >();
+builder.Services.AddScoped<IPaymentService, PaymentService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<ICheckoutService, CheckoutService>();
 builder.Services.AddScoped<ISecurityService, SecurityService>();
 
+// Register an HttpClient for the IProductApiService.
+builder.Services.AddHttpClient<IProductApiService, ProductApiService>();
 
+// Configure session state.
+builder.Services.AddSession(options =>
+{
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
+
+// Optionally register in-memory caching.
 builder.Services.AddMemoryCache();
+builder.Services.AddAutoMapper(typeof(MappingProfile).Assembly);
+builder.Services.AddHttpClient<IProductApiService, ProductApiService>();
 
 var app = builder.Build();
 
-// Seed roles if they don't exist.
+// Seed roles if they do not exist.
 using (var scope = app.Services.CreateScope())
 {
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
@@ -94,7 +114,7 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
-// Configure the HTTP request pipeline.
+// Configure the middleware pipeline.
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -104,16 +124,17 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
+app.UseSession();
+
 app.UseRouting();
 
-app.UseAuthentication();  
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
-// Wrap app.Run in a try/catch to log startup errors.
 try
 {
     app.Run();

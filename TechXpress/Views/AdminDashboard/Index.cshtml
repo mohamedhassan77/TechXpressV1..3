@@ -1,0 +1,242 @@
+@model TechXpress.Models.AdminDashboardViewModel
+@{
+    ViewData["Title"] = "Dashboard";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container-fluid p-4">
+    <!-- Dashboard Overview Cards -->
+    <section class="dashboard-overview mb-4">
+        <h1 class="section-title mb-4">Dashboard Overview</h1>
+        <div class="row g-4">
+            <div class="col-md-3 col-sm-6">
+                <div class="stat-card bg-gradient-primary">
+                    <div class="stat-card-body">
+                        <div class="stat-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="stat-details">
+                            <h3 class="stat-value">@Model.TotalUsers</h3>
+                            <p class="stat-label">Total Users</p>
+                        </div>
+                    </div>
+                    <div class="stat-footer">
+                        <span>+5% from last week</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6">
+                <div class="stat-card bg-gradient-success">
+                    <div class="stat-card-body">
+                        <div class="stat-icon">
+                            <i class="fas fa-shopping-cart"></i>
+                        </div>
+                        <div class="stat-details">
+                            <h3 class="stat-value">@Model.TotalOrders</h3>
+                            <p class="stat-label">Total Orders</p>
+                        </div>
+                    </div>
+                    <div class="stat-footer">
+                        <span>+8% from last month</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6">
+                <div class="stat-card bg-gradient-warning">
+                    <div class="stat-card-body">
+                        <div class="stat-icon">
+                            <i class="fas fa-hourglass-half"></i>
+                        </div>
+                        <div class="stat-details">
+                            <h3 class="stat-value">@Model.PendingOrders</h3>
+                            <p class="stat-label">Pending Orders</p>
+                        </div>
+                    </div>
+                    <div class="stat-footer">
+                        <span>-3% from yesterday</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6">
+                <div class="stat-card bg-gradient-danger">
+                    <div class="stat-card-body">
+                        <div class="stat-icon">
+                            <i class="fas fa-dollar-sign"></i>
+                        </div>
+                        <div class="stat-details">
+                            <h3 class="stat-value">@Model.TotalRevenue.ToString("C")</h3>
+                            <p class="stat-label">Total Revenue</p>
+                        </div>
+                    </div>
+                    <div class="stat-footer">
+                        <span>+12% from last month</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Recent Items -->
+    <div class="row g-4">
+        <!-- Recent Products -->
+        <div class="col-md-4">
+            <section class="content-card">
+                <div class="content-card-header">
+                    <h2><i class="fas fa-box me-2"></i>Recent Products</h2>
+                    <div class="card-tools">
+                        <button class="btn btn-sm btn-icon"><i class="fas fa-ellipsis-v"></i></button>
+                    </div>
+                </div>
+                <div class="content-card-body">
+                    @if (Model.RecentProducts.Any())
+                    {
+                        <div class="table-responsive custom-table">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Name</th>
+                                        <th class="text-end">Price</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var product in Model.RecentProducts)
+                                    {
+                                        <tr>
+                                            <td><span class="id-badge">@product.Id</span></td>
+                                            <td>@product.Name</td>
+                                            <td class="text-end"><span class="price-tag">@product.Price.ToString("C")</span></td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="empty-state">
+                            <i class="fas fa-box-open"></i>
+                            <p>No recent products found</p>
+                        </div>
+                    }
+                </div>
+                <div class="content-card-footer">
+                    <a href="@Url.Action("Products", "AdminDashboard")" class="btn btn-primary-outline">
+                        <i class="fas fa-external-link-alt me-2"></i>Manage Products
+                    </a>
+                </div>
+            </section>
+        </div>
+        <!-- Recent Categories -->
+        <div class="col-md-4">
+            <section class="content-card">
+                <div class="content-card-header">
+                    <h2><i class="fas fa-tags me-2"></i>Recent Categories</h2>
+                    <div class="card-tools">
+                        <button class="btn btn-sm btn-icon"><i class="fas fa-ellipsis-v"></i></button>
+                    </div>
+                </div>
+                <div class="content-card-body">
+                    @if (Model.RecentCategories.Any())
+                    {
+                        <div class="table-responsive custom-table">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Name</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var category in Model.RecentCategories)
+                                    {
+                                        <tr>
+                                            <td><span class="id-badge">@category.Id</span></td>
+                                            <td>
+                                                <span class="category-name">@category.Name</span>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="empty-state">
+                            <i class="fas fa-folder-open"></i>
+                            <p>No recent categories found</p>
+                        </div>
+                    }
+                </div>
+                <div class="content-card-footer">
+                    <a href="@Url.Action("Categories", "AdminDashboard")" class="btn btn-primary-outline">
+                        <i class="fas fa-external-link-alt me-2"></i>Manage Categories
+                    </a>
+                </div>
+            </section>
+        </div>
+        <!-- Recent Reviews -->
+        <div class="col-md-4">
+            <section class="content-card">
+                <div class="content-card-header">
+                    <h2><i class="fas fa-comments me-2"></i>Recent Reviews</h2>
+                    <div class="card-tools">
+                        <button class="btn btn-sm btn-icon"><i class="fas fa-ellipsis-v"></i></button>
+                    </div>
+                </div>
+                <div class="content-card-body">
+                    @if (Model.RecentReviews.Any())
+                    {
+                        <div class="table-responsive custom-table">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Product</th>
+                                        <th>Reviewer</th>
+                                        <th class="text-center">Rating</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var review in Model.RecentReviews)
+                                    {
+                                        <tr>
+                                            <td><span class="id-badge">@review.Id</span></td>
+                                            <td>@review.ProductName</td>
+                                            <td>
+                                                <div class="user-info">
+                                                    <span class="user-name">@review.UserName</span>
+                                                </div>
+                                            </td>
+                                            <td class="text-center">
+                                                <div class="rating-stars">
+                                                    @for (int i = 1; i <= 5; i++)
+                                                    {
+                                                        <i class="@(i <= review.Rating ? "fas" : "far") fa-star"></i>
+                                                    }
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="empty-state">
+                            <i class="fas fa-comment-slash"></i>
+                            <p>No recent reviews found</p>
+                        </div>
+                    }
+                </div>
+                <div class="content-card-footer">
+                    <a href="@Url.Action("Reviews", "AdminDashboard")" class="btn btn-primary-outline">
+                        <i class="fas fa-external-link-alt me-2"></i>Manage Reviews
+                    </a>
+                </div>
+            </section>
+        </div>
+    </div>
+</div>

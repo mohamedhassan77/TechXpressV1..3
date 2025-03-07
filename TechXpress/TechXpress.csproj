@@ -3,6 +3,8 @@
 		<TargetFramework>net9.0</TargetFramework>
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
+		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+
 	</PropertyGroup>
 	<ItemGroup>
 		<None Include="wwwroot\IMG\CP.jpg" />

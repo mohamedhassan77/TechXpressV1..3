@@ -56,7 +56,9 @@ namespace TechXpress_application.Services
                 TotalPrice = cart.CartItems.Sum(ci => ci.Quantity * ci.Product.Price),
                 PaymentMethod = paymentMethod,
                 TransactionId = transactionId,
-                Status = "Pending"
+                Status =  TechXpress_domain.Enums.OrderStatus.Pending,
+
+
             };
 
             await _orderRepository.AddOrderAsync(order);
@@ -73,7 +75,7 @@ namespace TechXpress_application.Services
             if (order == null) return "Order not found.";
             if (order.UserId != userId) return "You can only cancel your own orders.";
 
-            order.Status = "Cancelled";
+            order.Status = TechXpress_domain.Enums.OrderStatus.Cancelled;
             await _orderRepository.UpdateOrderAsync(order);
             await _orderRepository.SaveChangesAsync();
 

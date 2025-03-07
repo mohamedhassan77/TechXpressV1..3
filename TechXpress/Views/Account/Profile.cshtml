@@ -1,13 +1,15 @@
-@model TechXpress.Models.UserProfileViewModel
+@using TechXpress.Models;
+@model UserProfileViewModel
 
 @{
     ViewData["Title"] = "Profile";
 }
 
+
 <div class="profile-container">
     <!-- Header Section with Glassmorphism -->
     <header class="profile-header">
-        <div class="cover-image" style="background-image: url('@(Model.ProfilePictureUrl ?? "/images/default-cover.jpg")');"></div>
+        <div class="cover-image" style="background-image: url('@(Model.ProfilePictureUrl ?? "https://www.pngarts.com/files/10/Default-Profile-Picture-Download-PNG-Image.png")');"></div>
         <!-- Cart Link with Icon Badge -->
         <div class="header-actions">
             <a asp-action="Index" asp-controller="Cart" class="cart-button">
@@ -23,8 +25,7 @@
             <div class="basic-info">
                 <h1>@Model.FirstName @Model.LastName</h1>
                 <div class="user-contact">
-                    <span><i class="fas fa-envelope"></i> @Model.Email</span>
-                    <span><i class="fas fa-phone"></i> @Model.PhoneNumber</span>
+                   <span><i class="fas fa-phone"></i> @Model.PhoneNumber</span>
                 </div>
             </div>
         </div>
@@ -113,9 +114,15 @@
                                     <li class="activity-item">
                                         <span class="activity-title">@address.Street</span>
                                         <span class="activity-subtitle">@address.City, @address.Country</span>
-                                        <a href="#" class="activity-action">Edit</a>
+                                        <a asp-action="EditAddress" asp-controller="UserProfile" class="activity-action">Edit</a>
                                     </li>
                                 }
+                                <div class="empty-state">
+                                     
+                                    <a asp-action="AddAddress" asp-controller="UserProfile" class="cta-button">
+                                        Add Address
+                                    </a>
+                                </div>
                             </ul>
                         }
                         else
@@ -123,7 +130,8 @@
                             <div class="empty-state">
                                 <i class="fas fa-home"></i>
                                 <p>No addresses found</p>
-                                <a href="#" class="cta-button">Add Address</a>
+                                <a asp-action="AddAddress" asp-controller="UserProfile" class="cta-button">
+                                Add Address</a>
                             </div>
                         }
                     </div>
@@ -149,7 +157,7 @@
             <div class="tab-panel" id="settings">
                 <h2><i class="fas fa-cog"></i> Settings</h2>
                 <div class="settings-actions">
-                    <a asp-action="Manage" asp-controller="Account" class="settings-button primary-button primary-button">
+                    <a asp-action="Manage" asp-controller="Account" class="settings-button primary-button">
                         <i class="fas fa-user-edit"></i>
                         <span>Edit Profile</span>
                     </a>
@@ -433,7 +441,7 @@
                         }
 
                     .profile-nav ul li:hover {
-                        color: var(--primary-dark);
+                        color: var(--secondary-dark);
                     }
 
         /* Tab Content */
@@ -685,14 +693,14 @@
 
         .primary-button,
         .edit-button {
-            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            background: linear-gradient(135deg, var(--primary-dark));
             color: white;
-            border: none;
+            border: 2px solid var(--primary-color);
         }
 
             .primary-button:hover,
             .edit-button:hover {
-                background: linear-gradient(135deg, var(--primary-dark), var(--primary-color));
+                background: linear-gradient(135deg,  var(--primary-color));
                 transform: translateY(-4px);
                 box-shadow: var(--shadow-md);
             }
@@ -704,8 +712,7 @@
         }
 
             .secondary-button:hover {
-                background: #ffe4e1;
-                transform: translateY(-4px);
+                  transform: translateY(-4px);
                 box-shadow: var(--shadow-md);
             }
 
@@ -723,6 +730,19 @@
                 box-shadow: var(--shadow-md);
             }
 
+        .settings-button.primary-button {
+            background-color: white;
+            color:blue;
+            border: none;
+            padding: 1.2rem 1.5rem;
+            border-radius: var(--radius-md);
+            text-decoration: none;
+            font-weight: 500;
+            transition: background var(--transition-normal), transform var(--transition-normal), box-shadow var(--transition-normal);
+            box-shadow: var(--shadow-sm);
+        }
+
+          
         /* Animations */
         @@keyframes fadeIn {
             from
@@ -847,7 +867,7 @@
     </style>
 }
 
-@section Scripts {
+@section Scripts { 
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             // Tab switching functionality

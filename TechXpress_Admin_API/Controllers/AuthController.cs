@@ -1,14 +1,14 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
+using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using Microsoft.Extensions.Configuration;
-using System;
 using System.Threading.Tasks;
-using TechXpress_domain.Entities;
 using Microsoft.AspNetCore.Identity;
-using TechXpress_domain.Interfaces.Services;    
+using Microsoft.Extensions.Configuration;
+using TechXpress_domain.Entities;
+using TechXpress_domain.Interfaces.Services;
 
 namespace TechXpress_Admin_API.Controllers
 {
@@ -43,7 +43,7 @@ namespace TechXpress_Admin_API.Controllers
         [HttpPost("token")]
         public async Task<IActionResult> GenerateToken([FromBody] LoginDto model)
         {
-            // Use your AuthService to verify credentials.
+            // Use the AuthService to verify credentials.
             var authResult = await _authService.LoginAsync(model.Email, model.Password, false);
             if (!authResult.Success)
             {
@@ -60,12 +60,16 @@ namespace TechXpress_Admin_API.Controllers
             // Check if the user is in the "Admin" role.
             if (!await _userManager.IsInRoleAsync(user, "Admin"))
             {
-                return Forbid(); // User is not authorized to get an admin token.
+                return Forbid(); // Not authorized to receive an admin token.
             }
 
             // Generate the JWT token.
             var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.ASCII.GetBytes(_configuration["Jwt:Key"]);
+            var secret = _configuration.GetValue<string>("Jwt:Secret");
+            if (string.IsNullOrEmpty(secret))
+                throw new InvalidOperationException("JWT Secret is missing in configuration.");
+
+            var key = Encoding.UTF8.GetBytes(secret);
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(new Claim[]

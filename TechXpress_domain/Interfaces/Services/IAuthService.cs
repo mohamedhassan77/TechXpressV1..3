@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using TechXpress_domain.DTOs;
 
 
 namespace TechXpress_domain.Interfaces.Services
@@ -6,23 +7,15 @@ namespace TechXpress_domain.Interfaces.Services
     public interface IAuthService
     {
         Task<AuthResult> LoginAsync(string email, string password, bool rememberMe);
-        Task LogoutAsync();
+        Task LogoutAsync(); 
         Task<AuthResult> RegisterAsync(RegisterDto model);
         Task<AuthResult> ForgotPasswordAsync(string email);
-        Task<AuthResult> ResetPasswordAsync(ResetPasswordDto model); 
+        Task<AuthResult> ResetPasswordAsync(ResetPasswordDto model);
     }
-}
-
-
-
-public class AuthResult
-{
-    public bool Success { get; set; }
-    public string Message { get; set; }
-    public object Data { get; set; }
-    public string UserId { get; set; } 
 
 }
+
+
 
 
 public class ResetPasswordDto
@@ -41,6 +34,6 @@ public class ResetPasswordDto
         public string Password { get; set; }
         public string ConfirmPassword { get; set; }
         public string PhoneNumber { get; set; }
-        public DateTime? DateOfBirth { get; set; }
+        public DateTime? DateOfBirth { get; set; }  
     }
 

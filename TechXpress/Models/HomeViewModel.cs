@@ -22,7 +22,7 @@ namespace TechXpress.Models
         public int FeaturedProductsTotalPages { get; set; } = 1;
 
         // Categories that are used to display a horizontal product scroll per category.
-        public IEnumerable<Category> Categories { get; set; } = new List<Category>();
+        public IEnumerable<CategoryViewModel> Categories { get; set; } = new List<CategoryViewModel>();
 
         // Optional search term if you want to include a search context.
         public string Search { get; set; }

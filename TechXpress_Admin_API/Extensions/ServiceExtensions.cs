@@ -20,11 +20,21 @@ namespace TechXpress_Admin_API.Extensions
             // Repositories
             services.AddScoped<IProductRepository, ProductRepository>();
             services.AddScoped<IOrderRepository, OrderRepository>();
-            // Add other repositories
+            services.AddScoped<IUserProfileRepository, UserProfileRepository>();
+            services.AddScoped<ICategoryRepository, CategoryRepository>();
+            services.AddScoped<IReviewRepository, ReviewRepository>();
+            services.AddScoped<ICartRepository, CartRepository>();
+
             // Services
             services.AddScoped<IProductService, ProductService>();
             services.AddScoped<IOrderService, OrderService>();
-            // Add other services
+            services.AddScoped<IAdminService, AdminService>();
+            services.AddScoped<IAuthService, AuthService>();
+            services.AddScoped<ICategoryService, CategoryService>();
+            services.AddScoped<IReviewService, ReviewService>();
+
+
+
             return services;
         }
     }

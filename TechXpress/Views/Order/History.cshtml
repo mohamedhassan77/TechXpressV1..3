@@ -40,13 +40,13 @@
         <div class="orders-list">
             @foreach (var order in Model.Orders)
             {
-                <div class="order-card" data-order-number="@order.OrderNumber" data-status="@order.Status.ToLower()">
+                <div class="order-card" data-order-number="@order.OrderNumber" data-status="@order.Status">
                     <div class="order-header">
                         <div class="order-info">
                             <h3>Order #@order.OrderNumber</h3>
                             <span class="order-date">@order.OrderDate.ToString("MMMM dd, yyyy")</span>
                         </div>
-                        <div class="order-status @order.Status.ToLower()">@order.Status</div>
+                        <div class="order-status @order.Status">@order.Status</div>
                     </div>
 
                     <div class="order-items">
@@ -70,13 +70,13 @@
                         </div>
                         <div class="order-actions">
                             <a href="/Order/Details/@order.Id" class="btn-view">View Details</a>
-                            @if (order.Status == "Delivered")
+                            @if (order.Status == TechXpress_domain.Enums.OrderStatus.Delivered)
                             {
                                 <button type="button" class="btn-review" onclick="openReviewModal(@order.Id)">
                                     Write Review
                                 </button>
                             }
-                            @if (order.Status == "Pending")
+                            @if (order.Status == TechXpress_domain.Enums.OrderStatus.Cancelled)
                             {
                                 <button type="button" class="btn-cancel" onclick="cancelOrder(@order.Id)">
                                     Cancel Order
