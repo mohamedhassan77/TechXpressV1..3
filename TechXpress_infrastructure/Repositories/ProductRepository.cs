@@ -22,6 +22,8 @@ namespace TechXpress_infrastructure.Repositories
             return await _context.Products
                 .Include(p => p.Category)
                 .Include(p => p.Reviews)
+                .ThenInclude(r => r.ApplicationUser)
+                .ThenInclude(u=>u.UserProfile)
                 .FirstOrDefaultAsync(p => p.Id == id);
         }
 

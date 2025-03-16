@@ -6,9 +6,8 @@ using System.Threading.Tasks;
 
 namespace TechXpress_domain.DTOs
 {
-    public class CategoryCreateDto
+    public class TokenResponse
     {
-        public string Name { get; set; } = string.Empty;
-        public string? Description { get; set; }
+        public string Token { get; set; }
     }
 }

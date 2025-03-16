@@ -13,11 +13,14 @@ namespace TechXpress.Models
             RecentReviews = new List<ReviewViewModel>();
         }
 
+
         public List<UserProfileViewModel> Users { get; set; }
         public List<OrderDetailsViewModel> Orders { get; set; }
         public List<ProductViewModel> RecentProducts { get; set; }
         public List<CategoryViewModel> RecentCategories { get; set; }
         public List<ReviewViewModel> RecentReviews { get; set; }
+        public List<string> RecentActivities { get; set; } = new List<string>();
+
         public int TotalUsers { get; set; }
         public int TotalOrders { get; set; }
         public int PendingOrders { get; set; }

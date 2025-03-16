@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using System.Linq;
+using Microsoft.AspNetCore.Identity;
 
 namespace TechXpress.Tests
 {
@@ -23,6 +24,7 @@ namespace TechXpress.Tests
         private readonly Mock<ICartService> _cartServiceMock;
         private readonly Mock<ILogger<ProductController>> _loggerMock;
         private readonly ProductController _controller;
+        private readonly Mock<UserManager<ApplicationUser>> _userManagerMock;
 
         public ProductControllerTests()
         {
@@ -38,7 +40,8 @@ namespace TechXpress.Tests
                 _categoryServiceMock.Object,
                 _wishlistServiceMock.Object,
                 _cartServiceMock.Object,
-                _reviewServiceMock.Object
+                _reviewServiceMock.Object,
+                 _userManagerMock.Object
             );
 
             // Set up a dummy authenticated user.

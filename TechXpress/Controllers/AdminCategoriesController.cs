@@ -9,6 +9,7 @@ using TechXpress_domain.DTOs;
 using TechXpress_domain.Entities;
 using TechXpress_domain.Interfaces.Services;
 using TechXpress.Models;
+using Microsoft.AspNetCore.Authentication;
 
 namespace TechXpress.Controllers
 {
@@ -29,7 +30,6 @@ namespace TechXpress.Controllers
             _logger = logger;
         }
 
-        // GET: AdminCategories
         public async Task<IActionResult> Index()
         {
             try
@@ -46,13 +46,12 @@ namespace TechXpress.Controllers
             }
         }
 
-        // GET: AdminCategories/Create
+        [HttpGet]
         public IActionResult Create()
         {
             return View(new CategoryViewModel());
         }
 
-        // POST: AdminCategories/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(CategoryViewModel model)
@@ -66,7 +65,6 @@ namespace TechXpress.Controllers
             {
                 var category = _mapper.Map<Category>(model);
                 await _categoryService.AddCategoryAsync(category);
-
                 TempData["SuccessMessage"] = "Category created successfully!";
                 return RedirectToAction(nameof(Index));
             }
@@ -78,7 +76,7 @@ namespace TechXpress.Controllers
             }
         }
 
-        // GET: AdminCategories/Edit/5
+        [HttpGet]
         public async Task<IActionResult> Edit(int id)
         {
             try
@@ -89,7 +87,6 @@ namespace TechXpress.Controllers
                     TempData["ErrorMessage"] = "Category not found.";
                     return RedirectToAction(nameof(Index));
                 }
-
                 return View(_mapper.Map<CategoryViewModel>(category));
             }
             catch (Exception ex)
@@ -100,17 +97,10 @@ namespace TechXpress.Controllers
             }
         }
 
-        // POST: AdminCategories/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, CategoryViewModel model)
+        public async Task<IActionResult> Edit(CategoryViewModel model)
         {
-            if (id != model.Id)
-            {
-                TempData["ErrorMessage"] = "Category mismatch.";
-                return RedirectToAction(nameof(Index));
-            }
-
             if (!ModelState.IsValid)
             {
                 return View(model);
@@ -120,7 +110,6 @@ namespace TechXpress.Controllers
             {
                 var category = _mapper.Map<Category>(model);
                 await _categoryService.UpdateCategoryAsync(category);
-
                 TempData["SuccessMessage"] = "Category updated successfully!";
                 return RedirectToAction(nameof(Index));
             }
@@ -132,32 +121,9 @@ namespace TechXpress.Controllers
             }
         }
 
-        // GET: AdminCategories/Delete/5
-        public async Task<IActionResult> Delete(int id)
-        {
-            try
-            {
-                var category = await _categoryService.GetCategoryByIdAsync(id);
-                if (category == null)
-                {
-                    TempData["ErrorMessage"] = "Category not found.";
-                    return RedirectToAction(nameof(Index));
-                }
-
-                return View(_mapper.Map<CategoryViewModel>(category));
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error loading category for deletion.");
-                TempData["ErrorMessage"] = "Error loading category.";
-                return RedirectToAction(nameof(Index));
-            }
-        }
-
-        // POST: AdminCategories/Delete/5
-        [HttpPost, ActionName("Delete")]
+        [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public async Task<IActionResult> Delete(int id)
         {
             try
             {
@@ -169,7 +135,6 @@ namespace TechXpress.Controllers
                 _logger.LogError(ex, "Error deleting category.");
                 TempData["ErrorMessage"] = "Error deleting category. Please try again.";
             }
-
             return RedirectToAction(nameof(Index));
         }
     }

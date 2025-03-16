@@ -37,6 +37,7 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddDefaultTokenProviders();
 
 // Configure external authentication providers.
+
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = IdentityConstants.ApplicationScheme;
@@ -84,6 +85,7 @@ builder.Services.AddScoped<ISecurityService, SecurityService>();
 
 // Register an HttpClient for the IProductApiService.
 builder.Services.AddHttpClient<IProductApiService, ProductApiService>();
+builder.Services.AddHttpClient<ICategoryApiService, CategoryApiService>();
 
 // Configure session state.
 builder.Services.AddSession(options =>
@@ -96,6 +98,8 @@ builder.Services.AddSession(options =>
 builder.Services.AddMemoryCache();
 builder.Services.AddAutoMapper(typeof(MappingProfile).Assembly);
 builder.Services.AddHttpClient<IProductApiService, ProductApiService>();
+builder.Services.AddHttpContextAccessor();
+
 
 var app = builder.Build();
 
@@ -120,9 +124,9 @@ if (!app.Environment.IsDevelopment())
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
 }
+app.UseStaticFiles();
 
 app.UseHttpsRedirection();
-app.UseStaticFiles();
 
 app.UseSession();
 

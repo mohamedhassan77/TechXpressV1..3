@@ -18,16 +18,16 @@ using TechXpress_domain.Interfaces.Services;
 
 namespace TechXpress_application.Services
 {
-    public class ProductApiService : IProductApiService
+    public class CategoryApiService : ICategoryApiService
     {
         private readonly HttpClient _httpClient;
-        private readonly ILogger<ProductApiService> _logger;
+        private readonly ILogger<CategoryApiService> _logger;
         private readonly AsyncRetryPolicy<HttpResponseMessage> _retryPolicy;
         private readonly JsonSerializerOptions _jsonOptions;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private string _jwtToken;
 
-        public ProductApiService(HttpClient httpClient, IConfiguration configuration, ILogger<ProductApiService> logger, IHttpContextAccessor httpContextAccessor)
+        public CategoryApiService(HttpClient httpClient, IConfiguration configuration, ILogger<CategoryApiService> logger, IHttpContextAccessor httpContextAccessor)
         {
             _httpClient = httpClient;
             _logger = logger;
@@ -54,8 +54,6 @@ namespace TechXpress_application.Services
             _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
         }
 
-        // SetToken now checks if a token is available.
-        // If not, it will try to forward the authentication cookie.
         public void SetToken(string token)
         {
             if (!string.IsNullOrWhiteSpace(token))
@@ -77,72 +75,61 @@ namespace TechXpress_application.Services
             }
         }
 
-        public async Task<IEnumerable<ProductResponseDto>> GetAllProductsAsync(CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<CategoryResponseDto>> GetAllCategoriesAsync(int page, int pageSize, string sortBy, CancellationToken cancellationToken = default)
         {
-            return await ExecuteWithPolicyAsync<IEnumerable<ProductResponseDto>>(
+            return await ExecuteWithPolicyAsync<IEnumerable<CategoryResponseDto>>(
                 HttpMethod.Get,
-                "api/admin/products",
+                $"api/admin/categories?page={page}&pageSize={pageSize}&sortBy={sortBy}",
                 null,
-                "Error fetching products",
+                "Error fetching categories",
                 cancellationToken
             );
         }
 
-        public async Task<ProductResponseDto> CreateProductAsync(ProductCreateDto dto, CancellationToken cancellationToken = default)
+        public async Task<CategoryResponseDto> GetCategoryByIdAsync(int id, CancellationToken cancellationToken = default)
         {
-            ValidateDto(dto);
-            return await ExecuteWithPolicyAsync<ProductResponseDto>(
+            return await ExecuteWithPolicyAsync<CategoryResponseDto>(
+                HttpMethod.Get,
+                $"api/admin/categories/{id}",
+                null,
+                "Error fetching category by ID",
+                cancellationToken
+            );
+        }
+
+        public async Task<CategoryResponseDto> CreateCategoryAsync(CategoryCreateDto dto, CancellationToken cancellationToken = default)
+        {
+            return await ExecuteWithPolicyAsync<CategoryResponseDto>(
                 HttpMethod.Post,
-                "api/admin/products",
+                "api/admin/categories",
                 dto,
-                "Error creating product",
+                "Error creating category",
                 cancellationToken
             );
         }
 
-        public async Task<ProductResponseDto> GetProductByIdAsync(int id, CancellationToken cancellationToken = default)
+        public async Task<CategoryResponseDto> UpdateCategoryAsync(int id, CategoryUpdateDto dto, CancellationToken cancellationToken = default)
         {
-            if (id <= 0) throw new ArgumentException("Invalid product ID");
-            return await ExecuteWithPolicyAsync<ProductResponseDto>(
-                HttpMethod.Get,
-                $"api/admin/products/{id}",
-                null,
-                $"Error fetching product {id}",
-                cancellationToken
-            );
-        }
-
-        public async Task<ProductResponseDto> UpdateProductAsync(int id, ProductUpdateDto dto, CancellationToken cancellationToken = default)
-        {
-            if (id <= 0) throw new ArgumentException("Invalid product ID");
-            ValidateDto(dto);
-            return await ExecuteWithPolicyAsync<ProductResponseDto>(
+            return await ExecuteWithPolicyAsync<CategoryResponseDto>(
                 HttpMethod.Put,
-                $"api/admin/products/{id}",
+                $"api/admin/categories/{id}",
                 dto,
-                $"Error updating product {id}",
+                "Error updating category",
                 cancellationToken
             );
         }
 
-        public async Task DeleteProductAsync(int id, CancellationToken cancellationToken = default)
+        public async Task DeleteCategoryAsync(int id, CancellationToken cancellationToken = default)
         {
-            if (id <= 0) throw new ArgumentException("Invalid product ID");
-
-            var response = await _retryPolicy.ExecuteAsync(async () =>
-            {
-                using var request = new HttpRequestMessage(HttpMethod.Delete, $"api/admin/products/{id}");
-                return await _httpClient.SendAsync(request, cancellationToken);
-            });
-
-            if (!response.IsSuccessStatusCode)
-            {
-                await LogErrorDetails(response, $"Error deleting product {id}");
-                response.EnsureSuccessStatusCode();
-            }
+            await ExecuteWithPolicyAsync<object>(
+                HttpMethod.Delete,
+                $"api/admin/categories/{id}",
+                null,
+                "Error deleting category",
+                cancellationToken
+            );
         }
 
-        #region Helper Methods
         private async Task<T> ExecuteWithPolicyAsync<T>(
             HttpMethod method,
             string uri,
@@ -177,7 +164,7 @@ namespace TechXpress_application.Services
 
         private async Task<T> ProcessResponse<T>(HttpResponseMessage response)
         {
-            if (response.StatusCode == System.Net.HttpStatusCode.NoContent)
+            if (response.StatusCode == HttpStatusCode.NoContent)
             {
                 if (typeof(T) == typeof(object))
                     return default!;
@@ -204,11 +191,9 @@ namespace TechXpress_application.Services
                 context, response.StatusCode, errorContent);
         }
 
-        private void ValidateDto<T>(T dto) where T : class
+        public async Task<IEnumerable<CategoryResponseDto>> GetAllCategoriesAsync(CancellationToken cancellationToken = default)
         {
-            if (dto == null)
-                throw new ArgumentNullException(nameof(dto));
+            return await GetAllCategoriesAsync(1, 10, "name", cancellationToken);
         }
-        #endregion
     }
 }

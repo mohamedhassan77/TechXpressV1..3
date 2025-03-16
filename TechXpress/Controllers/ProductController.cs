@@ -4,6 +4,10 @@ using System.Threading.Tasks;
 using TechXpress.Models;
 using TechXpress_domain.Interfaces.Services;
 using System.Collections.Generic;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using TechXpress_domain.Entities;
 
 namespace TechXpress.Controllers
 {
@@ -14,19 +18,21 @@ namespace TechXpress.Controllers
         private readonly IWishlistService _wishlistService;
         private readonly ICartService _cartService;
         private readonly IReviewService _reviewService;
+        private readonly UserManager<ApplicationUser> _userManager;
 
         public ProductController(
             IProductService productService,
             ICategoryService categoryService,
             IWishlistService wishlistService,
             ICartService cartService,
-            IReviewService reviewService)
+            IReviewService reviewService,UserManager<ApplicationUser>  userManager)
         {
             _productService = productService;
             _categoryService = categoryService;
             _wishlistService = wishlistService;
             _cartService = cartService;
             _reviewService = reviewService;
+            _userManager = userManager;
         }
 
         // Displays a paginated list of products, with filtering and search.
@@ -228,6 +234,27 @@ namespace TechXpress.Controllers
             };
 
             return View(viewModel);
+        }
+
+
+
+        [HttpPost]
+        [Authorize]
+        public async Task<IActionResult> AddReview(int productId, string comment, int rating)
+        {
+            var userId = _userManager.GetUserId(User);
+            var result = await _reviewService.AddReviewAsync(userId, productId, comment, rating);
+
+            if (result == "Review added successfully.")
+            {
+                return RedirectToAction("Details", new { id = productId });
+            }
+            else
+            {
+                ModelState.AddModelError("", result);
+                var product = await _productService.GetProductByIdAsync(productId);
+                return View("Details", product);
+            }
         }
     }
 }

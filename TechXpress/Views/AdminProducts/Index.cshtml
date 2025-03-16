@@ -1,0 +1,131 @@
+﻿@model IEnumerable<TechXpress.Models.ProductViewModel>
+@{
+    ViewData["Title"] = "Product Management";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container-fluid p-4">
+    <div class="row mb-4">
+        @foreach (var item in new[] { new { Title = "Total Products", Count = Model.Count(), Icon = "fa-box", Color = "primary" },
+        new { Title = "In Stock", Count = Model.Count(p => p.StockQuantity > 0), Icon = "fa-check-circle", Color = "success" },
+        new { Title = "Low Stock", Count = Model.Count(p => p.StockQuantity > 0 && p.StockQuantity <= 5), Icon = "fa-exclamation-triangle", Color = "warning" },
+        new { Title = "Out of Stock", Count = Model.Count(p => p.StockQuantity == 0), Icon = "fa-times-circle", Color = "danger" } })
+        {
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="card border-left-@item.Color shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col">
+                                <div class="text-xs fw-bold text-@item.Color text-uppercase mb-1">
+                                    @item.Title
+                                </div>
+                                <div class="h5 mb-0 fw-bold text-gray-800">@item.Count</div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas @item.Icon fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 d-flex flex-wrap justify-content-between align-items-center">
+            <h6 class="m-0 fw-bold text-primary">Product Inventory</h6>
+            <a href="@Url.Action("Create", "AdminProducts")" class="btn btn-success">
+                <i class="fas fa-plus"></i> Add New Product
+            </a>
+        </div>
+        <div class="card-body">
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <div class="input-group">
+                        <input type="text" id="productSearch" class="form-control bg-light border-0" placeholder="Search for products..." aria-label="Search">
+                        <button class="btn btn-primary" type="button">
+                            <i class="fas fa-search fa-sm"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table id="productsTable" class="table table-bordered table-hover w-100">
+                    <thead>
+                        <tr>
+                            <th class="text-center">#</th>
+                            <th>ID</th>
+                            <th>Product Name</th>
+                            <th>Price</th>
+                            <th>Category</th>
+                            <th>Stock</th>
+                            <th>SKU</th>
+                            <th>Status</th>
+                            <th class="text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var product in Model)
+                        {
+                            <tr>
+                                <td class="text-center">
+                                    <input type="checkbox" class="form-check-input product-checkbox" id="product-@product.Id">
+                                </td>
+                                <td><strong>#@product.Id</strong></td>
+                                <td>
+                                    <a href="@Url.Action("Details", "AdminProducts", new { id = product.Id })" class="text-primary fw-bold d-block">
+                                        @product.Name
+                                    </a>
+                                </td>
+                                <td class="fw-bold">@product.Price.ToString("C")</td>
+                                <td><span class="badge bg-light text-dark">@product.CategoryName</span></td>
+                                <td>@product.StockQuantity</td>
+                                <td><code>@product.SKU</code></td>
+                                <td>
+                                    <span class="badge @(product.StockQuantity > 0 ? "bg-success" : "bg-danger")">
+                                        @(product.StockQuantity > 0 ? "Active" : "Out of Stock")
+                                    </span>
+                                </td>
+                                <td class="text-center">
+                                    <div class="btn-group">
+                                        <a href="@Url.Action("Edit", "AdminProducts", new { id = product.Id })" class="btn btn-sm btn-outline-primary"><i class="fas fa-pencil-alt"></i></a>
+                                        <a href="@Url.Action("Details", "AdminProducts", new { id = product.Id })" class="btn btn-sm btn-outline-info"><i class="fas fa-eye"></i></a>
+                                        <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal" data-product-id="@product.Id"><i class="fas fa-trash"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            var table = $('#productsTable').DataTable({
+                responsive: true,
+                paging: true,
+                info: true,
+                searching: true,
+                ordering: true,
+                order: [[1, "asc"]],
+                columnDefs: [{ orderable: false, targets: [0, 2, 8] }]
+            });
+
+            $('#productSearch').on('keyup', function () {
+                table.search(this.value).draw();
+            });
+
+            $('#deleteModal').on('show.bs.modal', function (event) {
+                var button = $(event.relatedTarget);
+                var productId = button.data('product-id');
+                var modal = $(this);
+                modal.find('#deleteForm').attr('action', '@Url.Action("Delete", "AdminProducts")/' + productId);
+            });
+        });
+    </script>
+}

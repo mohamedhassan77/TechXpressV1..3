@@ -29,6 +29,7 @@ namespace TechXpress_infrastructure.Repositories
             return await _context.UserProfiles
                 .Include(up => up.ApplicationUser) 
                 .Include(up => up.Addresses)       
+
                 .Include(up => up.ApplicationUser.Cart)
                 .Include(up => up.ApplicationUser.Wishlist)
                 .Include(up => up.ApplicationUser.Orders)

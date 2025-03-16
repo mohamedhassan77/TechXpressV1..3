@@ -18,7 +18,6 @@ namespace TechXpress_Admin_API.Controllers
             _productService = productService;
         }
 
-        // GET: api/admin/products
         [HttpGet]
         public async Task<IActionResult> GetAllProducts()
         {
@@ -26,7 +25,6 @@ namespace TechXpress_Admin_API.Controllers
             return Ok(products);
         }
 
-        // GET: api/admin/products/{id}
         [HttpGet("{id}")]
         public async Task<IActionResult> GetProduct(int id)
         {
@@ -36,7 +34,6 @@ namespace TechXpress_Admin_API.Controllers
             return Ok(product);
         }
 
-        // POST: api/admin/products
         [HttpPost]
         public async Task<IActionResult> CreateProduct([FromBody] ProductCreateDto dto)
         {
@@ -47,7 +44,6 @@ namespace TechXpress_Admin_API.Controllers
             return CreatedAtAction(nameof(GetProduct), new { id = createdProduct.Id }, createdProduct);
         }
 
-        // PUT: api/admin/products/{id}
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateProduct(int id, [FromBody] ProductUpdateDto dto)
         {
@@ -60,7 +56,6 @@ namespace TechXpress_Admin_API.Controllers
             return Ok(updatedProduct);
         }
 
-        // DELETE: api/admin/products/{id}
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteProduct(int id)
         {

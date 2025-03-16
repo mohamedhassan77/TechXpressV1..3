@@ -65,11 +65,16 @@ namespace TechXpress.Controllers
             var result = await _authService.LoginAsync(model.Email, model.Password, model.RememberMe);
             if (result.Success)
             {
-                // Store token in session
+                if (string.IsNullOrEmpty(result.Token))
+                {
+                    ModelState.AddModelError(string.Empty, "Token generation failed. Please try again.");
+                    return View(model);
+                }
+                // Save token under the key "AdminToken" in session.
                 HttpContext.Session.SetString("AdminToken", result.Token);
 
-                // Redirect to admin dashboard if user is an admin
-                if (await _userManager.IsInRoleAsync(await _userManager.FindByEmailAsync(model.Email), "Admin"))
+                var user = await _userManager.FindByEmailAsync(model.Email);
+                if (await _userManager.IsInRoleAsync(user, "Admin"))
                 {
                     return RedirectToAction("Index", "AdminDashboard");
                 }
@@ -79,6 +84,7 @@ namespace TechXpress.Controllers
             ModelState.AddModelError(string.Empty, result.Message);
             return View(model);
         }
+
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -127,7 +133,7 @@ namespace TechXpress.Controllers
 					ProfileImage = "https://www.pngarts.com/files/10/Default-Profile-Picture-Download-PNG-Image.png",
 					CreatedAt = DateTime.UtcNow,
 					UpdatedAt = DateTime.UtcNow,
-					Gender = GenderType.Male, // You might want to adjust this based on input.
+					Gender = GenderType.Male,  
 					DateOfBirth = model.DateOfBirth,
 					PhoneNumber = model.Phone,
 					IsBlocked = false,

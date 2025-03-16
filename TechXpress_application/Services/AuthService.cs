@@ -4,6 +4,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
@@ -18,12 +19,18 @@ namespace TechXpress_application.Services
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly IConfiguration _configuration;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public AuthService(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IConfiguration configuration)
+        public AuthService(
+            UserManager<ApplicationUser> userManager,
+            SignInManager<ApplicationUser> signInManager,
+            IConfiguration configuration,
+            IHttpContextAccessor httpContextAccessor)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _configuration = configuration;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         public async Task<AuthResult> RegisterAsync(RegisterDto model)
@@ -43,25 +50,14 @@ namespace TechXpress_application.Services
 
             var result = await _userManager.CreateAsync(user, model.Password);
             if (!result.Succeeded)
-            {
-                return new AuthResult
-                {
-                    Success = false,
-                    Message = string.Join(", ", result.Errors.Select(e => e.Description))
-                };
-            }
+                return new AuthResult { Success = false, Message = string.Join(", ", result.Errors.Select(e => e.Description)) };
 
-            // Assign default role (optional)
             await _userManager.AddToRoleAsync(user, "User");
 
             var token = await GenerateJwtToken(user);
-            return new AuthResult
-            {
-                Success = true,
-                Message = "Registration successful.",
-                Token = token,
-                UserId = user.Id
-            };
+            SetTokenSession(token);
+
+            return new AuthResult { Success = true, Message = "Registration successful.", UserId = user.Id, Token = token };
         }
 
         public async Task<AuthResult> LoginAsync(string email, string password, bool rememberMe)
@@ -75,18 +71,15 @@ namespace TechXpress_application.Services
                 return new AuthResult { Success = false, Message = "Invalid login attempt." };
 
             var token = await GenerateJwtToken(user);
-            return new AuthResult
-            {
-                Success = true,
-                Message = "Login successful.",
-                Token = token,
-                UserId = user.Id
-            };
+            SetTokenSession(token);
+
+            return new AuthResult { Success = true, Message = "Login successful.", UserId = user.Id, Token = token };
         }
 
         public async Task LogoutAsync()
         {
             await _signInManager.SignOutAsync();
+            RemoveTokenSession();
         }
 
         public async Task<AuthResult> ForgotPasswordAsync(string email)
@@ -110,37 +103,28 @@ namespace TechXpress_application.Services
 
             var result = await _userManager.ResetPasswordAsync(user, model.Token, model.NewPassword);
             if (!result.Succeeded)
-            {
-                return new AuthResult
-                {
-                    Success = false,
-                    Message = string.Join(", ", result.Errors.Select(e => e.Description))
-                };
-            }
+                return new AuthResult { Success = false, Message = string.Join(", ", result.Errors.Select(e => e.Description)) };
 
             return new AuthResult { Success = true, Message = "Password reset successfully." };
         }
 
         private async Task<string> GenerateJwtToken(ApplicationUser user)
         {
-            var secret = _configuration.GetValue<string>("Jwt:Secret");
+            var secret = _configuration["Jwt:Secret"];
             if (string.IsNullOrEmpty(secret))
                 throw new InvalidOperationException("JWT Secret is missing in configuration.");
 
             var key = Encoding.UTF8.GetBytes(secret);
-            var issuer = _configuration.GetValue<string>("Jwt:Issuer");
-            var audience = _configuration.GetValue<string>("Jwt:Audience");
+            var issuer = _configuration["Jwt:Issuer"];
+            var audience = _configuration["Jwt:Audience"];
 
-            // Get the user's roles
             var roles = await _userManager.GetRolesAsync(user);
-
-            // Create claims
             var claims = new[]
             {
-        new Claim(JwtRegisteredClaimNames.Sub, user.Id),
-        new Claim(JwtRegisteredClaimNames.Email, user.Email),
-        new Claim(ClaimTypes.Name, user.UserName),
-    }.Concat(roles.Select(role => new Claim(ClaimTypes.Role, role))).ToArray();
+                new Claim(JwtRegisteredClaimNames.Sub, user.Id),
+                new Claim(JwtRegisteredClaimNames.Email, user.Email),
+                new Claim(ClaimTypes.Name, user.UserName),
+            }.Concat(roles.Select(role => new Claim(ClaimTypes.Role, role))).ToArray();
 
             var tokenDescriptor = new SecurityTokenDescriptor
             {
@@ -154,6 +138,20 @@ namespace TechXpress_application.Services
             var tokenHandler = new JwtSecurityTokenHandler();
             var token = tokenHandler.CreateToken(tokenDescriptor);
             return tokenHandler.WriteToken(token);
+        }
+
+        private void SetTokenSession(string token)
+        {
+            var context = _httpContextAccessor.HttpContext;
+            if (context == null || context.Session == null)
+                throw new Exception("HttpContext or Session is null. Ensure session middleware is configured properly.");
+            context.Session.SetString("AdminToken", token);
+        }
+
+        private void RemoveTokenSession()
+        {
+            var context = _httpContextAccessor.HttpContext;
+            context?.Session.Remove("AdminToken");
         }
     }
 }
