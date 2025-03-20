@@ -33,7 +33,8 @@
                     @foreach (var item in Model.Items)
                     {
                         <div class="order-item">
-                            <img src="@item.Product.ImageUrl" alt="@item.Product.Name">
+                            <img src="@item.Product.ProductImages.Any() ? Product.ProductImages.First().ImageUrl : " https: //media.istockphoto.com/id/1159977010/id/vektor/simbol-ikon-produk-tanda-kreatif-dari-koleksi-ikon-kontrol-kualitas-ikon-produk-datar-terisi.jpg?s =170667a&w =0&k =20&c =FAID-1QdehsBNVqXEB2c8aefl6uGVRer93X8L9wmj9k =",
+    " alt="@item.Product.Name">
                             <div class="item-details">
                                 <h3>@item.Product.Name</h3>
                                 <p class="item-sku">SKU: @item.Product.SKU</p>

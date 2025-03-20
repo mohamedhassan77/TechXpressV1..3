@@ -37,7 +37,7 @@
             @foreach (var item in Model.Items)
             {
                 <div class="order-item">
-                    <img src="@item.Product.ImageUrl" alt="@item.Product.Name">
+                    <img src="@item.Product.ProductImages.Any()" alt="@item.Product.Name">
                     <div class="item-details">
                         <h3>@item.Product.Name</h3>
                         <p>Quantity: @item.Quantity</p>

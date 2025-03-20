@@ -741,14 +741,19 @@
                     @foreach (var product in Model.FeaturedProducts)
                     {
                         <div class="discount-item">
-                            <img src="@product.ImageUrl" alt="@product.ProductImages" />
+                            <a href="@Url.Action("Details", "Product", new { id = product.Id })">
+                                <img src="@product.ImageUrl" alt="@product.ProductImages" />
+                            </a>
                             <div class="discount-overlay">
-                                <span class="discount-info">Save @((product.Price- (product.DiscountPrice ?? product.Price)).ToString("C"))</span>
+                                <span class="discount-info">
+                                    Save @((product.Price - (product.DiscountPrice ?? product.Price)).ToString("C"))
+                                </span>
                             </div>
                         </div>
                     }
                 </div>
             </div>
+
         </div>
     </div>
 </section>
@@ -791,7 +796,7 @@
                     <div class="product-content">
                         <div class="product-category">@product.Category?.Name</div>
                         <h3 class="product-title">
-                            <a asp-controller="Product" asp-action="Details" asp-route-id="@product.Id">
+                            <a asp-controller="Product" asp-action="De50tails" asp-route-id="@product.Id">
                                 @product.Name
                             </a>
                         </h3>

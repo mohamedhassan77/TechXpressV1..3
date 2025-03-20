@@ -50,7 +50,7 @@ namespace TechXpress.Controllers
                     SKU = p.SKU,
                     Specifications = p.Specifications,
                     OldPrice = p.OldPrice,
-                    ProductImages = p.ProductImages?.ToList() ?? new List<string>(),
+                    ProductImages = p.ProductImages.Select(pi => pi.ImageUrl)?.ToList() ?? new List<string>(),
                     AverageRating = (p.Reviews != null && p.Reviews.Any()) ? p.Reviews.Average(r => r.Rating) : 0,
                     ReviewCount = p.Reviews?.Count() ?? 0,
                     Category = p.Category != null ? new CategoryViewModel

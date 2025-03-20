@@ -1,10 +1,172 @@
-@model IEnumerable<TechXpress_domain.Entities.Category>
+@model IEnumerable<Category>
 
-<div class="categories-dropdown-content">
-    @foreach (var category in Model)
-    {
-        <a class="category-item" asp-controller="Category" asp-action="Details" asp-route-id="@category.Id">
-            <i class="@category.ImageUrl"></i> @category.Name
+@{
+    ViewData["Title"] = "Explore Categories";
+}
+
+<div class="container mt-5">
+    <h1 class="text-center mb-5">Browse Categories</h1>
+    <div class="category-slider-container">
+        <button class="slider-nav-btn prev-btn"><i class="fas fa-chevron-left"></i></button>
+        <div class="category-slider">
+            @foreach (var category in Model)
+            {
+                <div class="category-card-wrapper">
+                    <a href="@Url.Action("Details", "Category", new { id = category.Id })" class="category-card">
+                        @if (!string.IsNullOrEmpty(category.ImageUrl))
+                        {
+                            <img src="@category.ImageUrl" alt="@category.Name" class="category-image" />
+                        }
+                        <div class="category-overlay">
+                            <h3>@category.Name</h3>
+                        </div>
+                    </a>
+                </div>
+            }
+        </div>
+        <button class="slider-nav-btn next-btn"><i class="fas fa-chevron-right"></i></button>
+    </div>
+    <div class="text-center mt-4">
+        <a href="@Url.Action("Index", "Category")" class="btn btn-outline-primary">
+            View All Categories
         </a>
-    }
+    </div>
 </div>
+
+<style>
+    /* Category Slider Container */
+    .category-slider-container {
+        position: relative;
+        padding: 0 40px;
+    }
+    /* Category Slider */
+    .category-slider {
+        display: flex;
+        overflow-x: auto;
+        scroll-behavior: smooth;
+        gap: 20px;
+        padding: 10px 0;
+        -ms-overflow-style: none; /* IE and Edge */
+        scrollbar-width: none; /* Firefox */
+    }
+
+        .category-slider::-webkit-scrollbar {
+            display: none; /* Chrome, Safari, Opera */
+        }
+    /* Each Category Card Wrapper */
+    .category-card-wrapper {
+        min-width: 250px;
+        flex: 0 0 auto;
+    }
+    /* Category Card Styling */
+    .category-card {
+        position: relative;
+        display: block;
+        width: 100%;
+        height: 150px;
+        overflow: hidden;
+        border-radius: 10px;
+        text-decoration: none;
+        transition: transform 0.3s;
+    }
+
+        .category-card:hover {
+            transform: translateY(-3px);
+        }
+
+    .category-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.3s;
+    }
+
+    .category-card:hover .category-image {
+        transform: scale(1.05);
+    }
+
+    .category-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.4);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
+
+    .category-card:hover .category-overlay {
+        opacity: 1;
+    }
+
+    .category-overlay h3 {
+        color: #fff;
+        font-size: 1.5rem;
+        margin: 0;
+        text-align: center;
+    }
+    /* Navigation Buttons */
+    .slider-nav-btn {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        background-color: white;
+        border: 1px solid #ddd;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        z-index: 2;
+        transition: background-color 0.3s, box-shadow 0.3s;
+    }
+
+        .slider-nav-btn:hover {
+            background-color: #f8f9fa;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+    .prev-btn {
+        left: 0;
+    }
+
+    .next-btn {
+        right: 0;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Set up navigation for the category slider
+        document.querySelectorAll('.category-slider-container').forEach(container => {
+            const slider = container.querySelector('.category-slider');
+            const prevBtn = container.querySelector('.prev-btn');
+            const nextBtn = container.querySelector('.next-btn');
+            const cardWidth = 270; // Approximate width of each card plus gap
+
+            prevBtn.addEventListener('click', () => {
+                slider.scrollLeft -= cardWidth * 2;
+            });
+
+            nextBtn.addEventListener('click', () => {
+                slider.scrollLeft += cardWidth * 2;
+            });
+
+            // Show/hide navigation buttons based on scroll position
+            function updateNavButtons() {
+                prevBtn.style.opacity = slider.scrollLeft <= 0 ? '0.5' : '1';
+                nextBtn.style.opacity = slider.scrollLeft >= slider.scrollWidth - slider.clientWidth - 10 ? '0.5' : '1';
+            }
+
+            slider.addEventListener('scroll', updateNavButtons);
+            // Initial button state
+            updateNavButtons();
+        });
+    });
+</script>

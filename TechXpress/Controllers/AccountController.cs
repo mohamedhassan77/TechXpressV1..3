@@ -95,184 +95,188 @@ namespace TechXpress.Controllers
             return RedirectToAction("Index", "Home");
         }
 
-       
-[HttpGet]
-		[AllowAnonymous]
-		public IActionResult Register()
-		{
-			return View();
-		}
 
-		[HttpPost]
-		[AllowAnonymous]
-		[ValidateAntiForgeryToken]
-		public async Task<IActionResult> Register(RegisterViewModel model)
-		{
-			if (!ModelState.IsValid)
-				return View(model);
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult Register()
+        {
+            return View();
+        }
 
-			var registerDto = new RegisterDto
-			{
-				FirstName = model.FirstName,
-				LastName = model.LastName,
-				Email = model.Email,
-				Password = model.Password,
-				ConfirmPassword = model.ConfirmPassword,
-				DateOfBirth = model.DateOfBirth,
-				PhoneNumber = model.Phone
-			};
+        [HttpPost]
+        [AllowAnonymous]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Register(RegisterViewModel model)
+        {
+            if (!ModelState.IsValid)
+                return View(model);
 
-			var result = await _authService.RegisterAsync(registerDto);
-			if (result.Success)
-			{
-				_logger.LogInformation("User registered successfully.");
+            var registerDto = new RegisterDto
+            {
+                FirstName = model.FirstName,
+                LastName = model.LastName,
+                Email = model.Email,
+                Password = model.Password,
+                ConfirmPassword = model.ConfirmPassword,
+                DateOfBirth = model.DateOfBirth,
+                PhoneNumber = model.Phone,
+               
+                
+               
+            };
 
-				var profile = new UserProfile
-				{
-					ApplicationUserId = result.UserId,
-					ProfileImage = "https://www.pngarts.com/files/10/Default-Profile-Picture-Download-PNG-Image.png",
-					CreatedAt = DateTime.UtcNow,
-					UpdatedAt = DateTime.UtcNow,
-					Gender = GenderType.Male,  
-					DateOfBirth = model.DateOfBirth,
-					PhoneNumber = model.Phone,
-					IsBlocked = false,
-					Addresses = new List<Address>()
-				};
+            var result = await _authService.RegisterAsync(registerDto);
+            if (result.Success)
+            {
+                _logger.LogInformation("User registered successfully.");
 
-				try
-				{
-					await _userProfileService.AddUserProfileAsync(profile);
-					_logger.LogInformation("User profile created successfully.");
-				}
-				catch (Exception ex)
-				{
-					_logger.LogError(ex, "Error creating user profile.");
-					ModelState.AddModelError(string.Empty, "An error occurred while creating your profile. Please try again.");
-					return View(model);
-				}
+                var profile = new UserProfile
+                {
+                    ApplicationUserId = result.UserId,
+                    ProfileImageUrl =null,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow,
+                    Gender = GenderType.Male,
+                    DateOfBirth = model.DateOfBirth,
+                    PhoneNumber = model.Phone,
+                    IsBlocked = false,
+                    Addresses = new List<Address>()
+                };
 
-				return RedirectToAction("Index", "Home");
-			}
+                try
+                {
+                    await _userProfileService.AddUserProfileAsync(profile);
+                    _logger.LogInformation("User profile created successfully.");
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error creating user profile.");
+                    ModelState.AddModelError(string.Empty, "An error occurred while creating your profile. Please try again.");
+                    return View(model);
+                }
 
-			ModelState.AddModelError(string.Empty, result.Message);
-			return View(model);
-		}
+                return RedirectToAction("Index", "Home");
+            }
 
-		[HttpGet]
-		[AllowAnonymous]
-		public IActionResult ForgotPassword()
-		{
-			return View();
-		}
+            ModelState.AddModelError(string.Empty, result.Message);
+            return View(model);
+        }
 
-		[HttpPost]
-		[AllowAnonymous]
-		[ValidateAntiForgeryToken]
-		public async Task<IActionResult> ForgotPassword(ForgotPasswordViewModel model)
-		{
-			if (!ModelState.IsValid) return View(model);
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult ForgotPassword()
+        {
+            return View();
+        }
 
-			var result = await _authService.ForgotPasswordAsync(model.Email);
-			if (!result.Success)
-			{
-				ModelState.AddModelError(string.Empty, result.Message);
-				return View(model);
-			}
+        [HttpPost]
+        [AllowAnonymous]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ForgotPassword(ForgotPasswordViewModel model)
+        {
+            if (!ModelState.IsValid) return View(model);
 
-			var resetLink = Url.Action("ResetPassword", "Account", new { token = result.Message, email = model.Email }, Request.Scheme);
-			await _emailService.SendEmailAsync(model.Email, "Reset Your Password", $"Click <a href='{resetLink}'>here</a> to reset your password.");
+            var result = await _authService.ForgotPasswordAsync(model.Email);
+            if (!result.Success)
+            {
+                ModelState.AddModelError(string.Empty, result.Message);
+                return View(model);
+            }
 
-			_logger.LogInformation($"Password reset link sent to {model.Email}");
-			return View("ForgotPasswordConfirmation");
-		}
+            var resetLink = Url.Action("ResetPassword", "Account", new { token = result.Message, email = model.Email }, Request.Scheme);
+            await _emailService.SendEmailAsync(model.Email, "Reset Your Password", $"Click <a href='{resetLink}'>here</a> to reset your password.");
 
-		[HttpGet]
-		[AllowAnonymous]
-		public IActionResult ForgotPasswordConfirmation()
-		{
-			return View();
-		}
+            _logger.LogInformation($"Password reset link sent to {model.Email}");
+            return View("ForgotPasswordConfirmation");
+        }
 
-		[HttpGet]
-		[AllowAnonymous]
-		public IActionResult ResetPassword(string token, string email)
-		{
-			if (token == null || email == null)
-				return BadRequest("Invalid password reset request.");
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult ForgotPasswordConfirmation()
+        {
+            return View();
+        }
 
-			return View(new ResetPasswordViewModel { Token = token, Email = email });
-		}
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult ResetPassword(string token, string email)
+        {
+            if (token == null || email == null)
+                return BadRequest("Invalid password reset request.");
 
-		[HttpPost]
-		[AllowAnonymous]
-		[ValidateAntiForgeryToken]
-		public async Task<IActionResult> ResetPassword(ResetPasswordViewModel model)
-		{
-			if (!ModelState.IsValid) return View(model);
+            return View(new ResetPasswordViewModel { Token = token, Email = email });
+        }
 
-			var result = await _authService.ResetPasswordAsync(new ResetPasswordDto
-			{
-				Email = model.Email,
-				Token = model.Token,
-				NewPassword = model.NewPassword
-			});
+        [HttpPost]
+        [AllowAnonymous]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ResetPassword(ResetPasswordViewModel model)
+        {
+            if (!ModelState.IsValid) return View(model);
 
-			if (result.Success)
-				return View("ResetPasswordConfirmation");
+            var result = await _authService.ResetPasswordAsync(new ResetPasswordDto
+            {
+                Email = model.Email,
+                Token = model.Token,
+                NewPassword = model.NewPassword
+            });
 
-			ModelState.AddModelError(string.Empty, result.Message);
-			return View(model);
-		}
+            if (result.Success)
+                return View("ResetPasswordConfirmation");
 
-		[HttpGet]
-		[AllowAnonymous]
-		public IActionResult ResetPasswordConfirmation()
-		{
-			return View();
-		}
+            ModelState.AddModelError(string.Empty, result.Message);
+            return View(model);
+        }
 
-		[HttpGet]
-		[Authorize]
-		public async Task<IActionResult> Profile()
-		{
-			var user = await _userManager.GetUserAsync(User);
-			var userId = user?.Id;
-			if (string.IsNullOrEmpty(userId))
-				return Unauthorized("User is not authenticated.");
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult ResetPasswordConfirmation()
+        {
+            return View();
+        }
 
-			var profile = await _userProfileService.GetUserProfileAsync(userId);
-			var viewModel = new UserProfileViewModel {
-				FirstName = user.FirstName, 
-				LastName = user.LastName,
-				Email = user.Email,
+        [HttpGet]
+        [Authorize]
+        public async Task<IActionResult> Profile()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            var userId = user?.Id;
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized("User is not authenticated.");
+
+            var profile = await _userProfileService.GetUserProfileAsync(userId);
+            var viewModel = new UserProfileViewModel
+            {
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Email = user.Email,
                 PhoneNumber = profile.PhoneNumber,
                 DateOfBirth = profile.DateOfBirth,
                 NewsletterSubscribed = profile.EmailNotifications,
                 Addresses = profile.Addresses.ToList(),
                 CreatedAt = profile.CreatedAt,
-				Gender = profile.Gender.ToString(),
-                ProfilePictureUrl = profile.ProfileImage,
-				Orders =profile.ApplicationUser.Orders.ToList(),
-				UserId = userId
+                Gender = profile.Gender.ToString(),
+                ProfilePictureUrl = profile.ProfileImageUrl,
+                Orders = profile.ApplicationUser.Orders.ToList(),
+                UserId = userId
 
             };
             return View(viewModel);
-		}
+        }
 
-		[HttpGet]
-		[Authorize]
-		public async Task<IActionResult> Manage()
-		{
-			var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-			if (string.IsNullOrEmpty(userId))
-				return Unauthorized("User is not authenticated.");
+        [HttpGet]
+        [Authorize]
+        public async Task<IActionResult> Manage()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized("User is not authenticated.");
 
-			var userProfile = await _userProfileService.GetUserProfileAsync(userId);
-			if (userProfile == null)
-				return NotFound("User profile not found.");
+            var userProfile = await _userProfileService.GetUserProfileAsync(userId);
+            if (userProfile == null)
+                return NotFound("User profile not found.");
 
-			var viewModel =  new UserProfileViewModel
+            var viewModel = new UserProfileViewModel
             {
                 FirstName = userProfile.ApplicationUser.FirstName,
                 LastName = userProfile.ApplicationUser.LastName,
@@ -283,180 +287,199 @@ namespace TechXpress.Controllers
                 Addresses = userProfile.Addresses.ToList(),
                 CreatedAt = userProfile.CreatedAt,
                 Gender = userProfile.Gender.ToString(),
-                ProfilePictureUrl = userProfile.ProfileImage,
+                ProfileImageUrl = userProfile.ProfileImageUrl,
                 Orders = userProfile.ApplicationUser.Orders.ToList(),
                 UserId = userId
 
             };
             return View(viewModel);
-		}
+        }
 
-		[HttpPost]
-		[Authorize]
-		[ValidateAntiForgeryToken]
-		public async Task<IActionResult> Edit(UserProfileViewModel model)
-		{
-			var user = await _userManager.GetUserAsync(User);
-			var userId = user?.Id;
-			if (string.IsNullOrEmpty(userId))
-				return Unauthorized("User is not authenticated.");
+        [HttpPost]
+        [Authorize]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(UserProfileViewModel model)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            var userId = user?.Id;
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized("User is not authenticated.");
 
-			var profile = await _userProfileService.GetUserProfileAsync(userId);
-			if (profile == null)
-				return NotFound("User profile not found.");
+            var profile = await _userProfileService.GetUserProfileAsync(userId);
+            if (profile == null)
+                return NotFound("User profile not found.");
 
-			if (profile.ApplicationUser == null)
-			{
-				_logger.LogWarning($"ApplicationUser for profile {userId} is null.");
-				return NotFound("Associated user not found.");
-			}
+            if (profile.ApplicationUser == null)
+            {
+                _logger.LogWarning($"ApplicationUser for profile {userId} is null.");
+                return NotFound("Associated user not found.");
+            }
 
-			// Update ApplicationUser details.
-			profile.ApplicationUser.UserName = model.Email;
-			profile.ApplicationUser.FirstName = model.FirstName;
-			profile.ApplicationUser.LastName = model.LastName;
-			profile.ApplicationUser.Email = model.Email;
+            profile.ApplicationUser.FirstName = model.FirstName;
+            profile.ApplicationUser.LastName = model.LastName;
+            profile.ApplicationUser.Email = model.Email;
 
-			// Update ProfileImage only if a new URL is provided.
-			if (!string.IsNullOrWhiteSpace(model.ProfilePictureUrl))
-				profile.ApplicationUser.ProfileImage = await _userProfileService.UpdateProfilePictureURLAsync(userId, model.ProfilePictureUrl);
-			else
-				profile.ApplicationUser.ProfileImage = "https://www.pngarts.com/files/10/Default-Profile-Picture-Download-PNG-Image.png";
+            if (model.ProfilePicture != null && model.ProfilePicture.Length > 0)
+            {
+                using (var ms = new MemoryStream())
+                {
+                    await model.ProfilePicture.CopyToAsync(ms);
+                    profile.ProfileImageData = ms.ToArray();
+                }
 
-			profile.PhoneNumber = model.PhoneNumber;
-			profile.DateOfBirth = model.DateOfBirth;
-			if (!string.IsNullOrEmpty(model.Gender) && Enum.TryParse<GenderType>(model.Gender, out var gender))
-				profile.Gender = gender;
+                 profile.ProfileImageUrl = Url.Action("GetProfileImage", "Account", new { userId = userId }, Request.Scheme);
+            }
 
-			try
-			{
-				await _userProfileService.UpdateUserProfileAsync(userId, profile);
-				_logger.LogInformation("Profile updated successfully.");
-			}
-			catch (Exception ex)
-			{
-				_logger.LogError(ex, "Error updating user profile.");
-				ModelState.AddModelError(string.Empty, "An error occurred while updating the profile.");
-				return View(model);
-			}
+            profile.PhoneNumber = model.PhoneNumber;
+            profile.DateOfBirth = model.DateOfBirth;
 
-			return RedirectToAction("Profile", "Account");
-		}
+            if (!string.IsNullOrEmpty(model.Gender) && Enum.TryParse<TechXpress_domain.Entities.GenderType>(model.Gender, out var gender))
+                profile.Gender = gender;
 
-		#region Settings / Preferences / Security
+            try
+            {
+                await _userProfileService.UpdateUserProfileAsync(userId, profile);
+                _logger.LogInformation("Profile updated successfully.");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating user profile.");
+                ModelState.AddModelError(string.Empty, "An error occurred while updating the profile.");
+                return View(model);
+            }
 
-		[HttpGet]
-		[Authorize]
-		public async Task<IActionResult> Settings()
-		{
-			var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-			if (string.IsNullOrEmpty(userId))
-				return Unauthorized("User is not authenticated.");
+            return RedirectToAction("Profile", "Account");
+        }
+        #region Settings / Preferences / Security
 
-			var profile = await _userProfileService.GetUserSettingsAsync(userId) ?? new UserProfile { ApplicationUserId = userId };
-			return View(profile);
-		}
+        [HttpGet]
+        [Authorize]
+        public async Task<IActionResult> Settings()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized("User is not authenticated.");
 
-		[HttpPost]
-		[Authorize]
-		[ValidateAntiForgeryToken]
-		public async Task<IActionResult> Settings(UserProfile model)
-		{
-			if (!ModelState.IsValid)
-				return View(model);
+            var profile = await _userProfileService.GetUserSettingsAsync(userId) ?? new UserProfile { ApplicationUserId = userId };
+            return View(profile);
+        }
 
-			await _userProfileService.UpdateUserSettingsAsync(model);
-			TempData["SuccessMessage"] = "Settings updated successfully.";
-			return RedirectToAction("Settings");
-		}
+        [HttpPost]
+        [Authorize]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Settings(UserProfile model)
+        {
+            if (!ModelState.IsValid)
+                return View(model);
 
-		[HttpGet]
-		[Authorize]
-		public async Task<IActionResult> Preferences()
-		{
-			var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-			if (string.IsNullOrEmpty(userId))
-				return Unauthorized("User is not authenticated.");
+            await _userProfileService.UpdateUserSettingsAsync(model);
+            TempData["SuccessMessage"] = "Settings updated successfully.";
+            return RedirectToAction("Settings");
+        }
 
-			var profile = await _userProfileService.GetUserSettingsAsync(userId);
-			var viewModel = new UserSettingsViewModel
-			{
-				UserId = profile.ApplicationUserId,
-				EmailNotifications = profile.EmailNotifications,
-				MarketingEmails = profile.MarketingEmails,
-				ShowBirthDate = profile.ShowBirthDate,
-				SmsNotificationsEnabled = profile.SmsNotificationsEnabled,
-				TwoFactorEnabled = profile.TwoFactorEnabled,
-				LanguagePreference = profile.LanguagePreference,
-				Theme = profile.Theme,
-				ProfileVisibility = profile.ProfileVisibility,
-				PreferredCurrency = profile.PreferredCurrency
-			};
-			return View(viewModel);
-		}
+        [HttpGet]
+        [Authorize]
+        public async Task<IActionResult> Preferences()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized("User is not authenticated.");
 
-		[HttpPost]
-		[Authorize]
-		[ValidateAntiForgeryToken]
-		public async Task<IActionResult> Preferences(UserSettingsViewModel model)
-		{
-			if (!ModelState.IsValid)
-				return View(model);
+            var profile = await _userProfileService.GetUserSettingsAsync(userId);
+            var viewModel = new UserSettingsViewModel
+            {
+                UserId = profile.ApplicationUserId,
+                EmailNotifications = profile.EmailNotifications,
+                MarketingEmails = profile.MarketingEmails,
+                ShowBirthDate = profile.ShowBirthDate,
+                SmsNotificationsEnabled = profile.SmsNotificationsEnabled,
+                TwoFactorEnabled = profile.TwoFactorEnabled,
+                LanguagePreference = profile.LanguagePreference,
+                Theme = profile.Theme,
+                ProfileVisibility = profile.ProfileVisibility,
+                PreferredCurrency = profile.PreferredCurrency
+            };
+            return View(viewModel);
+        }
 
-			await _userProfileService.UpdateUserSettingsAsync(_mapper.Map<UserProfile>(model));
-			TempData["SuccessMessage"] = "Preferences updated successfully.";
-			return RedirectToAction("Preferences");
-		}
+        [HttpPost]
+        [Authorize]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Preferences(UserSettingsViewModel model)
+        {
+            if (!ModelState.IsValid)
+                return View(model);
 
-		[HttpGet]
-		[Authorize]
-		public async Task<IActionResult> Security()
-		{
-			var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-			if (string.IsNullOrEmpty(userId))
-				return Unauthorized("User is not authenticated.");
+            await _userProfileService.UpdateUserSettingsAsync(_mapper.Map<UserProfile>(model));
+            TempData["SuccessMessage"] = "Preferences updated successfully.";
+            return RedirectToAction("Preferences");
+        }
 
-			var profile = await _userProfileService.GetUserSettingsAsync(userId) ?? new UserProfile { ApplicationUserId = userId };
-			var viewModel = new SecuritySettingsViewModel
-			{
-				UserId = profile.ApplicationUserId,
-				TwoFactorEnabled = profile.TwoFactorEnabled,
-				LoginNotificationsEnabled = false, // Default value; adjust as needed.
-				RecoveryEmail = profile.ApplicationUser?.Email ?? "",
-				LastPasswordChange = null, // To be handled via a password change process.
-				SecurityQuestionsEnabled = false,
-				DeviceManagementEnabled = false,
-				IpWhitelistEnabled = false,
-				CurrentPassword = "",
-				NewPassword = "",
-				ConfirmPassword = "",
-				LoginHistory = new List<LoginHistoryEntry>(),
-				ActiveSessions = new List<ActiveSession>()
-			};
+        [HttpGet]
+        [Authorize]
+        public async Task<IActionResult> Security()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized("User is not authenticated.");
 
-			return View(viewModel);
-		}
+            var profile = await _userProfileService.GetUserSettingsAsync(userId) ?? new UserProfile { ApplicationUserId = userId };
+            var viewModel = new SecuritySettingsViewModel
+            {
+                UserId = profile.ApplicationUserId,
+                TwoFactorEnabled = profile.TwoFactorEnabled,
+                LoginNotificationsEnabled = false, // Default value; adjust as needed.
+                RecoveryEmail = profile.ApplicationUser?.Email ?? "",
+                LastPasswordChange = null, // To be handled via a password change process.
+                SecurityQuestionsEnabled = false,
+                DeviceManagementEnabled = false,
+                IpWhitelistEnabled = false,
+                CurrentPassword = "",
+                NewPassword = "",
+                ConfirmPassword = "",
+                LoginHistory = new List<LoginHistoryEntry>(),
+                ActiveSessions = new List<ActiveSession>()
+            };
 
-		[HttpPost]
-		[Authorize]
-		[ValidateAntiForgeryToken]
-		public async Task<IActionResult> Security(SecuritySettingsViewModel model)
-		{
-			if (!ModelState.IsValid)
-				return View(model);
+            return View(viewModel);
+        }
 
-			var profile = await _userProfileService.GetUserSettingsAsync(model.UserId) ?? new UserProfile { ApplicationUserId = model.UserId };
-			profile.TwoFactorEnabled = model.TwoFactorEnabled;
-			if (profile.ApplicationUser != null)
-			{
-				profile.ApplicationUser.Email = model.RecoveryEmail;
-			}
-			await _userProfileService.UpdateUserSettingsAsync(profile);
+        [HttpPost]
+        [Authorize]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Security(SecuritySettingsViewModel model)
+        {
+            if (!ModelState.IsValid)
+                return View(model);
 
-			TempData["SuccessMessage"] = "Security settings updated successfully.";
-			return RedirectToAction("Security");
-		}
+            var profile = await _userProfileService.GetUserSettingsAsync(model.UserId) ?? new UserProfile { ApplicationUserId = model.UserId };
+            profile.TwoFactorEnabled = model.TwoFactorEnabled;
+            if (profile.ApplicationUser != null)
+            {
+                profile.ApplicationUser.Email = model.RecoveryEmail;
+            }
+            await _userProfileService.UpdateUserSettingsAsync(profile);
 
-		#endregion
-	}
+            TempData["SuccessMessage"] = "Security settings updated successfully.";
+            return RedirectToAction("Security");
+        }
+
+        #endregion
+
+
+        [HttpGet]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetProfileImage(string userId)
+        {
+            var profile = await _userProfileService.GetUserProfileAsync(userId);
+            if (profile == null || profile.ProfileImageData == null || profile.ProfileImageData.Length == 0)
+            {
+                return NotFound();
+            }
+
+            return File(profile.ProfileImageData, "image/jpeg");
+        }
+
+       
+    }
 }

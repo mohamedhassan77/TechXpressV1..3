@@ -27,10 +27,6 @@ namespace TechXpress_domain.Entities
         [NotMapped]
         public decimal FinalPrice => DiscountPrice ?? Price;
 
-        [Required]
-        [Url(ErrorMessage = "Invalid image URL.")]
-        public string ImageUrl { get; set; } = null!;
-
         public bool IsFeatured { get; set; }
 
         [Required]
@@ -72,8 +68,9 @@ namespace TechXpress_domain.Entities
         [Column(TypeName = "decimal(18,2)")]
         public decimal? OldPrice { get; set; }
 
-        [NotMapped]
-        public ICollection<string> ProductImages { get; set; } = new List<string>();
+        public string ImageUrl { get; set; } = null!;
+
+        public virtual ICollection<ProductImage> ProductImages { get; set; } = new List<ProductImage>();
 
         public virtual ICollection<Review> Reviews { get; set; } = new HashSet<Review>();
 
@@ -84,4 +81,5 @@ namespace TechXpress_domain.Entities
         public virtual ICollection<CartItem> CartItems { get; set; } = new HashSet<CartItem>();
         public virtual ICollection<WishlistItem> WishlistItems { get; set; } = new HashSet<WishlistItem>();
     }
+
 }

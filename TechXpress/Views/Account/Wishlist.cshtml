@@ -22,7 +22,7 @@
                 @foreach (var item in Model.WishlistItems)
                 {
                     <div class="wishlist-item">
-                        <img src="@item.Product.ImageUrl" alt="@item.Product.Name" class="wishlist-image" />
+                        <img src="@item.Product.ProductImages.Any()" alt="@item.Product.Name" class="wishlist-image" />
                         <div class="wishlist-content">
                             <h3 class="wishlist-product-name">@item.Product.Name</h3>
                             <p class="wishlist-product-price">@item.Product.Price.ToString("C")</p>

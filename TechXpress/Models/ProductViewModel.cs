@@ -43,8 +43,7 @@ namespace TechXpress.Models
 
             [Required(ErrorMessage = "Image URL is required.")]
             [Url(ErrorMessage = "Invalid image URL.")]
-            public string ImageUrl { get; set; }
-
+ 
             public bool IsFeatured { get; set; }
             public DateTime CreatedDate { get; set; }
             public DateTime UpdatedDate { get; set; }
@@ -74,12 +73,13 @@ namespace TechXpress.Models
             public string Specifications { get; set; }
 
             public decimal? OldPrice { get; set; }
-            public List<string> ProductImages { get; set; } = new List<string>();
+        public List<string> ProductImages { get; set; } = new List<string>();
 
-            public CategoryViewModel Category { get; set; }
+        public CategoryViewModel Category { get; set; }
             public double AverageRating { get; set; }
             public int ReviewCount { get; set; }
-        }
+        public string ImageUrl { get; internal set; }
+    }
 
 
     

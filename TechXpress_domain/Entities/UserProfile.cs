@@ -22,12 +22,12 @@ namespace TechXpress_domain.Entities
         [StringLength(15)]
         public string? PhoneNumber { get; set; }
 
-        public string ProfileImage { get; set; }
+         public byte[]? ProfileImageData { get; set; }
+        public string? ProfileImageUrl { get; set; }
 
         public ICollection<Address> Addresses { get; set; } = new List<Address>();
         public bool IsBlocked { get; set; }
 
-        // Settings properties added directly to the entity:
         public bool EmailNotifications { get; set; }
         public bool MarketingEmails { get; set; }
         public bool ShowBirthDate { get; set; }

@@ -1,5 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using TechXpress_domain.Entities;
 using TechXpress_domain.Interfaces.Services;
 
@@ -9,33 +12,41 @@ namespace TechXpress.ViewComponents
     {
         private readonly ICategoryService _categoryService;
         private readonly IMemoryCache _cache;
-        private const string CacheKey = "CategoryMenuCategories";
+        private const string CacheKey = "CategoryMenu";
+        private readonly TimeSpan _cacheExpiration = TimeSpan.FromHours(1);
 
         public CategoryMenuViewComponent(ICategoryService categoryService, IMemoryCache cache)
         {
-            _categoryService = categoryService;
-            _cache = cache;
+            _categoryService = categoryService ?? throw new ArgumentNullException(nameof(categoryService));
+            _cache = cache ?? throw new ArgumentNullException(nameof(cache));
         }
 
-        public async Task<IViewComponentResult> InvokeAsync()
+        public async Task<IViewComponentResult> InvokeAsync(bool showFeaturedOnly = false)
         {
-             int pageNumber = 1;
-            int pageSize = 50;  
-            string sortBy = "name_asc"; 
+            var categories = await GetCategoriesFromCacheAsync(showFeaturedOnly);
+            return View(categories); // No need to specify view name if using Default
+        }
 
-            // Try to get the list of categories from the cache.
-            if (!_cache.TryGetValue(CacheKey, out IEnumerable<Category> categories))
+        private async Task<IEnumerable<Category>> GetCategoriesFromCacheAsync(bool showFeaturedOnly)
+        {
+            string cacheKey = showFeaturedOnly ? $"{CacheKey}_Featured" : CacheKey;
+
+            if (!_cache.TryGetValue(cacheKey, out IEnumerable<Category> categories))
             {
+                int pageNumber = 1;
+                int pageSize = showFeaturedOnly ? 10 : 50;
+                string sortBy = "name_asc";
+
                 categories = await _categoryService.GetAllCategoriesAsync(pageNumber, pageSize, sortBy);
 
-                // Cache the categories for 15 minutes (adjust expiration as needed)
                 var cacheOptions = new MemoryCacheEntryOptions()
-                    .SetSlidingExpiration(TimeSpan.FromMinutes(15));
+                    .SetAbsoluteExpiration(_cacheExpiration)
+                    .SetPriority(CacheItemPriority.High);
 
-                _cache.Set(CacheKey, categories, cacheOptions);
+                _cache.Set(cacheKey, categories, cacheOptions);
             }
 
-            return View(categories);
+            return categories;
         }
     }
 }

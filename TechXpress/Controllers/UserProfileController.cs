@@ -7,10 +7,11 @@ using TechXpress_domain.Entities;
 using TechXpress_domain.Interfaces.Services;
 using System.Collections.Generic;
 using System.Linq;
+using TechXpress_application.Services;
 
 namespace TechXpress.Controllers
 {
-    [Authorize(Roles = "User")]
+    [Authorize(Roles = "Admin,User")]
     public class UserProfileController : Controller
     {
         private readonly IUserProfileService _profileService;
@@ -30,12 +31,12 @@ namespace TechXpress.Controllers
                 LastName = profile.ApplicationUser.LastName,
                 Email = profile.ApplicationUser.Email,
                 PhoneNumber = profile.PhoneNumber,
-                ProfilePictureUrl = profile.ProfileImage,
+                ProfilePictureUrl = profile.ProfileImageUrl,
                 DateOfBirth = profile.DateOfBirth,
                 Gender = profile.Gender?.ToString(),
                 CreatedAt = profile.CreatedAt,
                 NewsletterSubscribed = false,
-                Addresses = profile.Addresses as List<Address> ?? new List<Address>(),
+                Addresses = profile.Addresses?.ToList() ?? new List<Address>(),
                 Orders = new List<Order>()
             }).ToList();
 
@@ -55,11 +56,11 @@ namespace TechXpress.Controllers
                 LastName = profile.ApplicationUser.LastName,
                 Email = profile.ApplicationUser.Email,
                 PhoneNumber = profile.PhoneNumber,
-                ProfilePictureUrl = profile.ProfileImage,
+                ProfilePictureUrl = profile.ProfileImageUrl,
                 DateOfBirth = profile.DateOfBirth,
                 Gender = profile.Gender?.ToString(),
                 CreatedAt = profile.CreatedAt,
-                Addresses = profile.Addresses as List<Address> ?? new List<Address>(),
+                Addresses = profile.Addresses?.ToList() ?? new List<Address>(),
                 Orders = new List<Order>()
             };
             return View(viewModel);
@@ -76,38 +77,16 @@ namespace TechXpress.Controllers
         {
             if (ModelState.IsValid)
             {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
                 var profile = new UserProfile
                 {
-                    ApplicationUserId = viewModel.UserId,
+                    ApplicationUserId = userId,
                     DateOfBirth = viewModel.DateOfBirth,
                     PhoneNumber = viewModel.PhoneNumber,
-                    ProfileImage = viewModel.ProfilePictureUrl,
-                    ShowBirthDate = true,
-                    EmailNotifications = true,
-                    MarketingEmails = true,
-                    SmsNotificationsEnabled = true,
-                    TwoFactorEnabled = true,
-                    LanguagePreference = "en",
-                    Theme = "light",
-                    ProfileVisibility = true,
-                    PreferredCurrency = "EGP",
+                    ProfileImageUrl = viewModel.ProfilePictureUrl,
+                    CreatedAt = DateTime.UtcNow,
                     Addresses = new List<Address>(),
-                    IsBlocked = false,
-                     CreatedAt = DateTime.UtcNow,
-                    ApplicationUser = new ApplicationUser
-                    {
-                        Id = viewModel.UserId,
-                        FirstName = viewModel.FirstName,
-                        LastName = viewModel.LastName,
-                        Email = viewModel.Email,
-                        ProfileImage = viewModel.ProfilePictureUrl,
-                        Orders = new List<Order>(),
-                        Reviews = new List<Review>()
-                        
-                    }
-
-
-
+                    IsBlocked = false
                 };
                 await _profileService.AddUserProfileAsync(profile);
                 return RedirectToAction(nameof(Index));
@@ -120,6 +99,7 @@ namespace TechXpress.Controllers
             var profile = await _profileService.GetUserProfileByIdAsync(id);
             if (profile == null)
                 return NotFound();
+
             var viewModel = new UserProfileViewModel
             {
                 UserId = profile.ApplicationUserId,
@@ -127,11 +107,11 @@ namespace TechXpress.Controllers
                 LastName = profile.ApplicationUser.LastName,
                 Email = profile.ApplicationUser.Email,
                 PhoneNumber = profile.PhoneNumber,
-                ProfilePictureUrl = profile.ProfileImage,
+                ProfilePictureUrl = profile.ProfileImageUrl,
                 DateOfBirth = profile.DateOfBirth,
                 Gender = profile.Gender?.ToString(),
                 CreatedAt = profile.CreatedAt,
-                Addresses = profile.Addresses as List<Address> ?? new List<Address>(),
+                Addresses = profile.Addresses?.ToList() ?? new List<Address>(),
                 Orders = new List<Order>()
             };
             return View(viewModel);
@@ -152,10 +132,9 @@ namespace TechXpress.Controllers
 
                 profile.DateOfBirth = viewModel.DateOfBirth;
                 profile.PhoneNumber = viewModel.PhoneNumber;
-                profile.ProfileImage = viewModel.ProfilePictureUrl;
+                profile.ProfileImageUrl = viewModel.ProfilePictureUrl;
                 profile.Addresses = viewModel.Addresses;
                 profile.UpdatedAt = DateTime.UtcNow;
-                
 
                 await _profileService.UpdateUserProfileAsync(id, profile);
                 return RedirectToAction(nameof(Index));
@@ -163,44 +142,23 @@ namespace TechXpress.Controllers
             return View(viewModel);
         }
 
-        public async Task<IActionResult> Delete(string id)
-        {
-            var profile = await _profileService.GetUserProfileByIdAsync(id);
-            if (profile == null)
-                return NotFound();
-            var viewModel = new UserProfileViewModel
-            {
-                UserId = profile.ApplicationUserId,
-                FirstName = profile.ApplicationUser.FirstName,
-                LastName = profile.ApplicationUser.LastName,
-                Email = profile.ApplicationUser.Email,
-                PhoneNumber = profile.PhoneNumber,
-                ProfilePictureUrl = profile.ProfileImage,
-                DateOfBirth = profile.DateOfBirth,
-                Gender = profile.Gender?.ToString(),
-                CreatedAt = profile.CreatedAt,
-                Addresses = profile.Addresses as List<Address> ?? new List<Address>()
-            };
-            return View(viewModel);
-        }
-
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(string id)
         {
+            var profile = await _profileService.GetUserProfileByIdAsync(id);
+            if (profile == null)
+                return NotFound();
+
             await _profileService.DeleteUserProfileAsync(id);
             return RedirectToAction(nameof(Index));
         }
-
-        #region Address Management
-
         [HttpGet]
         [Authorize]
         public IActionResult AddAddress()
         {
             return View(new AddressViewModel());
         }
-
         [HttpPost]
         [Authorize]
         [ValidateAntiForgeryToken]
@@ -218,7 +176,7 @@ namespace TechXpress.Controllers
                 LastName = model.LastName,
                 Phone = model.Phone,
                 IsDefault = model.IsDefault,
-                
+
                 Street = model.Street,
                 City = model.City,
                 State = model.State,
@@ -248,7 +206,7 @@ namespace TechXpress.Controllers
                 return NotFound("User profile not found.");
             }
 
-            var address = _profileService. GetUserProfileAsync(userId).Result.Addresses.FirstOrDefault();
+            var address = _profileService.GetUserProfileAsync(userId).Result.Addresses.FirstOrDefault();
             if (address == null)
             {
                 return NotFound("Address not found.");
@@ -325,11 +283,6 @@ namespace TechXpress.Controllers
             // Fallback: if no valid action was provided, redisplay the form.
             return View(model);
         }
-
-
-
-
-        #endregion
 
     }
 }

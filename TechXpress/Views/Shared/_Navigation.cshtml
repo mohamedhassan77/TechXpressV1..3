@@ -21,9 +21,9 @@
         if (currentUser != null)
         {
             firstName = !string.IsNullOrEmpty(currentUser.FirstName) ? currentUser.FirstName : currentUser.UserName;
-            if (currentUser.UserProfile != null && !string.IsNullOrEmpty(currentUser.UserProfile.ProfileImage))
+            if (currentUser.UserProfile != null && !string.IsNullOrEmpty(currentUser.UserProfile.ProfileImageUrl))
             {
-                profileImageUrl = currentUser.UserProfile.ProfileImage;
+                profileImageUrl = currentUser.UserProfile.ProfileImageUrl;
             }
             isAdmin = await UserManager.IsInRoleAsync(currentUser, "Admin");
         }
@@ -69,51 +69,50 @@
             </li>
         </ul>
 
-        <!-- Cart and Wishlist -->
-        <ul class="navbar-nav d-none d-lg-flex">
-            <li class="nav-item">
-                <a class="nav-link" asp-controller="Cart" asp-action="Index">
-                    <i class="fas fa-shopping-cart"></i>
-                    <span id="cart-counter" class="badge bg-primary">0</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" asp-controller="Wishlist" asp-action="Index">
-                    <i class="fas fa-heart"></i>
-                    <span id="wishlist-counter" class="badge bg-primary">0</span>
-                </a>
+       <!-- Cart and Wishlist -->
+<ul class="navbar-nav d-none d-lg-flex">
+    <li class="nav-item">
+        <a class="nav-link" asp-controller="Cart" asp-action="Index">
+            <i class="fas fa-shopping-cart"></i>
+            <span id="cart-counter" class="badge bg-primary">0</span>
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" asp-controller="Wishlist" asp-action="Index">
+            <i class="fas fa-heart"></i>
+            <span id="wishlist-counter" class="badge bg-primary">0</span>
+        </a>
+    </li>
+</ul>
+
+<!--account -->
+<div class="dropdown ms-3">
+    @if (SignInManager.IsSignedIn(User))
+    {
+        <a class="d-flex align-items-center text-decoration-none" href="#" id="accountDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+            <img src="@profileImageUrl" alt="Profile Picture" class="rounded-circle" width="40" height="40">
+            <span class="ms-2 text-dark">Hello, @firstName</span>
+            <i class="fas fa-chevron-down ms-1"></i>
+        </a>
+        <ul class="dropdown-menu dropdown-menu-end">
+            <li><a class="dropdown-item" asp-controller="Account" asp-action="Profile">My Account</a></li>
+            @if (isAdmin)
+            {
+                <li><a class="dropdown-item" asp-controller="AdminDashboard" asp-action="Index">Dashboard</a></li>
+            }
+            <li><hr class="dropdown-divider" /></li>
+            <li>
+                <form asp-controller="Account" asp-action="Logout" method="post">
+                    <button type="submit" class="dropdown-item">Logout</button>
+                </form>
             </li>
         </ul>
-
-        <!-- User Account -->
-        <div class="dropdown">
-            @if (SignInManager.IsSignedIn(User))
-            {
-                <a class="d-flex align-items-center text-decoration-none" href="#" id="accountDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                    <img src="@profileImageUrl" alt="Profile Picture" class="rounded-circle" width="40" height="40">
-                    <span class="ms-2 text-dark">Hello, @firstName</span>
-                    <i class="fas fa-chevron-down ms-1"></i>
-                </a>
-                <ul class="dropdown-menu dropdown-menu-end">
-                    <li><a class="dropdown-item" asp-controller="Account" asp-action="Profile">My Account</a></li>
-                    @if (isAdmin)
-                    {
-                        <li><a class="dropdown-item" asp-controller="AdminDashboard" asp-action="Index">Dashboard</a></li>
-                    }
-                    <li><hr class="dropdown-divider" /></li>
-                    <li>
-                        <form asp-controller="Account" asp-action="Logout" method="post">
-                            <button type="submit" class="dropdown-item">Logout</button>
-                        </form>
-                    </li>
-                </ul>
-            }
-            else
-            {
-                <a class="btn btn-outline-primary" asp-controller="Account" asp-action="Login">Login</a>
-            }
-        </div>
-    </div>
+    }
+    else
+    {
+        <a class="btn btn-outline-primary" asp-controller="Account" asp-action="Login">Login</a>
+    }
+</div
     <!-- Dropdown for categories -->
     <div class="categories-dropdown" id="categoryDropdown">
         @await Component.InvokeAsync("CategoryMenu")

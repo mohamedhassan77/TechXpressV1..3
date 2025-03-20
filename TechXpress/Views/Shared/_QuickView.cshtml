@@ -6,23 +6,27 @@
             <i class="fas fa-times" aria-hidden="true"></i>
         </button>
         <div class="modal-grid">
-            <!-- Gallery Section -->
+            <!-- Gallery Section with Swiper -->
             <div class="modal-gallery">
-                <div class="main-image-container">
-                    <img id="modal-product-image" src="" alt="Product image" class="modal-product-image">
-                </div>
-                <div class="thumbnail-container">
-                    <div class="thumbnail active">
-                        <img id="modal-thumbnail-1" src="" alt="Thumbnail">
+                <div class="swiper mySwiper">
+                    <div class="swiper-wrapper">
+                        <div class="swiper-slide">
+                            <img id="modal-product-image" src="" alt="Product image">
+                        </div>
+                        <div class="swiper-slide">
+                            <img src="/api/placeholder/100/100" alt="Thumbnail">
+                        </div>
+                        <div class="swiper-slide">
+                            <img src="/api/placeholder/100/100" alt="Thumbnail">
+                        </div>
                     </div>
-                    <div class="thumbnail">
-                        <img src="/api/placeholder/100/100" alt="Thumbnail">
-                    </div>
-                    <div class="thumbnail">
-                        <img src="/api/placeholder/100/100" alt="Thumbnail">
-                    </div>
+                    <!-- Pagination and Navigation Buttons -->
+                    <div class="swiper-button-next"></div>
+                    <div class="swiper-button-prev"></div>
+                    <div class="swiper-pagination"></div>
                 </div>
             </div>
+
             <!-- Details Section -->
             <div class="modal-details">
                 <div class="modal-header">
@@ -82,3 +86,31 @@
         </div>
     </div>
 </div>
+<style>
+    .modal-gallery {
+        max-width: 300px;
+        margin: auto;
+    }
+
+    .mySwiper {
+        width: 100%;
+        height: 500PX; 
+    }
+
+    .swiper-slide {
+        display:  block;
+        justify-content: center;
+        align-items: center;
+        height: 100%;
+    }
+
+        .swiper-slide img {
+            max-width: 100%;
+            max-height: 100%;
+            width: auto;
+            height: auto;
+            object-fit: contain; 
+            border-radius: 5px; 
+        }
+
+</style>

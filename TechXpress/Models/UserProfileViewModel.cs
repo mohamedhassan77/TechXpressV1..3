@@ -30,7 +30,19 @@ namespace TechXpress.Models
         public string? PhoneNumber { get; set; }
 
         [Display(Name = "Profile Picture")]
-        public string? ProfilePictureUrl { get; set; }
+         public byte[]? ProfileImageData { get; set; }
+        public IFormFile? ProfilePicture { get; set; }
+
+          public string? ProfileImageUrl { get; set; }
+
+        // Generate a default profile image if no image exists
+        public string ProfilePictureUrl
+        {
+            get => string.IsNullOrEmpty(ProfileImageUrl)
+                ? "https://www.pngarts.com/files/10/Default-Profile-Picture-Download-PNG-Image.png"
+                : ProfileImageUrl;
+            set => ProfileImageUrl = value;
+        }
 
         [Display(Name = "Date of Birth")]
         [DataType(DataType.Date)]

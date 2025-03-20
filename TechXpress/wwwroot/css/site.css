@@ -22,7 +22,20 @@
     --transition-speed: 0.3s;
     --border-radius: 4px;
 }
+}
 
+@media (min-width: 768px) {
+    .col-md-6 {
+        flex: 0 0 auto;
+        width: 25%;
+    }
+}
+@media (min-width: 992px) {
+    .col-lg-4 {
+        flex: 0 0 auto;
+        width: 25%;
+    }
+}
 /* ==========================================================================  
    Base Styles & Typography  
    ========================================================================== */
@@ -258,8 +271,7 @@ a {
 .badge {
     position: absolute;
     top: -8px;
-    right: -8px;
-    background: var(--accent);
+     background: var(--accent);
     color: #fff;
     font-size: 0.7rem;
     padding: 0.25rem 0.4rem;

@@ -193,7 +193,7 @@ namespace TechXpress.Controllers
                         SKU = ci.Product.SKU,
                         Specifications = ci.Product.Specifications,
                         OldPrice = ci.Product.OldPrice,
-                        ProductImages = ci.Product.ProductImages.ToList(),
+                        ProductImages = ci.Product.ProductImages.Select(pi => pi.ImageUrl).ToList(),
                         Category = new CategoryViewModel
                         {
                             Id = ci.Product.Category.Id,

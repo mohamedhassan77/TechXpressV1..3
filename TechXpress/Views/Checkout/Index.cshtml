@@ -124,7 +124,7 @@
                 @foreach (var item in Model.CartItems)
                 {
                     <div class="cart-item">
-                        <img src="@item.Product.ImageUrl" alt="@item.Product.Name">
+                        <img src="@item.Product.ProductImages.Any()" alt="@item.Product.Name">
                         <div class="item-details">
                             <h3>@item.Product.Name</h3>
                             <p>Quantity: @item.Quantity</p>

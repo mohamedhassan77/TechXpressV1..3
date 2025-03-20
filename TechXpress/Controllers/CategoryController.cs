@@ -30,7 +30,31 @@ namespace TechXpress.Controllers
                     ImageUrl = cat.ImageUrl,
                     CreatedAt = cat.CreatedAt,
                     UpdatedAt = cat.UpdatedAt,
-                    IsFeatured = false // or set as needed
+                    IsFeatured = false ,
+                    Products = cat.Products?.Select(p => new ProductViewModel
+                    {
+                        Id = p.Id,
+                        Name = p.Name,
+                        Description = p.Description,
+                        Price = p.Price,
+                        DiscountPrice = p.DiscountPrice,
+                        ImageUrl = p.ImageUrl,
+                        IsFeatured = p.IsFeatured,
+                        CreatedDate = p.CreatedDate,
+                        UpdatedDate = p.UpdatedDate,
+                        Tag = p.Tag,
+                        Brand = p.Brand,
+                        CategoryId = p.CategoryId,
+                        StockQuantity = p.StockQuantity,
+                        SKU = p.SKU,
+                        Specifications = p.Specifications,
+                        OldPrice = p.OldPrice,
+                        ProductImages = p.ProductImages.Select(pi => pi.ImageUrl).ToList(),
+                        AverageRating = p.Reviews.Any() ? p.Reviews.Average(r => r.Rating) : 0,
+                        ReviewCount = p.Reviews.Count()
+                    }).ToList() ?? new System.Collections.Generic.List<ProductViewModel>(),
+
+
                 });
             }
             return View(viewModel);
@@ -172,7 +196,7 @@ namespace TechXpress.Controllers
                     SKU = p.SKU,
                     Specifications = p.Specifications,
                     OldPrice = p.OldPrice,
-                    ProductImages = p.ProductImages.ToList(),
+                    ProductImages = p.ProductImages.Select(pi=>pi.ImageUrl).ToList(),
                     AverageRating = p.Reviews.Any() ? p.Reviews.Average(r => r.Rating) : 0,
                     ReviewCount = p.Reviews.Count()
                 }).ToList() ?? new List<ProductViewModel>()

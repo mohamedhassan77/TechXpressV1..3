@@ -35,7 +35,7 @@ namespace TechXpress_application.Services
 
             profile.DateOfBirth = updatedProfile.DateOfBirth;
             profile.PhoneNumber = updatedProfile.PhoneNumber;
-            profile.ProfileImage = updatedProfile.ProfileImage;
+            profile.ProfileImageUrl = updatedProfile.ProfileImageUrl;
             profile.ApplicationUser.FirstName = updatedProfile.ApplicationUser.FirstName;
             profile.ApplicationUser.LastName = updatedProfile.ApplicationUser.LastName;
             profile.ApplicationUser.Email = updatedProfile.ApplicationUser.Email;
@@ -53,7 +53,7 @@ namespace TechXpress_application.Services
             var profile = await _userProfileRepository.GetByIdAsync(userId);
             if (profile != null)
             {
-                profile.ProfileImage = pictureUrl;
+                profile.ProfileImageUrl = pictureUrl;
                 await _userProfileRepository.UpdateAsync(profile);
             }
             return "Profile image updated successfully.";
@@ -77,7 +77,7 @@ namespace TechXpress_application.Services
             var profile = await _userProfileRepository.GetByIdAsync(userId);
             if (profile != null)
             {
-                profile.ProfileImage = $"/uploads/profile-images/{fileName}";
+                profile.ProfileImageUrl = $"/uploads/profile-images/{fileName}";
                 await _userProfileRepository.UpdateAsync(profile);
             }
             return "Profile image uploaded successfully.";
@@ -86,9 +86,9 @@ namespace TechXpress_application.Services
         public async Task<bool> DeleteProfilePictureAsync(string userId)
         {
             var profile = await _userProfileRepository.GetByIdAsync(userId);
-            if (profile != null && !string.IsNullOrEmpty(profile.ProfileImage))
+            if (profile != null && !string.IsNullOrEmpty(profile.ProfileImageUrl))
             {
-                profile.ProfileImage = "https://www.pngarts.com/files/10/Default-Profile-Picture-Download-PNG-Image.png";
+                profile.ProfileImageUrl = "https://www.pngarts.com/files/10/Default-Profile-Picture-Download-PNG-Image.png";
                 await _userProfileRepository.UpdateAsync(profile);
                 return true;
             }

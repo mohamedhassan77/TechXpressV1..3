@@ -13,17 +13,22 @@
                     <h5 class="fw-bold mb-0">Refine Products</h5>
                 </div>
                 <div class="card-body">
-                    <form method="get">
+                    <form id="filterForm" method="get">
                         <!-- Category Filter -->
                         <div class="mb-4">
                             <label for="categorySelect" class="form-label fw-medium text-secondary">Category</label>
-                            <select id="categorySelect" class="form-select border-0 bg-light rounded-3 py-3" name="category">
+                            <select id="categorySelect" class="form-select border-0 bg-light rounded-3 py-3 auto-submit" name="category">
                                 <option value="">All Categories</option>
                                 @foreach (var cat in Model.Categories)
                                 {
-                                    <option value="@cat.Name" @@(Model.CurrentCategory == cat.Name ? "selected" : "")>
-                                        @cat.Name
-                                    </option>
+                                    if (Model.CurrentCategory == cat.Name)
+                                    {
+                                        <option value="@cat.Name" selected>@cat.Name</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@cat.Name">@cat.Name</option>
+                                    }
                                 }
                             </select>
                         </div>
@@ -44,15 +49,23 @@
                         <div class="mb-4">
                             <label class="form-label fw-medium text-secondary">Price Range</label>
                             <div id="priceSlider" class="mt-3"></div>
+                            <div class="row mt-3">
+                                <div class="col">
+                                    <input type="number" id="minPrice" name="minPrice" class="form-control"
+                                           placeholder="From" value="@Model.Filter.MinPrice" min="0" max="100000" />
+                                </div>
+                                <div class="col">
+                                    <input type="number" id="maxPrice" name="maxPrice" class="form-control"
+                                           placeholder="To" value="@Model.Filter.MaxPrice" min="0" max="100000" />
+                                </div>
+                            </div>
                             <div id="priceRangeDisplay" class="price-range-display mt-3 text-primary fw-bold"></div>
-                            <input type="hidden" id="minPrice" name="minPrice" value="@Model.Filter.MinPrice" />
-                            <input type="hidden" id="maxPrice" name="maxPrice" value="@Model.Filter.MaxPrice" />
                         </div>
 
                         <!-- Sort Options -->
                         <div class="mb-4">
                             <label for="sortBySelect" class="form-label fw-medium text-secondary">Sort By</label>
-                            <select id="sortBySelect" class="form-select border-0 bg-light rounded-3 py-3" name="sortBy">
+                            <select id="sortBySelect" class="form-select border-0 bg-light rounded-3 py-3 auto-submit" name="sortBy">
                                 <option value="newest" @@(Model.Filter.SortBy == "newest" ? "selected" : "")>Newest First</option>
                                 <option value="price_asc" @@(Model.Filter.SortBy == "price_asc" ? "selected" : "")>Price: Low to High</option>
                                 <option value="price_desc" @@(Model.Filter.SortBy == "price_desc" ? "selected" : "")>Price: High to Low</option>
@@ -61,20 +74,18 @@
                             </select>
                         </div>
                         
-                        <button type="submit" class="btn btn-primary w-100 py-3 rounded-3 fw-medium">
-                            <i class="bi bi-filter me-2"></i> Apply Filters
-                        </button>
-                        
-                        <button type="reset" class="btn btn-outline-secondary w-100 py-3 rounded-3 fw-medium mt-2">
+                        <button type="button" id="resetFilters" class="btn btn-outline-secondary w-100 py-3 rounded-3 fw-medium">
                             <i class="bi bi-arrow-counterclockwise me-2"></i> Reset Filters
                         </button>
+                        
+                        <!-- Hidden field to track filter state -->
+                        <input type="hidden" id="filtersApplied" name="filtersApplied" value="@(Model.Filter.MinPrice > 0 || Model.Filter.MaxPrice < 100000 || !string.IsNullOrEmpty(Model.CurrentCategory) || !string.IsNullOrEmpty(Model.Search) || Model.Filter.SortBy != "newest" ? "true" : "false")" />
                     </form>
                 </div>
             </div>
         </aside>
 
         <!-- Main Content: Products List -->
-
         <main class="col-lg-9 col-md-8">
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h2 class="fw-bold mb-0">
@@ -84,9 +95,15 @@
                         <span class="fs-6 ms-2 text-secondary fw-normal">Search results for: "@Model.Search"</span>
                     }
                 </h2>
-                <span class="text-secondary">
-                    Showing @Model.Products.Count() of @Model.PaginationInfo.TotalItems products
-                </span>
+                <div class="d-flex align-items-center">
+                    @if (Model.Filter.MinPrice > 0 || Model.Filter.MaxPrice < 100000 || !string.IsNullOrEmpty(Model.CurrentCategory) || !string.IsNullOrEmpty(Model.Search) || Model.Filter.SortBy != "newest")
+                    {
+                        <span class="badge bg-primary me-2 py-2 px-3">Filters Applied</span>
+                    }
+                    <span class="text-secondary">
+                        Showing @Model.Products.Count() of @Model.PaginationInfo.TotalItems products
+                    </span>
+                </div>
             </div>
 
             <div class="row g-4 product-list">
@@ -192,42 +209,148 @@
         .pagination .page-link { border: none; color: #6c757d; padding: 0.5rem 0.75rem; margin: 0 0.25rem; }
         .pagination .page-item.active .page-link { background-color: var(--bs-primary); color: white; }
         .pagination .page-item:not(.active) .page-link:hover { background-color: #f8f9fa; color: var(--bs-primary); }
+        /* Toast notification */
+        .toast-container { position: fixed; top: 20px; right: 20px; z-index: 1060; }
+        .toast { opacity: 0; transition: opacity 0.3s ease; background-color: rgba(25, 135, 84, 0.9); color: white; }
+        .toast.show { opacity: 1; }
     </style>
 }
-
 @section Scripts {
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
     <script>
         $(function () {
+            // Save filters to sessionStorage
+            function saveFilters() {
+                let filters = {
+                    category: $("#categorySelect").val(),
+                    search: $("#searchInput").val(),
+                    minPrice: $("#minPrice").val(),
+                    maxPrice: $("#maxPrice").val(),
+                    sortBy: $("#sortBySelect").val()
+                };
+                sessionStorage.setItem('productFilters', JSON.stringify(filters));
+            }
+
+            // Load filters from sessionStorage if they exist
+            function loadFilters() {
+                let savedFilters = sessionStorage.getItem('productFilters');
+                if (savedFilters) {
+                    savedFilters = JSON.parse(savedFilters);
+                    if (!$("#filtersApplied").val() || $("#filtersApplied").val() === "false") {
+                        if (savedFilters.category) $("#categorySelect").val(savedFilters.category);
+                        if (savedFilters.search) $("#searchInput").val(savedFilters.search);
+                        if (savedFilters.minPrice) $("#minPrice").val(savedFilters.minPrice);
+                        if (savedFilters.maxPrice) $("#maxPrice").val(savedFilters.maxPrice);
+                        if (savedFilters.sortBy) $("#sortBySelect").val(savedFilters.sortBy);
+                        if (savedFilters.minPrice && savedFilters.maxPrice) {
+                            $("#priceSlider").slider("values", [savedFilters.minPrice, savedFilters.maxPrice]);
+                            $("#priceRangeDisplay").text("EGP" + savedFilters.minPrice + " - EGP" + savedFilters.maxPrice);
+                        }
+                    }
+                }
+            }
+
             // Initialize price slider
             var initialMin = parseInt($("#minPrice").val()) || 0;
-            var initialMax = parseInt($("#maxPrice").val()) || 1000;
-            
+            var initialMax = parseInt($("#maxPrice").val()) || 100000;
             $("#priceSlider").slider({
                 range: true,
                 min: 0,
-                max: 1000,
+                max: 100000,
                 values: [initialMin, initialMax],
                 slide: function (event, ui) {
-                    $("#priceRangeDisplay").text("$" + ui.values[0] + " - $" + ui.values[1]);
+                    $("#priceRangeDisplay").text("EGP" + ui.values[0] + " - EGP" + ui.values[1]);
                     $("#minPrice").val(ui.values[0]);
                     $("#maxPrice").val(ui.values[1]);
+                },
+                stop: function(event, ui) {
+                    saveFilters();
+                    $("#filterForm").submit();
                 }
             });
-            
-            $("#priceRangeDisplay").text("$" + $("#priceSlider").slider("values", 0) + " - $" + $("#priceSlider").slider("values", 1));
-            
-            // Reset button functionality
-            $("button[type='reset']").click(function(e) {
-                e.preventDefault();
-                $("form")[0].reset();
-                $("#minPrice").val(0);
-                $("#maxPrice").val(1000);
-                $("#priceSlider").slider("values", [0, 1000]);
-                $("#priceRangeDisplay").text("$0 - $1000");
-                $("form").submit();
+
+            // Update slider based on input values
+            function updateSlider() {
+                var min = parseInt($("#minPrice").val()) || 0;
+                var max = parseInt($("#maxPrice").val()) || 100000;
+                var sliderMin = $("#priceSlider").slider("option", "min");
+                var sliderMax = $("#priceSlider").slider("option", "max");
+
+                // Clamp values to slider range and ensure min <= max
+                if (min < sliderMin) min = sliderMin;
+                if (max > sliderMax) max = sliderMax;
+                if (min > max) {
+                    var temp = min;
+                    min = max;
+                    max = temp;
+                }
+                $("#minPrice").val(min);
+                $("#maxPrice").val(max);
+                $("#priceSlider").slider("values", [min, max]);
+                $("#priceRangeDisplay").text("EGP" + min + " - EGP" + max);
+            }
+
+            // Update display on input for immediate feedback
+            $("#minPrice, #maxPrice").on("input", function () {
+                var min = parseInt($("#minPrice").val()) || 0;
+                var max = parseInt($("#maxPrice").val()) || 100000;
+                $("#priceRangeDisplay").text("EGP" + min + " - EGP" + max);
             });
+
+            // Update slider and submit on change (e.g., blur)
+            $("#minPrice, #maxPrice").on("change", function () {
+                updateSlider();
+                saveFilters();
+                $("#filterForm").submit();
+            });
+
+            // Handle Enter key for immediate submission
+            $("#minPrice, #maxPrice").on("keypress", function (e) {
+                if (e.which === 13) { // Enter key
+                    e.preventDefault();
+                    updateSlider();
+                    saveFilters();
+                    $("#filterForm").submit();
+                }
+            });
+
+            // Debounce function to delay submission
+            function debounce(func, wait) {
+                let timeout;
+                return function (...args) {
+                    clearTimeout(timeout);
+                    timeout = setTimeout(() => func.apply(this, args), wait);
+                };
+            }
+
+            // Submit form on filter change
+            $(".auto-submit").on("change", function () {
+                saveFilters();
+                $("#filterForm").submit();
+            });
+
+            // Search input with debounce
+            $("#searchInput").on("keyup", debounce(function () {
+                saveFilters();
+                $("#filterForm").submit();
+            }, 300));
+
+            // Reset filters
+            $("#resetFilters").on("click", function () {
+                $("#categorySelect").val("");
+                $("#searchInput").val("");
+                $("#sortBySelect").val("newest");
+                $("#minPrice").val(0);
+                $("#maxPrice").val(100000);
+                $("#priceSlider").slider("values", [0, 100000]);
+                $("#priceRangeDisplay").text("EGP0 - EGP100000");
+                sessionStorage.removeItem("productFilters");
+                $("#filterForm").submit();
+            });
+
+            // Load filters on page load
+            loadFilters();
         });
     </script>
 }

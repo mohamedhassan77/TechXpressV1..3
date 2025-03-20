@@ -36,12 +36,15 @@ namespace TechXpress.Controllers
         }
 
         // Displays a paginated list of products, with filtering and search.
-        public async Task<IActionResult> Index(string category, string search, string sortBy, int page = 1, int minPrice = 0, int maxPrice = 10000)
+        public async Task<IActionResult> Index(string category, string search, string sortBy, int page = 1, int minPrice = 0, int maxPrice = 100000)
         {
             int pageSize = 12;
 
             // Get filtered products (using a unified method from your service)
-            var (products, totalCount) = await _productService.GetFilteredProductsAsync(category, search, minPrice, maxPrice, sortBy, page, pageSize);
+            var (products, totalCount) = await _productService.GetFilteredProductsAsync(category, search, minPrice,
+                maxPrice, sortBy, page, pageSize);
+
+
 
             // Get categories for the sidebar
             var domainCategories = await _categoryService.GetAllCategoriesAsync(1, 10, "name_asc");
@@ -60,8 +63,7 @@ namespace TechXpress.Controllers
                 Description = p.Description,
                 Price = p.Price,
                 DiscountPrice = p.DiscountPrice,
-                ImageUrl = p.ImageUrl,
-                IsFeatured = p.IsFeatured,
+                 IsFeatured = p.IsFeatured,
                 CreatedDate = p.CreatedDate,
                 UpdatedDate = p.UpdatedDate,
                 Tag = p.Tag,
@@ -72,7 +74,8 @@ namespace TechXpress.Controllers
                 SKU = p.SKU,
                 Specifications = p.Specifications,
                 OldPrice = p.OldPrice,
-                ProductImages = p.ProductImages.ToList(),
+                ProductImages = p.ProductImages.Select(pi => pi.ImageUrl).ToList(),
+                ImageUrl =  p.ImageUrl,
                 Category = new CategoryViewModel
                 {
                     Id = p.Category.Id,
@@ -136,8 +139,7 @@ namespace TechXpress.Controllers
                     Description = product.Description,
                     Price = product.Price,
                     DiscountPrice = product.DiscountPrice,
-                    ImageUrl = product.ImageUrl,
-                    IsFeatured = product.IsFeatured,
+                       IsFeatured = product.IsFeatured,
                     CreatedDate = product.CreatedDate,
                     UpdatedDate = product.UpdatedDate,
                     Tag = product.Tag,
@@ -147,7 +149,9 @@ namespace TechXpress.Controllers
                     SKU = product.SKU,
                     Specifications = product.Specifications,
                     OldPrice = product.OldPrice,
-                    ProductImages = product.ProductImages.ToList(),
+                    ImageUrl = product.ImageUrl,
+
+                    ProductImages = product.ProductImages.Select(pi => pi.ImageUrl).ToList(),
                     Category = new CategoryViewModel
                     {
                         Id = product.Category.Id,
@@ -162,8 +166,7 @@ namespace TechXpress.Controllers
                     Description = rp.Description,
                     Price = rp.Price,
                     DiscountPrice = rp.DiscountPrice,
-                    ImageUrl = rp.ImageUrl,
-                    IsFeatured = rp.IsFeatured,
+                     IsFeatured = rp.IsFeatured,
                     CreatedDate = rp.CreatedDate,
                     UpdatedDate = rp.UpdatedDate,
                     Tag = rp.Tag,
@@ -173,7 +176,8 @@ namespace TechXpress.Controllers
                     SKU = rp.SKU,
                     Specifications = rp.Specifications,
                     OldPrice = rp.OldPrice,
-                    ProductImages = rp.ProductImages.ToList(),
+                    ProductImages = rp.ProductImages.Select(pi => pi.ImageUrl).ToList(),
+                    ImageUrl =rp.ImageUrl,
                     Category = new CategoryViewModel
                     {
                         Id = rp.Category.Id,
@@ -205,8 +209,7 @@ namespace TechXpress.Controllers
                 Description = p.Description,
                 Price = p.Price,
                 DiscountPrice = p.DiscountPrice,
-                ImageUrl = p.ImageUrl,
-                IsFeatured = p.IsFeatured,
+                 IsFeatured = p.IsFeatured,
                 CreatedDate = p.CreatedDate,
                 UpdatedDate = p.UpdatedDate,
                 Tag = p.Tag,
@@ -216,7 +219,8 @@ namespace TechXpress.Controllers
                 SKU = p.SKU,
                 Specifications = p.Specifications,
                 OldPrice = p.OldPrice,
-                ProductImages = p.ProductImages?.ToList() ?? new List<string>(),
+                ProductImages = p.ProductImages.Select(pi => pi.ImageUrl).ToList(),
+                ImageUrl = p.ImageUrl,
                 AverageRating = p.Reviews.Any() ? p.Reviews.Average(r => r.Rating) : 0,
                 ReviewCount = p.Reviews.Count,
             }).ToList();
