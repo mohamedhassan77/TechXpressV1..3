@@ -1,0 +1,261 @@
+@model TechXpress.Models.OrderHistoryViewModel
+@{
+    ViewData["Title"] = "My Orders";
+}
+
+<div class="container py-5">
+    <div class="row mb-4">
+        <div class="col">
+            <h1 class="display-4 fw-bold text-primary">My Orders</h1>
+            <p class="text-muted lead">Track and manage your purchase history</p>
+        </div>
+    </div>
+
+    @if (!Model.Orders.Any())
+    {
+        <div class="card shadow-sm border-0 rounded-3 p-5 text-center">
+            <div class="card-body">
+                <i class="bi bi-bag-x fs-1 text-muted mb-3"></i>
+                <h3>No Orders Yet</h3>
+                <p class="mb-4">You haven't placed any orders with us yet.</p>
+                <a asp-controller="Product" asp-action="Index" class="btn btn-primary px-4 py-2">Start Shopping</a>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="accordion" id="ordersAccordion">
+            @foreach (var order in Model.Orders)
+            {
+                <div class="accordion-item border-0 shadow-sm mb-4 rounded-3 order-card">
+                    <h2 class="accordion-header" id="heading-@order.Id">
+                        <button class="accordion-button collapsed bg-white rounded-3" type="button"
+                                data-bs-toggle="collapse"
+                                data-bs-target="#collapse-@order.Id"
+                                aria-expanded="false"
+                                aria-controls="collapse-@order.Id">
+                            <div class="d-flex justify-content-between align-items-center w-100">
+                                <div>
+                                    <span class="fw-bold">Order #@order.OrderNumber</span>
+                                    <span class="text-muted ms-3 small">@order.OrderDate.ToString("MMM dd, yyyy")</span>
+                                </div>
+                                <div class="d-flex align-items-center">
+                                    <span class="badge rounded-pill @GetStatusBadgeClass(order.Status.ToString()) me-3">@order.Status</span>
+                                    <span class="fw-bold">@order.Total.ToString("C")</span>
+                                </div>
+                            </div>
+                        </button>
+                    </h2>
+                    <div id="collapse-@order.Id" class="accordion-collapse collapse"
+                         aria-labelledby="heading-@order.Id"
+                         data-bs-parent="#ordersAccordion">
+                        <div class="accordion-body p-0">
+                            <div class="card-body p-4">
+                                <div class="row mb-3">
+                                    <div class="col-md-4">
+                                        <div class="order-info-card p-3 bg-light rounded-3">
+                                            <h5 class="text-primary mb-3"><i class="bi bi-info-circle me-2"></i>Order Details</h5>
+                                            <p class="mb-1"><strong>Order Number:</strong> @order.OrderNumber</p>
+                                            <p class="mb-1"><strong>Date:</strong> @order.OrderDate.ToString("MMMM dd, yyyy")</p>
+                                            <p class="mb-1"><strong>Total:</strong> @order.Total.ToString("C")</p>
+											<p class="mb-1"><strong>Status:</strong> <span class="badge rounded-pill @GetStatusBadgeClass(order.Status.ToString())">@order.Status</span></p>
+ 
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <h5 class="text-primary mb-3"><i class="bi bi-box me-2"></i>Order Items</h5>
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Product</th>
+                                                <th>Price</th>
+                                                <th>Quantity</th>
+                                                <th>Total</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var item in order.OrderItems)
+                                            {
+                                                <tr>
+                                                    <td>
+                                                        <div class="d-flex align-items-center">
+                                                            @if (!string.IsNullOrEmpty(item.Product.ImageUrl))
+                                                            {
+                                                                <img src="@item.Product.ImageUrl" class="img-thumbnail me-3" style="width: 60px; height: 60px; object-fit: cover;" alt="@item.Product.Name" />
+                                                            }
+                                                            <div>
+                                                                <a href="@Url.Action("Details", "Product", new { id = item.Product.Id })" class="text-decoration-none">
+                                                                    <p class="mb-0 fw-bold text-dark">@item.Product.Name</p>
+                                                                </a>
+                                                                @if (!string.IsNullOrEmpty(item.Product.SKU))
+                                                                {
+                                                                    <small class="text-muted d-block">SKU: @item.Product.SKU</small>
+                                                                }
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td>@item.Product.FinalPrice.ToString("C")</td>
+                                                    <td>@item.Quantity</td>
+                                                    <td>@((item.Product.FinalPrice * item.Quantity).ToString("C"))</td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                        <tfoot class="table-light">
+                                            <tr>
+                                                <td colspan="3" class="text-end fw-bold">Order Total:</td>
+                                                <td class="fw-bold">@order.Total.ToString("C")</td>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+
+                                <div class="d-flex justify-content-between mt-4">
+                                    <a asp-controller="Order" asp-action="Details" asp-route-id="@order.Id" class="btn btn-primary">
+                                        <i class="bi bi-file-text me-1"></i> View Full Details
+                                    </a>
+                                    <div>
+                                        @if (order.Status == TechXpress_domain.Enums.OrderStatus.Delivered)
+                                        {
+                                            <a asp-controller="Review" asp-action="Create" asp-route-orderId="@order.Id" class="btn btn-outline-secondary me-2">
+                                                <i class="bi bi-star me-1"></i> Write a Review
+                                            </a>
+                                        }
+                                        @if (order.Status == TechXpress_domain.Enums.OrderStatus.Processing || order.Status == TechXpress_domain.Enums.OrderStatus.Pending)
+                                        {
+                                            <form asp-controller="Order" asp-action="Cancel" method="post" class="d-inline">
+                                                <input type="hidden" name="id" value="@order.Id" />
+                                                @Html.AntiForgeryToken()
+                                                <button type="submit" class="btn btn-outline-danger">
+                                                    <i class="bi bi-x-circle me-1"></i> Cancel Order
+                                                </button>
+                                            </form>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        @* Pagination Controls *@
+        @if (Model.TotalPages > 1)
+        {
+            <nav aria-label="Order Pagination" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item @(Model.CurrentPage == 1 ? "disabled" : "")">
+                        <a class="page-link" asp-action="Index" asp-route-page="@(Model.CurrentPage - 1)">
+                            <i class="bi bi-chevron-left"></i>
+                        </a>
+                    </li>
+
+                    @{
+                        int startPage = Math.Max(1, Model.CurrentPage - 2);
+                        int endPage = Math.Min(Model.TotalPages, startPage + 4);
+
+                        if (startPage > 1)
+                        {
+                            <li class="page-item">
+                                <a class="page-link" asp-action="Index" asp-route-page="1">1</a>
+                            </li>
+                            if (startPage > 2)
+                            {
+                                <li class="page-item disabled">
+                                    <span class="page-link">...</span>
+                                </li>
+                            }
+                        }
+
+                        for (int i = startPage; i <= endPage; i++)
+                        {
+                            <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+                                <a class="page-link" asp-action="Index" asp-route-page="@i">@i</a>
+                            </li>
+                        }
+
+                        if (endPage < Model.TotalPages)
+                        {
+                            if (endPage < Model.TotalPages - 1)
+                            {
+                                <li class="page-item disabled">
+                                    <span class="page-link">...</span>
+                                </li>
+                            }
+                            <li class="page-item">
+                                <a class="page-link" asp-action="Index" asp-route-page="@Model.TotalPages">@Model.TotalPages</a>
+                            </li>
+                        }
+                    }
+
+                    <li class="page-item @(Model.CurrentPage == Model.TotalPages ? "disabled" : "")">
+                        <a class="page-link" asp-action="Index" asp-route-page="@(Model.CurrentPage + 1)">
+                            <i class="bi bi-chevron-right"></i>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        }
+    }
+</div>
+
+@functions {
+    string GetStatusBadgeClass(string status)
+    {
+        return status.ToLower() switch
+        {
+            "delivered" => "bg-success",
+            "shipped" => "bg-info",
+            "processing" => "bg-primary",
+            "pending" => "bg-warning",
+            "cancelled" => "bg-danger",
+            _ => "bg-secondary"
+        };
+    }
+}
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Fade in animation for orders
+            const orders = document.querySelectorAll('.order-card');
+            orders.forEach((order, index) => {
+                setTimeout(() => {
+                    order.style.opacity = '0';
+                    order.style.transform = 'translateY(20px)';
+                    order.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+
+                    setTimeout(() => {
+                        order.style.opacity = '1';
+                        order.style.transform = 'translateY(0)';
+                    }, 100);
+                }, index * 100);
+            });
+                function submitCancelOrder(orderId) {
+            document.getElementById('cancelOrderId').value = orderId;
+            document.getElementById('cancelOrderForm').submit();
+        }
+            // Add sliding animation to accordion
+            const accordionButtons = document.querySelectorAll('.accordion-button');
+            accordionButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const content = this.closest('.accordion-item').querySelector('.accordion-collapse');
+                    if (!content.classList.contains('show')) {
+                        content.style.maxHeight = '0';
+                        content.style.transition = 'max-height 0.5s ease';
+                        setTimeout(() => {
+                            content.style.maxHeight = content.scrollHeight + 'px';
+                        }, 10);
+                    } else {
+                        content.style.maxHeight = content.scrollHeight + 'px';
+                        setTimeout(() => {
+                            content.style.maxHeight = '0';
+                        }, 10);
+                    }
+                });
+            });
+        });
+    </script>
+}

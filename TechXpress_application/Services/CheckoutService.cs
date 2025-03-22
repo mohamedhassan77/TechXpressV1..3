@@ -41,13 +41,13 @@ namespace TechXpress_application.Services
             decimal totalAmount = cart.CartItems.Sum(ci => ci.Quantity * ci.Product.Price);
             string transaction = string.Empty;
 
-            if (paymentMethod.ToLower() == "stripe")
+            if (paymentMethod.Equals("Card", StringComparison.CurrentCultureIgnoreCase))
             {
-                transaction = await _paymentService.ProcessStripePaymentAsync(userId, totalAmount, "USD", transactionId);
+                transaction = await _paymentService.ProcessStripePaymentAsync(userId, totalAmount, "EGP", transactionId);
             }
-            else if (paymentMethod.ToLower() == "paypal")
+            else if (paymentMethod.Equals("paypal", StringComparison.CurrentCultureIgnoreCase))
             {
-                transaction = await _paymentService.ProcessPayPalPaymentAsync(userId, totalAmount, "USD");
+                transaction = await _paymentService.ProcessPayPalPaymentAsync(userId, totalAmount, "EGP");
             }
             else
             {

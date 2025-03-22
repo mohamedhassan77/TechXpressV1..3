@@ -31,7 +31,6 @@ namespace TechXpress.Controllers
                 // Get featured products with paging.
                 var featuredProducts = await _productService.GetFeaturedProductsAsync(page, pageSize);
 
-                // Map each product to a ProductViewModel safely.
                 var productViewModels = featuredProducts.Select(p => new ProductViewModel
                 {
                     Id = p.Id,
@@ -50,7 +49,7 @@ namespace TechXpress.Controllers
                     SKU = p.SKU,
                     Specifications = p.Specifications,
                     OldPrice = p.OldPrice,
-                    ProductImages = p.ProductImages.Select(pi => pi.ImageUrl)?.ToList() ?? new List<string>(),
+                    ProductImages = p.ProductImages.Any() ? p.ProductImages.Select(pi => pi.ImageUrl).ToList() : new List<string> { p.ImageUrl },
                     AverageRating = (p.Reviews != null && p.Reviews.Any()) ? p.Reviews.Average(r => r.Rating) : 0,
                     ReviewCount = p.Reviews?.Count() ?? 0,
                     Category = p.Category != null ? new CategoryViewModel
@@ -64,7 +63,7 @@ namespace TechXpress.Controllers
                     } : new CategoryViewModel { Id = 0, Name = "Uncategorized" }
                 }).ToList();
 
-                // Get categories for navigation.
+                // Get categories for navigation
                 var categories = await _categoryService.GetAllCategoriesAsync(1, 10, "name_asc");
                 var categoryViewModels = categories.Select(c => new CategoryViewModel
                 {
@@ -82,10 +81,10 @@ namespace TechXpress.Controllers
                     HeroText = "Welcome to TechXpress",
                     HeroDescription = "Discover a world where every gadget opens the door to a brighter future. Experience tech in a whole new way.",
                     FeaturedProducts = productViewModels,
-                    Categories = categoryViewModels
-                };
+                    Categories = categoryViewModels,
+                    FeaturedProductsPage = page,
+                 };
 
-                // Optionally, store categories in ViewData.
                 ViewData["Categories"] = categories;
                 return View(viewModel);
             }
@@ -95,6 +94,5 @@ namespace TechXpress.Controllers
                 return View("Error");
             }
         }
-
     }
 }

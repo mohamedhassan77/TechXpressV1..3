@@ -7,8 +7,7 @@ namespace TechXpress.Models
     {
         public int Id { get; set; }
 
-        [Required]
-        [Display(Name = "Comment")]
+         [Display(Name = "Comment")]
         public string Comment { get; set; } = string.Empty;
 
         [Range(1, 5, ErrorMessage = "Rating must be between 1 and 5.")]

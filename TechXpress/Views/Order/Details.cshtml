@@ -33,16 +33,15 @@
                     @foreach (var item in Model.Items)
                     {
                         <div class="order-item">
-                            <img src="@item.Product.ProductImages.Any() ? Product.ProductImages.First().ImageUrl : " https: //media.istockphoto.com/id/1159977010/id/vektor/simbol-ikon-produk-tanda-kreatif-dari-koleksi-ikon-kontrol-kualitas-ikon-produk-datar-terisi.jpg?s =170667a&w =0&k =20&c =FAID-1QdehsBNVqXEB2c8aefl6uGVRer93X8L9wmj9k =",
-    " alt="@item.Product.Name">
+                            <img src="@(item.Product.ProductImages.FirstOrDefault()?.ImageUrl ?? item.Product.ImageUrl)" alt="@item.Product.Name">
                             <div class="item-details">
                                 <h3>@item.Product.Name</h3>
                                 <p class="item-sku">SKU: @item.Product.SKU</p>
                                 <div class="item-price-qty">
-                                    <span class="item-price">@item.Subtotal.ToString("C")</span>
+                                    <span class="item-price">@item.PriceAtPurchase.ToString("C")</span>
                                     <span class="item-quantity">Qty: @item.Quantity</span>
                                 </div>
-                                <p class="item-total">@((item.Subtotal * item.Quantity).ToString("C"))</p>
+                                <p class="item-total">@((item.Quantity * item.PriceAtPurchase).ToString("C"))</p>
                             </div>
                         </div>
                     }
@@ -104,13 +103,16 @@
                 <h2>Payment Information</h2>
                 <div class="payment-details">
                     <p>Payment Method: @Model.PaymentMethod</p>
-                    @if (!string.IsNullOrEmpty(Model.PaymentMethod))
-                    {
-                        <p>Payment Reference: @Model.PaymentMethod</p>
-                    }
+                    <p>Payment Details: @Model.PaymentDetails</p>
                 </div>
             </div>
         </div>
+    </div>
+
+ 
+    <div class="details-actions">
+        <a asp-action="Index" class="btn btn-back">Back to Orders</a>
+        <a href="javascript:window.print()" class="btn btn-print">Print Order</a>
     </div>
 </div>
 
@@ -145,11 +147,30 @@
             text-align: center;
         }
 
-        .order-status.pending { background: #fff3cd; color: #856404; }
-        .order-status.processing { background: #cce5ff; color: #004085; }
-        .order-status.shipped { background: #d4edda; color: #155724; }
-        .order-status.delivered { background: #d1e7dd; color: #0f5132; }
-        .order-status.cancelled { background: #f8d7da; color: #721c24; }
+            .order-status.pending {
+                background: #fff3cd;
+                color: #856404;
+            }
+
+            .order-status.processing {
+                background: #cce5ff;
+                color: #004085;
+            }
+
+            .order-status.shipped {
+                background: #d4edda;
+                color: #155724;
+            }
+
+            .order-status.delivered {
+                background: #d1e7dd;
+                color: #0f5132;
+            }
+
+            .order-status.cancelled {
+                background: #f8d7da;
+                color: #721c24;
+            }
 
         .tracking-info {
             margin-top: 10px;
@@ -186,12 +207,12 @@
             border-bottom: 1px solid #eee;
         }
 
-        .order-item img {
-            width: 100px;
-            height: 100px;
-            object-fit: cover;
-            border-radius: 5px;
-        }
+            .order-item img {
+                width: 100px;
+                height: 100px;
+                object-fit: cover;
+                border-radius: 5px;
+            }
 
         .item-details h3 {
             margin: 0 0 5px;
@@ -225,13 +246,13 @@
             padding: 8px 0;
         }
 
-        .price-row.total {
-            border-top: 2px solid #eee;
-            margin-top: 10px;
-            padding-top: 15px;
-            font-weight: bold;
-            font-size: 1.2rem;
-        }
+            .price-row.total {
+                border-top: 2px solid #eee;
+                margin-top: 10px;
+                padding-top: 15px;
+                font-weight: bold;
+                font-size: 1.2rem;
+            }
 
         .discount {
             color: #28a745;
@@ -242,71 +263,13 @@
             margin-top: 15px;
         }
 
-        .address-details p,
-        .payment-details p {
-            margin: 5px 0;
-        }
+            .address-details p,
+            .payment-details p {
+                margin: 5px 0;
+            }
 
         .name {
             font-weight: bold;
-        }
-
-        .payment-method {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .card-info {
-            color: #666;
-            font-size: 0.9rem;
-        }
-
-        .order-timeline {
-            margin-top: 20px;
-        }
-
-        .timeline-item {
-            display: flex;
-            gap: 15px;
-            padding: 15px 0;
-            position: relative;
-        }
-
-        .timeline-item:not(:last-child)::after {
-            content: '';
-            position: absolute;
-            left: 15px;
-            top: 45px;
-            bottom: 0;
-            width: 2px;
-            background: #eee;
-        }
-
-        .timeline-icon {
-            width: 30px;
-            height: 30px;
-            background: #f8f9fa;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1;
-        }
-
-        .timeline-item.current .timeline-icon {
-            background: #28a745;
-            color: white;
-        }
-
-        .timeline-content h4 {
-            margin: 0 0 5px;
-        }
-
-        .timeline-content p {
-            margin: 0;
-            color: #666;
-            font-size: 0.9rem;
         }
 
         .details-actions {
@@ -315,62 +278,68 @@
             margin-top: 30px;
         }
 
-        .btn-review,
-        .btn-cancel,
-        .btn-print,
-        .btn-invoice,
-        .btn-back {
+        .btn-back,
+        .btn-print {
             padding: 10px 20px;
             border-radius: 5px;
-            cursor: pointer;
+            text-decoration: none;
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            text-decoration: none;
         }
 
-        .btn-review { background: #28a745; color: white; border: none; }
-        .btn-cancel { background: #dc3545; color: white; border: none; }
-        .btn-print { background: #6c757d; color: white; border: none; }
-        .btn-invoice { background: #007bff; color: white; }
-        .btn-back { background: #f8f9fa; color: #333; border: 1px solid #ddd; }
+        .btn-back {
+            background: #f8f9fa;
+            color: #333;
+            border: 1px solid #ddd;
+        }
 
+        .btn-print {
+            background: #6c757d;
+            color: white;
+            border: none;
+        }
         @@media (max-width: 992px) {
-            .details-grid {
-                grid-template-columns: 1fr;
-            }
+            .details-grid
+
+        {
+            grid-template-columns: 1fr;
         }
 
+        }
         @@media (max-width: 768px) {
-            .details-header {
-                flex-direction: column;
-                gap: 15px;
-            }
+            .details-header
 
-            .details-actions {
-                flex-direction: column;
-            }
-
-            .btn-review,
-            .btn-cancel,
-            .btn-print,
-            .btn-invoice,
-            .btn-back {
-                width: 100%;
-                justify-content: center;
-            }
+        {
+            flex-direction: column;
+            gap: 15px;
         }
 
+        .details-actions {
+            flex-direction: column;
+        }
+
+        .btn-back,
+        .btn-print {
+            width: 100%;
+            justify-content: center;
+        }
+
+        }
         @@media print {
-            .details-actions {
-                display: none;
-            }
+            .details-actions
+
+        {
+            display: none;
+        }
+
         }
     </style>
 }
 
 @section Scripts {
     <script>
+        // JavaScript functions for canceling the order if needed
         function cancelOrder() {
             if (confirm('Are you sure you want to cancel this order?')) {
                 fetch(`/Order/Cancel/@Model.OrderId`, {
@@ -386,6 +355,10 @@
                     }
                 });
             }
+        }
+        function submitCancelOrder(orderId) {
+            document.getElementById('cancelOrderId').value = orderId;
+            document.getElementById('cancelOrderForm').submit();
         }
     </script>
 }

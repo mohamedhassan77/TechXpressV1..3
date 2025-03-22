@@ -1,4 +1,5 @@
-﻿@model TechXpress.Models.HomeViewModel
+﻿@using System.Text.Json
+@model TechXpress.Models.HomeViewModel
 @{
     ViewData["Title"] = "Home";
     Layout = "_Layout";
@@ -36,16 +37,13 @@
                 }
 
             @@keyframes backgroundMove {
-                0%
+                0% {
+                    transform: translate(-50%, -50%) rotate(0deg);
+                }
 
-            {
-                transform: translate(-50%, -50%) rotate(0deg);
-            }
-
-            100% {
-                transform: translate(-50%, -50%) rotate(360deg);
-            }
-
+                100% {
+                    transform: translate(-50%, -50%) rotate(360deg);
+                }
             }
 
             .hero-content {
@@ -76,16 +74,13 @@
             }
 
             @@keyframes titleGlow {
-                0%
+                0% {
+                    text-shadow: 0 0 20px rgba(255, 51, 102, 0.1);
+                }
 
-            {
-                text-shadow: 0 0 20px rgba(255, 51, 102, 0.1);
-            }
-
-            100% {
-                text-shadow: 0 0 40px rgba(255, 51, 102, 0.3);
-            }
-
+                100% {
+                    text-shadow: 0 0 40px rgba(255, 51, 102, 0.3);
+                }
             }
 
             .hero-text p {
@@ -131,16 +126,13 @@
             }
 
             @@keyframes slideDiscounts {
-                0%
+                0% {
+                    transform: translateX(0);
+                }
 
-            {
-                transform: translateX(0);
-            }
-
-            100% {
-                transform: translateX(-50%);
-            }
-
+                100% {
+                    transform: translateX(-50%);
+                }
             }
 
             .device-mockup {
@@ -617,21 +609,19 @@
                 font-size: 0.9rem;
                 color: #666;
             }
+
             @@media (max-width: 768px) {
-                .modal-grid
+                .modal-grid {
+                    grid-template-columns: 1fr;
+                }
 
-            {
-                grid-template-columns: 1fr;
-            }
+                .modal-content {
+                    padding: 1rem;
+                }
 
-            .modal-content {
-                padding: 1rem;
-            }
-
-            .product-meta {
-                grid-template-columns: 1fr;
-            }
-
+                .product-meta {
+                    grid-template-columns: 1fr;
+                }
             }
 
             .toast {
@@ -653,17 +643,15 @@
                 .toast.error {
                     background: #dc3545;
                 }
+
             @@keyframes slideIn {
-                from
+                from {
+                    transform: translateX(100%);
+                }
 
-            {
-                transform: translateX(100%);
-            }
-
-            to {
-                transform: translateX(0);
-            }
-
+                to {
+                    transform: translateX(0);
+                }
             }
 
             .product-link {
@@ -680,19 +668,21 @@
 
 
 
-            
-          
+
+
             /* --------------------------------------------------------------------------
-               SHOP BY CATEGORY (Cards)
-               -------------------------------------------------------------------------- */
+                           SHOP BY CATEGORY (Cards)
+                           -------------------------------------------------------------------------- */
             .categories {
                 padding: 4rem 0;
             }
+
             .categories-grid {
                 display: grid;
                 grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
                 gap: 1.5rem;
             }
+
             .category-card {
                 display: block;
                 position: relative;
@@ -701,27 +691,30 @@
                 box-shadow: 0 2px 8px rgba(0,0,0,0.1);
                 transition: transform var(--transition-speed) ease;
             }
-            .category-card:hover {
-                transform: translateY(-5px);
-            }
-            .category-card img {
-                width: 100%;
-                height: 200px;
-                object-fit: cover;
-            }
-            .category-card .category-overlay {
-                position: absolute;
-                bottom: 0;
-                left: 0;
-                width: 100%;
-                background: rgba(0,0,0,0.6);
-                color: #fff;
-                padding: 0.5rem;
-                text-align: center;
-            }
+
+                .category-card:hover {
+                    transform: translateY(-5px);
+                }
+
+                .category-card img {
+                    width: 100%;
+                    height: 200px;
+                    object-fit: cover;
+                }
+
+                .category-card .category-overlay {
+                    position: absolute;
+                    bottom: 0;
+                    left: 0;
+                    width: 100%;
+                    background: rgba(0,0,0,0.6);
+                    color: #fff;
+                    padding: 0.5rem;
+                    text-align: center;
+                }
         </style>
     }
-   </head>
+</head>
 
 <!-- Hero Section -->
 <section class="hero" aria-label="Hero Section">
@@ -741,19 +734,14 @@
                     @foreach (var product in Model.FeaturedProducts)
                     {
                         <div class="discount-item">
-                            <a href="@Url.Action("Details", "Product", new { id = product.Id })">
-                                <img src="@product.ImageUrl" alt="@product.ProductImages" />
-                            </a>
+                            <img src="@product.ImageUrl" alt="@product.ProductImages" />
                             <div class="discount-overlay">
-                                <span class="discount-info">
-                                    Save @((product.Price - (product.DiscountPrice ?? product.Price)).ToString("C"))
-                                </span>
+                                <span class="discount-info">Save @((product.Price - (product.DiscountPrice ?? product.Price)).ToString("C"))</span>
                             </div>
                         </div>
                     }
                 </div>
             </div>
-
         </div>
     </div>
 </section>
@@ -780,7 +768,15 @@
                                     </button>
                                 </form>
                                 <button type="button" class="action-button"
-                                        onclick="openModal('@product.Name', '@product.Description', '@product.FinalPrice', '@product.ImageUrl', '@product.Id')"
+                                        data-name="@product.Name"
+                                        data-rating="@product.AverageRating"
+                                        data-reviewcount="@product.ReviewCount"
+                                        data-description="@product.Description"
+                                        data-price="@product.FinalPrice"
+                                        data-imageurl="@product.ImageUrl"
+                                        data-id="@product.Id"
+                                        data-images='@Html.Raw(JsonSerializer.Serialize(product.ProductImages))'
+                                        onclick="openModalFromData(this)"
                                         title="Quick View">
                                     <i class="fas fa-eye" aria-hidden="true"></i>
                                 </button>
@@ -796,7 +792,7 @@
                     <div class="product-content">
                         <div class="product-category">@product.Category?.Name</div>
                         <h3 class="product-title">
-                            <a asp-controller="Product" asp-action="De50tails" asp-route-id="@product.Id">
+                            <a asp-controller="Product" asp-action="Details" asp-route-id="@product.Id">
                                 @product.Name
                             </a>
                         </h3>
@@ -805,7 +801,8 @@
                                 var rating = product.AverageRating;
                                 for (int i = 1; i <= 5; i++)
                                 {
-                                    <i class="fas fa-star @(i <= rating ? "active" : "")" aria-hidden="true"></i>;
+                                    <i class="fas fa-star @(i <= rating ? "active" : "")" aria-hidden="true"></i>
+                                    ;
                                 }
                             }
                             <span class="rating-count">(@(product.ReviewCount) Reviews)</span>
@@ -850,30 +847,118 @@
 
 <!-- Single Quick View Modal (Shared Partial) -->
 @await Html.PartialAsync("_QuickView")
-
+ 
 @section Scripts {
     <script>
-        // Helper: Get the Request Verification Token
+           // Helper: Get the Request Verification Token
         const getRequestVerificationToken = () => {
             const tokenInput = document.querySelector('input[name="__RequestVerificationToken"]');
             return tokenInput ? tokenInput.value : '';
         };
 
+        // Initialize Swiper when document is loaded
+        document.addEventListener('DOMContentLoaded', () 
+        => {
+            // Initialize Swiper if it exists on the page
+            if (document.querySelector('.swiper')) {
+                const swiper = new Swiper(".mySwiper", {
+                    pagination: {
+                        el: ".swiper-pagination",
+                        type: "progressbar",
+                    },
+                    navigation: {
+                        nextEl: ".swiper-button-next",
+                        prevEl: ".swiper-button-prev",
+                    },
+                });
+            }
+        });
+
         // Open the modal and populate product details dynamically
-        function openModal(name, description, price, imageUrl, productId) {
+        function openModal(name, description, price, imageUrl, productId)
+        {
+            // References to modal elements
             const modal = document.getElementById('productModal');
-            modal.style.display = 'flex';
-            setTimeout(() => { modal.classList.add('active'); }, 10);
+            const swiperWrapper = document.getElementById('swiper-wrapper');
+            const thumbnailContainer = document.getElementById('thumbnail-container');
+
+            // Clear existing slides and thumbnails
+            if (swiperWrapper) swiperWrapper.innerHTML = '';
+            if (thumbnailContainer) thumbnailContainer.innerHTML = '';
+
+            // Add main image to swiper
+            if (swiperWrapper) {
+                swiperWrapper.innerHTML = `
+                    <div class="swiper-slide">
+                        <img src="${imageUrl}" alt="${name}" class="modal-product-image">
+                    </div>
+                `;
+            }
+
+            // Add thumbnail
+            if (thumbnailContainer) 
+            {
+                thumbnailContainer.innerHTML = `
+                    <div class="thumbnail active" data-index="0">
+                        <img src="${imageUrl}" alt="${name}">
+                    </div>
+                `;
+            }
+
+            // Update product details
             document.getElementById('modal-product-name').innerText = name;
             document.getElementById('modal-product-description').innerText = description;
             document.getElementById('modal-product-price').innerText = parseFloat(price).toLocaleString('en-US', {
                 style: 'currency',
                 currency: 'EGP'
             });
-            document.getElementById('modal-product-image').src = imageUrl;
-            document.getElementById('modal-thumbnail-1').src = imageUrl;
+
+            // Update form hidden inputs for Add to Cart and Buy Now
             document.getElementById("modalProductId").value = productId;
             document.getElementById("modalProductIdOrder").value = productId;
+
+            // Display modal with animation
+            modal.style.display = 'block';
+            setTimeout(() => {
+                modal.classList.add('active');
+            }, 10);
+
+            // Reset quantity
+            document.getElementById('quantity').value = 1;
+
+            // Generate star ratings (assuming a default rating of 4 out of 5)
+            const starsContainer = document.getElementById('modal-stars');
+            if (starsContainer) {
+                starsContainer.innerHTML = '';
+                for (let i = 0; i < 5; i++) {
+                    const star = document.createElement('i');
+                    star.className = i < 4 ? 'fas fa-star' : 'far fa-star';
+                    starsContainer.appendChild(star);
+                }
+            }
+
+            // Set review count (example value)
+            const reviewCount = document.getElementById('modal-review-count');
+            if (reviewCount) {
+                reviewCount.innerText = '(24 Reviews)';
+            }
+
+            // Set in-stock status
+            document.getElementById('stock-status').innerHTML = '<i class="fas fa-check-circle"></i> In Stock';
+
+            // Reinitialize Swiper if needed
+            if (typeof Swiper !== 'undefined') {
+                const swiper = new Swiper(".mySwiper", {
+                    pagination: {
+                        el: ".swiper-pagination",
+                        type: "progressbar",
+                    },
+                    navigation: {
+                        nextEl: ".swiper-button-next",
+                        prevEl: ".swiper-button-prev",
+                    },
+                });
+            }
         }
 
         // Close the modal
@@ -883,21 +968,6 @@
             setTimeout(() => { modal.style.display = 'none'; }, 300);
         }
 
-        // Close modal when clicking outside the content or pressing Escape key
-        document.addEventListener('DOMContentLoaded', () => {
-            const modal = document.getElementById('productModal');
-            modal.addEventListener('click', (event) => {
-                if (event.target === modal) {
-                    closeModal();
-                }
-            });
-            document.addEventListener('keydown', (event) => {
-                if (event.key === 'Escape' && modal.style.display === 'flex') {
-                    closeModal();
-                }
-            });
-        });
-
         // Update quantity ensuring it stays between 1 and 99
         function updateQuantity(change) {
             const quantityInput = document.getElementById('quantity');
@@ -906,90 +976,41 @@
             quantityInput.value = newValue;
         }
 
-        // Additional functions for AJAX cart/wishlist operations can be centralized here...
-        async function addToCart(productId) {
-            try {
-                const response = await fetch('/Cart/Add', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'RequestVerificationToken': getRequestVerificationToken()
-                    },
-                    body: JSON.stringify({
-                        productId: productId,
-                        quantity: document.getElementById('quantity')?.value || 1
-                    })
-                });
-                if (response.ok) {
-                    showToast('Product added to cart!');
-                    updateCartCount(1);
-                } else {
-                    showToast('Failed to add to cart', 'error');
+        // Event listeners for modal
+        document.addEventListener('DOMContentLoaded', () => {
+            const modal = document.getElementById('productModal');
+
+            // Close modal when clicking on the overlay
+            const overlay = document.querySelector('.modal-overlay');
+            if (overlay) {
+                overlay.addEventListener('click', closeModal);
+            }
+
+            // Close modal with Escape key
+            document.addEventListener('keydown', (event) => {
+                if (event.key === 'Escape' && modal.style.display === 'block') {
+                    closeModal();
                 }
-            } catch (error) {
-                console.error('Error:', error);
-                showToast('Network error', 'error');
-            }
-        }
+            });
 
-        async function addToWishlist(productId) {
-            try {
-                const response = await fetch('/Wishlist/Add', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'RequestVerificationToken': getRequestVerificationToken()
-                    },
-                    body: JSON.stringify({ productId: productId })
-                });
-                if (response.ok) {
-                    showToast('Added to wishlist!');
-                } else {
-                    showToast('Failed to add to wishlist', 'error');
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                showToast('Network error', 'error');
-            }
-        }
-
-        function showToast(message, type = 'success') {
-            const toast = document.createElement('div');
-            toast.className = `toast ${type}`;
-            toast.textContent = message;
-            document.body.appendChild(toast);
-            setTimeout(() => toast.remove(), 3000);
-        }
-
-        // Smooth scroll for any scroll down button (if present)
-        document.addEventListener("DOMContentLoaded", () => {
-            const scrollButton = document.getElementById("scrollDownButton");
-            if (scrollButton) {
-                scrollButton.addEventListener("click", (e) => {
-                    e.preventDefault();
-                    document.querySelector("#featured-products").scrollIntoView({ behavior: "smooth", block: "start" });
-                });
-            }
-        });
-
-        // Auto slide for Sales Promotions in Hero
-        document.addEventListener("DOMContentLoaded", () => {
-            const slider = document.querySelector(".sales-slider .sales-slider-inner");
-            if (slider) {
-                let scrollAmount = 0;
-                const step = 1;
-                const slideInterval = setInterval(() => {
-                    if (scrollAmount >= slider.scrollWidth - slider.clientWidth) {
-                        scrollAmount = 0;
-                        slider.scrollLeft = 0;
-                    } else {
-                        scrollAmount += step;
-                        slider.scrollLeft += step;
+            // Thumbnail click handling
+            const thumbnailContainer = document.getElementById('thumbnail-container');
+            if (thumbnailContainer) {
+                thumbnailContainer.addEventListener('click', (e) => {
+                    const thumbnail = e.target.closest('.thumbnail');
+                    if (thumbnail) {
+                        const index = thumbnail.dataset.index;
+                        // Update active thumbnail
+                        document.querySelectorAll('.thumbnail').forEach(t => t.classList.remove('active'));
+                        thumbnail.classList.add('active');
+                        // Slide to the corresponding slide
+                        if (typeof swiper !== 'undefined') {
+                            swiper.slideTo(index);
+                        }
                     }
-                }, 30);
+                });
             }
         });
-
-      
     </script>
 }
+

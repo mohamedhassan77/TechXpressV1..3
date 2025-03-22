@@ -21,12 +21,12 @@ namespace TechXpress_infrastructure.Repositories
         {
             return await _context.Products
                 .Include(p => p.Category)
+                .Include(p => p.ProductImages)
                 .Include(p => p.Reviews)
-                .ThenInclude(r => r.ApplicationUser)
-                .ThenInclude(u=>u.UserProfile)
+                    .ThenInclude(r => r.ApplicationUser)
+                        .ThenInclude(u => u.UserProfile)
                 .FirstOrDefaultAsync(p => p.Id == id);
         }
-
 
         public async Task UpdateAsync(Product product)
         {
@@ -53,6 +53,7 @@ namespace TechXpress_infrastructure.Repositories
         {
             return await _context.Products
                 .Where(p => p.IsFeatured)
+                .Include(p => p.ProductImages)
                 .OrderBy(p => p.Price)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)

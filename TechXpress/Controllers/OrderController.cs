@@ -6,6 +6,11 @@ using System.Threading.Tasks;
 using TechXpress_domain.Interfaces.Services;
 using TechXpress_domain.Entities;
 using Microsoft.Extensions.Logging;
+using TechXpress.Models;
+using System.Collections.Generic;
+using System;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Http;
 
 namespace TechXpress.Controllers
 {
@@ -14,49 +19,104 @@ namespace TechXpress.Controllers
     {
         private readonly IOrderService _orderService;
         private readonly ICartService _cartService;
+        private readonly IUserProfileService _userProfileService;
+        private readonly UserManager<ApplicationUser> userManager;
+
         private readonly ILogger<OrderController> _logger;
 
-        public OrderController(IOrderService orderService, ICartService cartService, ILogger<OrderController> logger)
+        public OrderController(IOrderService orderService, ICartService cartService, ILogger<OrderController> logger, IUserProfileService userProfileService , UserManager<ApplicationUser> user)
         {
             _orderService = orderService;
             _cartService = cartService;
             _logger = logger;
+            _userProfileService = userProfileService;
+            userManager = user;
+
         }
 
+        // Order history mapped to a view model
         public async Task<IActionResult> Index()
         {
             try
             {
                 var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
                 var orders = await _orderService.GetOrdersByUserIdAsync(userId);
-                // Optionally map each order to an OrderDetailsViewModel
-                return View(orders);
+
+                // Map orders to OrderHistoryViewModel
+                var viewModel = new OrderHistoryViewModel
+                {
+                    UserId = userId,
+                    Orders = orders.ToList(),
+                    DateRange = "All Time",
+                    FilterStatus = "All",
+                    SortBy = "DateDesc",
+                    CurrentPage = 1,
+                    ItemsPerPage = 10,
+                    TotalPages = (int)Math.Ceiling(orders.Count() / 10.0),
+                    HasMoreOrders = orders.Count() > 10
+                    
+                    
+                };
+
+                return View(viewModel);
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
                 _logger.LogError(ex, "Error retrieving orders");
                 TempData["ErrorMessage"] = "Failed to load orders";
-                return View(Enumerable.Empty<Order>());
+                return View(new OrderHistoryViewModel { Orders = new List<Order>() });
             }
         }
 
+        // Order details mapped to a view model
         public async Task<IActionResult> Details(int id)
         {
             try
             {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
                 var order = await _orderService.GetOrderByIdAsync(id);
                 if (order == null)
                     return NotFound();
-                // Optionally map order to OrderDetailsViewModel here
-                return View(order);
+                 var user = await _userProfileService.GetUserProfileAsync( userId);
+                var defaultAddress =  user.Addresses.FirstOrDefault();
+
+
+                var shippingAddress = order.ApplicationUser?.Addresses?.FirstOrDefault() ?? defaultAddress;
+                var billingAddress = order.ApplicationUser?.Addresses?.FirstOrDefault() ?? defaultAddress;
+
+                // Map domain order to OrderDetailsViewModel
+                var viewModel = new OrderDetailsViewModel
+                {
+                    OrderId = order.OrderNumber,
+                    OrderDate = order.OrderDate,
+                    CurrentStatus = order.Status.ToString(),
+                    StatusHistory = new List<OrderStatusHistory>(), 
+                    Items = order.OrderItems?.ToList() ?? new List<OrderItem>(),
+                    ShippingAddress = shippingAddress,
+                    BillingAddress = billingAddress,
+                    PaymentMethod = order.PaymentMethod,
+                    PaymentDetails = !string.IsNullOrEmpty(order.CardType)
+                        ? $"{order.CardType} ending in {order.LastFourDigits}"
+                        : $"Transaction ID: {order.TransactionId}",
+                    Subtotal = order.TotalPrice,
+                    ShippingCost = 15,
+                    Tax = 5,
+                    Discount = order.Discount,
+                    Total = order.Total,
+                    TrackingNumber = order.TrackingNumber,
+                    EstimatedDeliveryDate = order.OrderDate.AddDays(6)
+                };
+
+                return View(viewModel);
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
                 _logger.LogError(ex, "Error retrieving order details");
                 TempData["ErrorMessage"] = "Failed to load order details";
                 return RedirectToAction(nameof(Index));
             }
         }
+
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -65,15 +125,44 @@ namespace TechXpress.Controllers
             try
             {
                 var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-                // Dummy payment data for example purposes
+  
                 string paymentMethod = "stripe";
-                string transactionId = "dummyTransaction";
+                string transactionId = "Test Transaction";
                 var orderMessage = await _orderService.PlaceOrderAsync(userId, paymentMethod, transactionId);
                 await _cartService.ClearCartAsync(userId);
                 TempData["SuccessMessage"] = orderMessage;
+                var order =  _orderService.GetOrdersByUserIdAsync(userId).Result.FirstOrDefault();
+                var defaultAddress = _userProfileService.GetDefaultShippingAddressAsync(userId).Result;
+
+
+                var shippingAddress = order.ApplicationUser?.Addresses?.FirstOrDefault() ;
+                var billingAddress = order.ApplicationUser?.Addresses?.FirstOrDefault() ?? defaultAddress;
+
+                var OrderDetail = new OrderDetailsViewModel
+                {
+                    OrderId = order.OrderNumber,
+                    OrderDate = order.OrderDate,
+                    CurrentStatus = order.Status.ToString(),
+                    StatusHistory = new List<OrderStatusHistory>(),
+                    Items = order.OrderItems?.ToList() ?? new List<OrderItem>(),
+                    ShippingAddress = shippingAddress,
+                    BillingAddress = billingAddress,
+                    PaymentMethod = order.PaymentMethod,
+                    PaymentDetails = !string.IsNullOrEmpty(order.CardType)
+                        ? $"{order.CardType} ending in {order.LastFourDigits}"
+                        : $"Transaction ID: {order.TransactionId}",
+                    Subtotal = order.TotalPrice,
+                    ShippingCost = 15,
+                    Tax = 5,
+                    Discount = order.Discount,
+                    Total = order.Total,
+                    TrackingNumber = order.TrackingNumber,
+
+                    EstimatedDeliveryDate = order.OrderDate.AddDays(6)
+                };
                 return RedirectToAction(nameof(Index));
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
                 _logger.LogError(ex, "Error creating order");
                 TempData["ErrorMessage"] = "Failed to create order";
@@ -92,7 +181,7 @@ namespace TechXpress.Controllers
                 TempData["SuccessMessage"] = result;
                 return RedirectToAction(nameof(Index));
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
                 _logger.LogError(ex, "Error cancelling order");
                 TempData["ErrorMessage"] = "Failed to cancel order";

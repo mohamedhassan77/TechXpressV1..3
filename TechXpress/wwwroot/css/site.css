@@ -269,7 +269,7 @@ a {
 
 /* Cart and Wishlist Badge */
 .badge {
-    position: absolute;
+    position: static;
     top: -8px;
      background: var(--accent);
     color: #fff;

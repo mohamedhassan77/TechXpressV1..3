@@ -1,4 +1,4 @@
-﻿@model CheckoutViewModel
+﻿@model TechXpress.Models.CheckoutViewModel
 
 @{
     ViewData["Title"] = "Checkout";
@@ -8,28 +8,36 @@
     <div class="checkout-grid">
         <div class="checkout-form">
             <h1>Checkout</h1>
-            
+
             <form asp-action="PlaceOrder" method="post">
                 <div class="form-section">
                     <h2>Shipping Address</h2>
                     <div class="saved-addresses">
-                        @foreach (var address in Model.SavedAddresses)
+                        @if (Model.SavedAddresses.Any())
                         {
-                            <div class="address-card">
-                                <input type="radio" name="shippingAddressId" value="@address.Id" 
-                                       id="address_@address.Id" @(address.IsDefault ? "checked" : "")>
-                                <label for="address_@address.Id">
-                                    <strong>@address.FullName</strong>
-                                    <p>@address.Street</p>
-                                    <p>@address.City, @address.State @address.PostalCode</p>
-                                    <p>@address.Phone</p>
-                                </label>
-                            </div>
+                            @foreach (var address in Model.SavedAddresses)
+                            {
+                                <div class="address-card">
+                                    <input type="radio" name="shippingAddressId" value="@address.Id"
+                                           id="address_@address.Id" @(address.IsDefault ? "checked" : "")>
+                                    <label for="address_@address.Id">
+                                        <strong>@address.FirstName @address.LastName</strong>
+                                        <p>@address.Street</p>
+                                        <p>@address.City, @address.State @address.PostalCode</p>
+                                        <p>@address.Phone</p>
+                                    </label>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <p>No saved addresses. Please add a new address.</p>
                         }
                         <button type="button" class="btn-add-address" onclick="showNewAddressForm()">
                             <i class="fas fa-plus"></i> Add New Address
                         </button>
                     </div>
+
 
                     <div id="newAddressForm" class="new-address-form" style="display: none;">
                         <div class="form-row">
@@ -115,6 +123,10 @@
                         </div>
                     </div>
                 </div>
+
+                 <button type="submit" class="btn-place-order">
+                    Place Order
+                </button>
             </form>
         </div>
 
@@ -124,7 +136,7 @@
                 @foreach (var item in Model.CartItems)
                 {
                     <div class="cart-item">
-                        <img src="@item.Product.ProductImages.Any()" alt="@item.Product.Name">
+                        <img src="@(item.Product.ImageUrl)" alt="@item.Product.Name">
                         <div class="item-details">
                             <h3>@item.Product.Name</h3>
                             <p>Quantity: @item.Quantity</p>
@@ -155,10 +167,6 @@
                     <span>@Model.Subtotal.ToString("C")</span>
                 </div>
             </div>
-
-            <button type="submit" class="btn-place-order">
-                Place Order
-            </button>
 
             <div class="secure-checkout">
                 <i class="fas fa-lock"></i>
@@ -200,11 +208,11 @@
             margin-bottom: 20px;
         }
 
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            color: #555;
-        }
+            .form-group label {
+                display: block;
+                margin-bottom: 8px;
+                color: #555;
+            }
 
         .form-control {
             width: 100%;
@@ -222,9 +230,9 @@
             cursor: pointer;
         }
 
-        .address-card input[type="radio"] {
-            margin-right: 10px;
-        }
+            .address-card input[type="radio"] {
+                margin-right: 10px;
+            }
 
         .btn-add-address {
             width: 100%;
@@ -243,12 +251,12 @@
             margin-bottom: 10px;
         }
 
-        .payment-method label {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            cursor: pointer;
-        }
+            .payment-method label {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                cursor: pointer;
+            }
 
         .payment-details {
             margin-top: 15px;
@@ -272,12 +280,12 @@
             border-bottom: 1px solid #eee;
         }
 
-        .cart-item img {
-            width: 80px;
-            height: 80px;
-            object-fit: cover;
-            border-radius: 5px;
-        }
+            .cart-item img {
+                width: 80px;
+                height: 80px;
+                object-fit: cover;
+                border-radius: 5px;
+            }
 
         .summary-row {
             display: flex;
@@ -285,13 +293,13 @@
             padding: 10px 0;
         }
 
-        .summary-row.total {
-            border-top: 2px solid #eee;
-            margin-top: 10px;
-            padding-top: 15px;
-            font-weight: bold;
-            font-size: 1.2rem;
-        }
+            .summary-row.total {
+                border-top: 2px solid #eee;
+                margin-top: 10px;
+                padding-top: 15px;
+                font-weight: bold;
+                font-size: 1.2rem;
+            }
 
         .btn-place-order {
             width: 100%;
@@ -312,13 +320,16 @@
         }
 
         @@media (max-width: 768px) {
-            .checkout-grid {
-                grid-template-columns: 1fr;
-            }
+            .checkout-grid
 
-            .order-summary {
-                position: static;
-            }
+        {
+            grid-template-columns: 1fr;
+        }
+
+        .order-summary {
+            position: static;
+        }
+
         }
     </style>
 }
@@ -332,7 +343,7 @@
         // Payment method toggle
         document.querySelectorAll('input[name="paymentMethod"]').forEach(input => {
             input.addEventListener('change', function() {
-                document.getElementById('cardDetails').style.display = 
+                document.getElementById('cardDetails').style.display =
                     this.value === 'card' ? 'block' : 'none';
             });
         });

@@ -1,50 +1,45 @@
-@* _QuickView.cshtml - Updated Quick View Modal Partial *@
-<div id="productModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-product-name">
+@* _QuickView.cshtml - Consolidated Dynamic Quick View Modal Partial without a strongly typed model *@
+<div id="productModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-product-name" style="display:none;">
+    <!-- Modal overlay -->
     <div class="modal-overlay" onclick="closeModal()"></div>
+
+    <!-- Modal content -->
     <div class="modal-content">
         <button class="close-button" onclick="closeModal()" aria-label="Close modal">
             <i class="fas fa-times" aria-hidden="true"></i>
         </button>
+
         <div class="modal-grid">
-            <!-- Gallery Section with Swiper -->
+            <!-- Gallery Section using Swiper -->
             <div class="modal-gallery">
                 <div class="swiper mySwiper">
-                    <div class="swiper-wrapper">
-                        <div class="swiper-slide">
-                            <img id="modal-product-image" src="" alt="Product image">
-                        </div>
-                        <div class="swiper-slide">
-                            <img src="/api/placeholder/100/100" alt="Thumbnail">
-                        </div>
-                        <div class="swiper-slide">
-                            <img src="/api/placeholder/100/100" alt="Thumbnail">
-                        </div>
+                    <div class="swiper-wrapper" id="swiper-wrapper">
+                        <!-- Slides will be dynamically generated -->
                     </div>
-                    <!-- Pagination and Navigation Buttons -->
+                    <!-- Swiper controls -->
                     <div class="swiper-button-next"></div>
                     <div class="swiper-button-prev"></div>
                     <div class="swiper-pagination"></div>
                 </div>
+                <!-- Thumbnail container -->
+                <div class="thumbnail-container" id="thumbnail-container">
+                    <!-- Thumbnails will be generated dynamically -->
+                </div>
             </div>
-
             <!-- Details Section -->
             <div class="modal-details">
                 <div class="modal-header">
                     <h2 id="modal-product-name"></h2>
                     <div class="modal-rating" aria-label="Product rating">
-                        <div class="stars">
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star-half-alt"></i>
+                        <div class="stars" id="modal-stars">
+                            <!-- Star icons generated dynamically -->
                         </div>
-                        <span>(4.5/5)</span>
+                        <span id="modal-review-count"></span>
                     </div>
                 </div>
                 <div class="modal-price-container">
                     <h3 id="modal-product-price"></h3>
-                    <span class="stock-status" id="stock-status"><!-- Stock status set dynamically --></span>
+                    <span class="stock-status" id="stock-status"><!-- Stock status if needed --></span>
                 </div>
                 <p id="modal-product-description"></p>
                 <div class="modal-options">
@@ -55,15 +50,15 @@
                     </div>
                 </div>
                 <div class="modal-actions">
-                    <form asp-controller="Cart" asp-action="AddToCart" method="post">
+                    <form asp-controller="Cart" asp-action="AddToCart" method="post" class="d-inline">
                         <input type="hidden" id="modalProductId" name="productId" value="" />
-                        <button class="add-to-cart-button">
+                        <button type="submit" class="add-to-cart-button">
                             <i class="fas fa-shopping-cart"></i> Add to Cart
                         </button>
                     </form>
-                    <form asp-controller="CheckOut" asp-action="PlaceOrder" method="post">
+                    <form asp-controller="CheckOut" asp-action="PlaceOrder" method="post" class="d-inline">
                         <input type="hidden" id="modalProductIdOrder" name="productId" value="" />
-                        <button class="buy-now-button">
+                        <button type="submit" class="buy-now-button">
                             <i class="fas fa-bolt"></i> Buy Now
                         </button>
                     </form>
@@ -86,31 +81,309 @@
         </div>
     </div>
 </div>
+
+<!-- Styles -->
 <style>
+    /* Modal Styles */
+    .modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 1000;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: none;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+        .modal.active {
+            opacity: 1;
+        }
+
+    .modal-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        cursor: pointer;
+    }
+
+    .modal-content {
+        position: relative;
+        width: 90%;
+        max-width: 1000px;
+        margin: 50px auto;
+        background: #fff;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+
+    .close-button {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background: transparent;
+        border: none;
+        font-size: 1.5rem;
+        color: #666;
+        cursor: pointer;
+        z-index: 10;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        transition: background-color 0.3s ease;
+    }
+
+        .close-button:hover {
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+    .modal-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+        padding: 2rem;
+    }
+
+    /* Gallery Styles */
     .modal-gallery {
-        max-width: 300px;
-        margin: auto;
+        position: relative;
     }
 
     .mySwiper {
         width: 100%;
-        height: 500PX; 
+        border-radius: 10px;
+        overflow: hidden;
+        margin-bottom: 1rem;
+    }
+
+    .swiper-wrapper {
+        align-items: center;
     }
 
     .swiper-slide {
-        display:  block;
+        display: flex;
         justify-content: center;
         align-items: center;
-        height: 100%;
     }
 
         .swiper-slide img {
-            max-width: 100%;
-            max-height: 100%;
-            width: auto;
+            width: 100%;
             height: auto;
-            object-fit: contain; 
-            border-radius: 5px; 
+            object-fit: contain;
+            border-radius: 8px;
         }
 
+    .thumbnail-container {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 1rem;
+        overflow-x: auto;
+        padding-bottom: 0.5rem;
+    }
+
+    .thumbnail {
+        width: 70px;
+        height: 70px;
+        border-radius: 8px;
+        overflow: hidden;
+        cursor: pointer;
+        opacity: 0.6;
+        transition: all 0.3s ease;
+        flex-shrink: 0;
+    }
+
+        .thumbnail.active {
+            opacity: 1;
+            border: 2px solid #E91E63;
+        }
+
+        .thumbnail img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+    /* Details Section */
+    .modal-details {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .modal-header h2 {
+        font-size: 1.8rem;
+        margin-bottom: 0.5rem;
+        color: #333;
+    }
+
+    .modal-rating {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .stars {
+        color: #FFD700;
+        display: flex;
+    }
+
+        .stars i {
+            margin-right: 2px;
+        }
+
+    .modal-price-container {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1.5rem;
+    }
+
+        .modal-price-container h3 {
+            font-size: 1.6rem;
+            color: #E91E63;
+            font-weight: 600;
+        }
+
+    .stock-status {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.9rem;
+        color: #28a745;
+    }
+
+    /* Quantity Selector */
+    .quantity-selector {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .quantity-btn {
+        width: 40px;
+        height: 40px;
+        border: none;
+        background: #f3f3f3;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        border-radius: 8px;
+        cursor: pointer;
+        color: #333;
+        transition: all 0.2s ease;
+    }
+
+        .quantity-btn:hover {
+            background: #e0e0e0;
+        }
+
+    .quantity-selector input {
+        width: 60px;
+        height: 40px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        text-align: center;
+        font-size: 1rem;
+    }
+
+    /* Action Buttons */
+    .modal-actions {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .add-to-cart-button, .buy-now-button {
+        flex: 1;
+        height: 50px;
+        border: none;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        font-weight: 600;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .add-to-cart-button {
+        background: #f1f1f1;
+        color: #333;
+    }
+
+        .add-to-cart-button:hover {
+            background: #e3e3e3;
+        }
+
+    .buy-now-button {
+        background: #E91E63;
+        color: white;
+    }
+
+        .buy-now-button:hover {
+            background: #d81b60;
+        }
+
+    /* Product Meta */
+    .product-meta {
+        border-top: 1px solid #eee;
+        padding-top: 1.5rem;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+    }
+
+    .meta-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.9rem;
+        color: #666;
+    }
+
+        .meta-item i {
+            color: #E91E63;
+        }
+
+    /* Responsive adjustments */
+    @@media (max-width: 992px) {
+        .modal-grid
+
+    {
+        grid-template-columns: 1fr;
+    }
+
+    }
+
+    @@media (max-width: 576px) {
+        .modal-content
+
+    {
+        width: 95%;
+        margin: 20px auto;
+    }
+
+    .modal-grid {
+        padding: 1rem;
+    }
+
+    .modal-actions {
+        flex-direction: column;
+    }
+
+    }
 </style>
