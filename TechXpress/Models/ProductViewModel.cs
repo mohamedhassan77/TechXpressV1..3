@@ -12,11 +12,18 @@ namespace TechXpress.Models
         public ProductFilterModel Filter { get; set; } = new ProductFilterModel();
         public PaginationInfo PaginationInfo { get; set; } = new PaginationInfo();
         public IEnumerable<CategoryViewModel> Categories { get; set; } = new List<CategoryViewModel>();
+
+        // ProductDetails is used when showing a single product's details.
         public ProductViewModel ProductDetails { get; set; }
         public IEnumerable<ProductViewModel> RelatedProducts { get; set; } = new List<ProductViewModel>();
+
+        // Indicates if the current product is in the user's wishlist.
         public bool IsInWishlist { get; set; }
+
+        // Reviews for the current product.
         public IEnumerable<Review> Reviews { get; set; } = new List<Review>();
 
+        // Computed overall rating and review count for the current product.
         public double AverageRating => Reviews?.Any() == true
             ? Math.Round(Reviews.Average(r => r.Rating), 1)
             : 0;
@@ -43,6 +50,8 @@ namespace TechXpress.Models
         public decimal Price { get; set; }
 
         public decimal? DiscountPrice { get; set; }
+
+        // FinalPrice is computed to be either the discount price (if available) or the base price.
         public decimal FinalPrice => DiscountPrice ?? Price;
 
         [Required(ErrorMessage = "Image URL is required.")]
@@ -63,6 +72,8 @@ namespace TechXpress.Models
 
         [Required(ErrorMessage = "Category is required.")]
         public int CategoryId { get; set; }
+
+        // Optional: use this property to display the category name.
         public string CategoryName { get; set; }
 
         [Required(ErrorMessage = "Stock quantity is required.")]
@@ -82,9 +93,10 @@ namespace TechXpress.Models
         // List of image URLs for this product.
         public List<string> ProductImages { get; set; } = new List<string>();
 
-        // Optionally, you can include a category view model if needed:
+        // Optionally, include a Category view model if needed.
         public CategoryViewModel Category { get; set; }
 
+        // Added properties for ratings.
         public double AverageRating { get; set; }
         public int ReviewCount { get; set; }
     }
@@ -104,6 +116,7 @@ namespace TechXpress.Models
         public int CurrentPage { get; set; }
         public int ItemsPerPage { get; set; }
         public int TotalItems { get; set; }
+
         public int TotalPages => (int)Math.Ceiling((decimal)TotalItems / ItemsPerPage);
     }
 }

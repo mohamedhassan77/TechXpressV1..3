@@ -53,6 +53,9 @@ namespace TechXpress_infrastructure.Repositories
         {
             return await _context.Products
                 .Where(p => p.IsFeatured)
+                .Include(p => p.Category)
+               .Include (p => p.Reviews)
+               .Include (p => p.WishlistItems)
                 .Include(p => p.ProductImages)
                 .OrderBy(p => p.Price)
                 .Skip((page - 1) * pageSize)

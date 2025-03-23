@@ -50,8 +50,7 @@ namespace TechXpress.Controllers
                         Specifications = p.Specifications,
                         OldPrice = p.OldPrice,
                         ProductImages = p.ProductImages.Select(pi => pi.ImageUrl).ToList(),
-                        AverageRating = p.Reviews.Any() ? p.Reviews.Average(r => r.Rating) : 0,
-                        ReviewCount = p.Reviews.Count()
+                       CategoryName = p.Category.Name
                     }).ToList() ?? new System.Collections.Generic.List<ProductViewModel>(),
 
 

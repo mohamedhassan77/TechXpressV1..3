@@ -1,14 +1,12 @@
-@* _QuickView.cshtml - Consolidated Dynamic Quick View Modal Partial without a strongly typed model *@
+<!-- _QuickView.cshtml - Consolidated Dynamic Quick View Modal Partial without a strongly typed model -->
 <div id="productModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-product-name" style="display:none;">
     <!-- Modal overlay -->
     <div class="modal-overlay" onclick="closeModal()"></div>
-
     <!-- Modal content -->
     <div class="modal-content">
         <button class="close-button" onclick="closeModal()" aria-label="Close modal">
             <i class="fas fa-times" aria-hidden="true"></i>
         </button>
-
         <div class="modal-grid">
             <!-- Gallery Section using Swiper -->
             <div class="modal-gallery">
@@ -23,19 +21,21 @@
                 </div>
                 <!-- Thumbnail container -->
                 <div class="thumbnail-container" id="thumbnail-container">
-                    <!-- Thumbnails will be generated dynamically -->
+                    <!-- Thumbnails will be dynamically generated -->
                 </div>
             </div>
             <!-- Details Section -->
             <div class="modal-details">
+                <!-- Product Name on its own line -->
                 <div class="modal-header">
                     <h2 id="modal-product-name"></h2>
-                    <div class="modal-rating" aria-label="Product rating">
-                        <div class="stars" id="modal-stars">
-                            <!-- Star icons generated dynamically -->
-                        </div>
-                        <span id="modal-review-count"></span>
+                </div>
+                <!-- Rating placed under the name -->
+                <div class="modal-rating" aria-label="Product rating">
+                    <div class="stars" id="modal-stars">
+                        <!-- Star icons generated dynamically -->
                     </div>
+                    <span id="modal-review-count"></span>
                 </div>
                 <div class="modal-price-container">
                     <h3 id="modal-product-price"></h3>
@@ -66,7 +66,7 @@
                 <div class="product-meta">
                     <div class="meta-item">
                         <i class="fas fa-shipping-fast"></i>
-                        Free shipping on orders over $50
+                        Free shipping on orders over 500 EGP
                     </div>
                     <div class="meta-item">
                         <i class="fas fa-undo"></i>
@@ -84,23 +84,18 @@
 
 <!-- Styles -->
 <style>
-    /* Modal Styles */
     .modal {
         position: fixed;
         top: 0;
         left: 0;
         width: 100%;
         height: 100%;
-        z-index: 1000;
-        background-color: rgba(0, 0, 0, 0.5);
-        display: none;
-        opacity: 0;
-        transition: opacity 0.3s ease;
+        z-index: 1050;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(0, 0, 0, 0.5);
     }
-
-        .modal.active {
-            opacity: 1;
-        }
 
     .modal-overlay {
         position: absolute;
@@ -108,282 +103,253 @@
         left: 0;
         width: 100%;
         height: 100%;
-        cursor: pointer;
+        background: rgba(0, 0, 0, 0.7);
     }
 
     .modal-content {
         position: relative;
-        width: 90%;
-        max-width: 1000px;
-        margin: 50px auto;
         background: #fff;
-        border-radius: 20px;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-        overflow: hidden;
-        max-height: 90vh;
-        overflow-y: auto;
+        width: 90%;
+        max-width: 1200px;
+        padding: 20px;
+        border-radius: 10px;
+        z-index: 1060;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
     }
 
     .close-button {
         position: absolute;
-        top: 15px;
-        right: 15px;
+        top: 10px;
+        right: 10px;
         background: transparent;
         border: none;
         font-size: 1.5rem;
-        color: #666;
         cursor: pointer;
-        z-index: 10;
-        width: 40px;
-        height: 40px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 50%;
-        transition: background-color 0.3s ease;
     }
-
-        .close-button:hover {
-            background: rgba(0, 0, 0, 0.05);
-        }
 
     .modal-grid {
         display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 2rem;
-        padding: 2rem;
+        grid-template-columns: 2fr 1fr;
+        gap: 30px;
     }
 
-    /* Gallery Styles */
     .modal-gallery {
-        position: relative;
+        max-width: 300px;
+        margin: auto;
     }
 
     .mySwiper {
         width: 100%;
-        border-radius: 10px;
-        overflow: hidden;
-        margin-bottom: 1rem;
+        height: 500px;
     }
 
     .swiper-wrapper {
-        align-items: center;
+        display: flex;
     }
 
     .swiper-slide {
+        flex-shrink: 0;
         display: flex;
         justify-content: center;
         align-items: center;
+        height: 100%;
     }
 
         .swiper-slide img {
-            width: 100%;
-            height: auto;
+            max-width: 100%;
+            max-height: 100%;
             object-fit: contain;
-            border-radius: 8px;
+            border-radius: 5px;
         }
 
     .thumbnail-container {
         display: flex;
-        gap: 0.5rem;
-        margin-top: 1rem;
-        overflow-x: auto;
-        padding-bottom: 0.5rem;
+        justify-content: center;
+        gap: 5px;
+        margin-top: 10px;
     }
 
     .thumbnail {
-        width: 70px;
-        height: 70px;
-        border-radius: 8px;
-        overflow: hidden;
+        border: 1px solid #ddd;
+        padding: 3px;
         cursor: pointer;
-        opacity: 0.6;
-        transition: all 0.3s ease;
-        flex-shrink: 0;
+        width: 60px;
+        height: 60px;
+        object-fit: cover;
+        border-radius: 3px;
     }
 
         .thumbnail.active {
-            opacity: 1;
-            border: 2px solid #E91E63;
+            border-color: #007bff;
         }
 
-        .thumbnail img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-    /* Details Section */
     .modal-details {
         display: flex;
         flex-direction: column;
+        gap: 20px;
     }
 
     .modal-header h2 {
-        font-size: 1.8rem;
-        margin-bottom: 0.5rem;
-        color: #333;
+        margin: 0;
     }
 
+        .modal-header h2 a {
+            color: inherit;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+            .modal-header h2 a:hover {
+                color: #007bff;
+            }
+
     .modal-rating {
+        margin-top: 5px;
         display: flex;
         align-items: center;
-        gap: 0.5rem;
-        margin-bottom: 1rem;
+        gap: 5px;
     }
 
     .stars {
-        color: #FFD700;
-        display: flex;
+        display: inline-block;
     }
 
         .stars i {
+            color: #f5c518;
             margin-right: 2px;
         }
 
     .modal-price-container {
         display: flex;
         align-items: center;
-        justify-content: space-between;
-        margin-bottom: 1.5rem;
+        gap: 15px;
     }
-
-        .modal-price-container h3 {
-            font-size: 1.6rem;
-            color: #E91E63;
-            font-weight: 600;
-        }
 
     .stock-status {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
         font-size: 0.9rem;
-        color: #28a745;
+        color: #666;
     }
 
-    /* Quantity Selector */
     .quantity-selector {
         display: flex;
         align-items: center;
-        gap: 0.5rem;
-        margin-bottom: 1.5rem;
+        gap: 10px;
     }
 
     .quantity-btn {
-        width: 40px;
-        height: 40px;
-        border: none;
-        background: #f3f3f3;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.2rem;
-        border-radius: 8px;
+        padding: 5px 10px;
         cursor: pointer;
-        color: #333;
-        transition: all 0.2s ease;
     }
 
-        .quantity-btn:hover {
-            background: #e0e0e0;
-        }
-
-    .quantity-selector input {
-        width: 60px;
-        height: 40px;
-        border: 1px solid #ddd;
-        border-radius: 8px;
-        text-align: center;
-        font-size: 1rem;
-    }
-
-    /* Action Buttons */
     .modal-actions {
         display: flex;
-        gap: 1rem;
-        margin-bottom: 2rem;
+        gap: 15px;
     }
 
     .add-to-cart-button, .buy-now-button {
-        flex: 1;
-        height: 50px;
+        padding: 10px 20px;
         border: none;
-        border-radius: 10px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.5rem;
-        font-weight: 600;
-        font-size: 1rem;
+        border-radius: 5px;
         cursor: pointer;
-        transition: all 0.3s ease;
     }
 
     .add-to-cart-button {
-        background: #f1f1f1;
-        color: #333;
+        background: #28a745;
+        color: #fff;
     }
-
-        .add-to-cart-button:hover {
-            background: #e3e3e3;
-        }
 
     .buy-now-button {
-        background: #E91E63;
-        color: white;
+        background: #007bff;
+        color: #fff;
     }
 
-        .buy-now-button:hover {
-            background: #d81b60;
-        }
-
-    /* Product Meta */
     .product-meta {
-        border-top: 1px solid #eee;
-        padding-top: 1.5rem;
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 1rem;
+        display: flex;
+        gap: 15px;
+        flex-wrap: wrap;
     }
 
     .meta-item {
         display: flex;
         align-items: center;
-        gap: 0.5rem;
+        gap: 5px;
         font-size: 0.9rem;
         color: #666;
     }
 
-        .meta-item i {
-            color: #E91E63;
-        }
-
-    /* Responsive adjustments */
     @@media (max-width: 992px) {
-        .modal-grid
-
-    {
-        grid-template-columns: 1fr;
-    }
-
-    }
-
-    @@media (max-width: 576px) {
-        .modal-content
-
-    {
-        width: 95%;
-        margin: 20px auto;
-    }
-
-    .modal-grid {
-        padding: 1rem;
-    }
-
-    .modal-actions {
-        flex-direction: column;
-    }
-
+        .modal-grid {
+            grid-template-columns: 1fr;
+        }
     }
 </style>
+
+<!-- Scripts -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+      // Initialize Swiper (will be reinitialized when modal opens)
+      let swiperInstance;
+
+      function generateGallery(images) {
+        const swiperWrapper = document.getElementById('swiper-wrapper');
+        const thumbnailContainer = document.getElementById('thumbnail-container');
+        swiperWrapper.innerHTML = "";
+        thumbnailContainer.innerHTML = "";
+        images.forEach((src, index) => {
+          // Create slide
+          const slide = document.createElement('div');
+          slide.classList.add('swiper-slide');
+          slide.innerHTML = `<img src="${src}" alt="Product Image ${index + 1}">`;
+          swiperWrapper.appendChild(slide);
+          // Create thumbnail
+          const thumb = document.createElement('img');
+          thumb.src = src;
+          thumb.alt = `Thumbnail ${index + 1}`;
+          thumb.classList.add('thumbnail');
+          thumb.dataset.index = index;
+          if (index === 0) thumb.classList.add('active');
+          thumbnailContainer.appendChild(thumb);
+        });
+        // Bind thumbnail clicks
+        thumbnailContainer.addEventListener('click', function (event) {
+          if (event.target && event.target.classList.contains('thumbnail')) {
+            const index = parseInt(event.target.dataset.index, 10);
+            swiperInstance.slideToLoop(index, 300, true);
+            document.querySelectorAll('.thumbnail').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+          }
+        });
+      }
+
+      // Expose function to load product data
+      window.loadProductData = function (product) {
+         // Update product name as a link to the details page
+        document.getElementById('modal-product-name').innerHTML = `<a href="/Product/Details/${product.id}" target="_blank">${product.name}</a>`;
+        document.getElementById('modal-product-price').textContent = product.price;
+        document.getElementById('modal-product-description').textContent = product.description;
+        generateGallery(product.images);
+        // Reinitialize Swiper
+        if (swiperInstance) { swiperInstance.destroy(true, true); }
+        swiperInstance = new Swiper(".mySwiper", {
+          loop: true,
+          navigation: { nextEl: ".swiper-button-next", prevEl: ".swiper-button-prev" },
+          pagination: { el: ".swiper-pagination", clickable: true }
+        });
+        swiperInstance.on('slideChange', function () {
+          const realIndex = swiperInstance.realIndex;
+          document.querySelectorAll('.thumbnail').forEach(t => t.classList.remove('active'));
+          const activeThumb = document.querySelector(`.thumbnail[data-index="${realIndex}"]`);
+          if (activeThumb) activeThumb.classList.add('active');
+        });
+        // Reset quantity
+        document.getElementById('quantity').value = 1;
+        // Display the modal
+        document.getElementById('productModal').style.display = 'flex';
+      };
+    });
+
+    // Dummy closeModal function (implement as needed)
+    function closeModal() {
+      document.getElementById('productModal').style.display = 'none';
+    }
+</script>

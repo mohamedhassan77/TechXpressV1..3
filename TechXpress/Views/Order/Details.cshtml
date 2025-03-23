@@ -1,6 +1,11 @@
 @model TechXpress.Models.OrderDetailsViewModel
 
 @{
+    if (Model == null)
+    {
+        <p>Error: Order details are not available.</p>
+        return;
+    }
     ViewData["Title"] = $"Order #{Model.OrderId}";
 }
 
@@ -11,7 +16,7 @@
             <p class="order-number">Order #@Model.OrderId</p>
             <p class="order-date">Placed on @Model.OrderDate.ToString("MMMM dd, yyyy")</p>
         </div>
-        <div class="order-status @Model.CurrentStatus.ToLower()">
+        <div class="order-status @(Model.CurrentStatus?.ToLower() ?? "")">
             <span class="status-label">@Model.CurrentStatus</span>
             @if (Model.CurrentStatus == "Shipped" && !string.IsNullOrEmpty(Model.TrackingNumber))
             {
@@ -28,22 +33,25 @@
     <div class="details-grid">
         <div class="order-summary">
             <div class="summary-section">
-                <h2>Items (@Model.Items.Count)</h2>
+                <h2>Items (@(Model.Items?.Count ?? 0))</h2>
                 <div class="items-list">
-                    @foreach (var item in Model.Items)
+                    @if (Model.Items != null)
                     {
-                        <div class="order-item">
-                            <img src="@(item.Product.ProductImages.FirstOrDefault()?.ImageUrl ?? item.Product.ImageUrl)" alt="@item.Product.Name">
-                            <div class="item-details">
-                                <h3>@item.Product.Name</h3>
-                                <p class="item-sku">SKU: @item.Product.SKU</p>
-                                <div class="item-price-qty">
-                                    <span class="item-price">@item.PriceAtPurchase.ToString("C")</span>
-                                    <span class="item-quantity">Qty: @item.Quantity</span>
+                        foreach (var item in Model.Items)
+                        {
+                            <div class="order-item">
+                                <img src="@(item.Product?.ProductImages?.FirstOrDefault()?.ImageUrl ?? item.Product?.ImageUrl ?? "/images/placeholder.png")" alt="@(item.Product?.Name ?? "Unknown Product")">
+                                <div class="item-details">
+                                    <h3>@(item.Product?.Name ?? "Unknown Product")</h3>
+                                    <p class="item-sku">SKU: @(item.Product?.SKU ?? "N/A")</p>
+                                    <div class="item-price-qty">
+                                        <span class="item-price">@item.PriceAtPurchase.ToString("C")</span>
+                                        <span class="item-quantity">Qty: @item.Quantity</span>
+                                    </div>
+                                    <p class="item-total">@((item.Quantity * item.PriceAtPurchase).ToString("C"))</p>
                                 </div>
-                                <p class="item-total">@((item.Quantity * item.PriceAtPurchase).ToString("C"))</p>
                             </div>
-                        </div>
+                        }
                     }
                 </div>
             </div>
@@ -82,20 +90,34 @@
             <div class="info-section">
                 <h2>Shipping Address</h2>
                 <div class="address-details">
-                    <p class="name">@Model.ShippingAddress.FullName</p>
-                    <p>@Model.ShippingAddress.Street</p>
-                    <p>@Model.ShippingAddress.City, @Model.ShippingAddress.State @Model.ShippingAddress.PostalCode</p>
-                    <p>@Model.ShippingAddress.Country</p>
+                    @if (Model.ShippingAddress != null)
+                    {
+                        <p class="name">@Model.ShippingAddress.FullName</p>
+                        <p>@Model.ShippingAddress.Street</p>
+                        <p>@Model.ShippingAddress.City, @Model.ShippingAddress.State @Model.ShippingAddress.PostalCode</p>
+                        <p>@Model.ShippingAddress.Country</p>
+                    }
+                    else
+                    {
+                        <p>No shipping address provided.</p>
+                    }
                 </div>
             </div>
 
             <div class="info-section">
                 <h2>Billing Address</h2>
                 <div class="address-details">
-                    <p class="name">@Model.BillingAddress.FullName</p>
-                    <p>@Model.BillingAddress.Street</p>
-                    <p>@Model.BillingAddress.City, @Model.BillingAddress.State @Model.BillingAddress.PostalCode</p>
-                    <p>@Model.BillingAddress.Country</p>
+                    @if (Model.BillingAddress != null)
+                    {
+                        <p class="name">@Model.BillingAddress.FullName</p>
+                        <p>@Model.BillingAddress.Street</p>
+                        <p>@Model.BillingAddress.City, @Model.BillingAddress.State @Model.BillingAddress.PostalCode</p>
+                        <p>@Model.BillingAddress.Country</p>
+                    }
+                    else
+                    {
+                        <p>No billing address provided.</p>
+                    }
                 </div>
             </div>
 
@@ -109,7 +131,6 @@
         </div>
     </div>
 
- 
     <div class="details-actions">
         <a asp-action="Index" class="btn btn-back">Back to Orders</a>
         <a href="javascript:window.print()" class="btn btn-print">Print Order</a>
@@ -299,40 +320,83 @@
             color: white;
             border: none;
         }
+
         @@media (max-width: 992px) {
-            .details-grid
-
-        {
-            grid-template-columns: 1fr;
+            .details-grid {
+                grid-template-columns: 1fr;
+            }
         }
 
-        }
         @@media (max-width: 768px) {
-            .details-header
+            .details-header {
+                flex-direction: column;
+                gap: 15px;
+            }
 
-        {
-            flex-direction: column;
-            gap: 15px;
+            .details-actions {
+                flex-direction: column;
+            }
+
+            .btn-back,
+            .btn-print {
+                width: 100%;
+                justify-content: center;
+            }
         }
 
-        .details-actions {
-            flex-direction: column;
-        }
-
-        .btn-back,
-        .btn-print {
-            width: 100%;
-            justify-content: center;
-        }
-
-        }
         @@media print {
-            .details-actions
-
-        {
-            display: none;
+            .details-actions {
+                display: none;
+            }
         }
 
+        .related-products-wrapper {
+            position: relative;
+        }
+
+        .related-products-container {
+            display: flex;
+            overflow-x: auto;
+            scroll-behavior: smooth;
+            gap: 1rem;
+            padding: 1rem 0;
+            scroll-snap-type: x mandatory;
+        }
+
+            .related-products-container .product-card {
+                flex: 0 0 auto;
+                width: 280px;
+                scroll-snap-align: start;
+                transition: transform 0.3s ease;
+            }
+
+                .related-products-container .product-card:hover {
+                    transform: scale(1.05);
+                }
+
+        .related-prev, .related-next {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0, 0, 0, 0.4);
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            cursor: pointer;
+        }
+
+        .related-prev {
+            left: 0;
+        }
+
+        .related-next {
+            right: 0;
         }
     </style>
 }
@@ -360,5 +424,21 @@
             document.getElementById('cancelOrderId').value = orderId;
             document.getElementById('cancelOrderForm').submit();
         }
+        document.addEventListener("DOMContentLoaded", function () {
+            const container = document.querySelector(".related-products-container");
+            const prevButton = document.querySelector(".related-prev");
+            const nextButton = document.querySelector(".related-next");
+
+            // Calculate scroll amount as half the container's width
+            const scrollAmount = () => container.offsetWidth / 2;
+
+            prevButton.addEventListener("click", function () {
+                container.scrollBy({ left: -scrollAmount(), behavior: "smooth" });
+            });
+
+            nextButton.addEventListener("click", function () {
+                container.scrollBy({ left: scrollAmount(), behavior: "smooth" });
+            });
+        });
     </script>
 }

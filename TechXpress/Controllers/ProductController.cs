@@ -1,13 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using System.Linq;
 using System.Threading.Tasks;
 using TechXpress.Models;
+using TechXpress_domain.Entities;
 using TechXpress_domain.Interfaces.Services;
 using System.Collections.Generic;
-using System.Security.Claims;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
-using TechXpress_domain.Entities;
 
 namespace TechXpress.Controllers
 {
@@ -25,7 +24,8 @@ namespace TechXpress.Controllers
             ICategoryService categoryService,
             IWishlistService wishlistService,
             ICartService cartService,
-            IReviewService reviewService,UserManager<ApplicationUser>  userManager)
+            IReviewService reviewService,
+            UserManager<ApplicationUser> userManager)
         {
             _productService = productService;
             _categoryService = categoryService;
@@ -41,10 +41,7 @@ namespace TechXpress.Controllers
             int pageSize = 12;
 
             // Get filtered products (using a unified method from your service)
-            var (products, totalCount) = await _productService.GetFilteredProductsAsync(category, search, minPrice,
-                maxPrice, sortBy, page, pageSize);
-
-
+            var (products, totalCount) = await _productService.GetFilteredProductsAsync(category, search, minPrice, maxPrice, sortBy, page, pageSize);
 
             // Get categories for the sidebar
             var domainCategories = await _categoryService.GetAllCategoriesAsync(1, 10, "name_asc");
@@ -56,33 +53,7 @@ namespace TechXpress.Controllers
             });
 
             // Map products from your domain model to your view model
-            var productViewModels = products.Select(p => new ProductViewModel
-            {
-                Id = p.Id,
-                Name = p.Name,
-                Description = p.Description,
-                Price = p.Price,
-                DiscountPrice = p.DiscountPrice,
-                 IsFeatured = p.IsFeatured,
-                CreatedDate = p.CreatedDate,
-                UpdatedDate = p.UpdatedDate,
-                Tag = p.Tag,
-                Brand = p.Brand,
-                CategoryId = p.CategoryId,
-                CategoryName = p.Category?.Name ?? "",
-                StockQuantity = p.StockQuantity,
-                SKU = p.SKU,
-                Specifications = p.Specifications,
-                OldPrice = p.OldPrice,
-                ProductImages = p.ProductImages.Select(pi => pi.ImageUrl).ToList(),
-                ImageUrl =  p.ImageUrl,
-                Category = new CategoryViewModel
-                {
-                    Id = p.Category.Id,
-                    Name = p.Category.Name,
-                    ImageUrl = p.Category.ImageUrl
-                }
-            }).ToList();
+            var productViewModels = products.Select(p => MapToProductViewModel(p)).ToList();
 
             var model = new UnifiedProductViewModel
             {
@@ -132,59 +103,8 @@ namespace TechXpress.Controllers
 
             var model = new UnifiedProductViewModel
             {
-                ProductDetails = new ProductViewModel
-                {
-                    Id = product.Id,
-                    Name = product.Name,
-                    Description = product.Description,
-                    Price = product.Price,
-                    DiscountPrice = product.DiscountPrice,
-                       IsFeatured = product.IsFeatured,
-                    CreatedDate = product.CreatedDate,
-                    UpdatedDate = product.UpdatedDate,
-                    Tag = product.Tag,
-                    Brand = product.Brand,
-                    CategoryId = product.CategoryId,
-                    StockQuantity = product.StockQuantity,
-                    SKU = product.SKU,
-                    Specifications = product.Specifications,
-                    OldPrice = product.OldPrice,
-                    ImageUrl = product.ImageUrl,
-
-                    ProductImages = product.ProductImages.Select(pi => pi.ImageUrl).ToList(),
-                    Category = new CategoryViewModel
-                    {
-                        Id = product.Category.Id,
-                        Name = product.Category.Name,
-                        ImageUrl = product.Category.ImageUrl
-                    }
-                },
-                RelatedProducts = relatedProducts.Select(rp => new ProductViewModel
-                {
-                    Id = rp.Id,
-                    Name = rp.Name,
-                    Description = rp.Description,
-                    Price = rp.Price,
-                    DiscountPrice = rp.DiscountPrice,
-                     IsFeatured = rp.IsFeatured,
-                    CreatedDate = rp.CreatedDate,
-                    UpdatedDate = rp.UpdatedDate,
-                    Tag = rp.Tag,
-                    Brand = rp.Brand,
-                    CategoryId = rp.CategoryId,
-                    StockQuantity = rp.StockQuantity,
-                    SKU = rp.SKU,
-                    Specifications = rp.Specifications,
-                    OldPrice = rp.OldPrice,
-                    ProductImages = rp.ProductImages.Select(pi => pi.ImageUrl).ToList(),
-                    ImageUrl =rp.ImageUrl,
-                    Category = new CategoryViewModel
-                    {
-                        Id = rp.Category.Id,
-                        Name = rp.Category.Name,
-                        ImageUrl = rp.Category.ImageUrl
-                    }
-                }),
+                ProductDetails = MapToProductViewModel(product),
+                RelatedProducts = relatedProducts.Select(rp => MapToProductViewModel(rp)),
                 IsInWishlist = isInWishlist,
                 Reviews = product.Reviews
             };
@@ -202,28 +122,7 @@ namespace TechXpress.Controllers
             }
 
             var products = await _productService.SearchProductsAsync(search);
-            var productViewModels = products.Select(p => new ProductViewModel
-            {
-                Id = p.Id,
-                Name = p.Name,
-                Description = p.Description,
-                Price = p.Price,
-                DiscountPrice = p.DiscountPrice,
-                 IsFeatured = p.IsFeatured,
-                CreatedDate = p.CreatedDate,
-                UpdatedDate = p.UpdatedDate,
-                Tag = p.Tag,
-                Brand = p.Brand,
-                CategoryId = p.CategoryId,
-                StockQuantity = p.StockQuantity,
-                SKU = p.SKU,
-                Specifications = p.Specifications,
-                OldPrice = p.OldPrice,
-                ProductImages = p.ProductImages.Select(pi => pi.ImageUrl).ToList(),
-                ImageUrl = p.ImageUrl,
-                AverageRating = p.Reviews.Any() ? p.Reviews.Average(r => r.Rating) : 0,
-                ReviewCount = p.Reviews.Count,
-            }).ToList();
+            var productViewModels = products.Select(p => MapToProductViewModel(p)).ToList();
 
             var viewModel = new UnifiedProductViewModel
             {
@@ -240,8 +139,6 @@ namespace TechXpress.Controllers
             return View(viewModel);
         }
 
-
-
         [HttpPost]
         [Authorize]
         public async Task<IActionResult> AddReview(int productId, string comment, int rating)
@@ -256,9 +153,72 @@ namespace TechXpress.Controllers
             else
             {
                 ModelState.AddModelError("", result);
-                var product = await _productService.GetProductByIdAsync(productId);
-                return View("Details", product);
+
+                // Re-map the product for the Details view so that ratings and reviews are shown correctly.
+                var product = await _productService.GetByIdAsync(productId);
+                if (product == null)
+                {
+                    return NotFound();
+                }
+
+                var relatedProducts = await _productService.GetRelatedProductsAsync(productId);
+                bool isInWishlist = false;
+                if (User.Identity.IsAuthenticated)
+                {
+                    var wishlist = await _wishlistService.GetWishlistAsync(User.Identity.Name);
+                    if (wishlist != null)
+                    {
+                        isInWishlist = wishlist.WishlistItems.Any(w => w.ProductId == productId);
+                    }
+                }
+
+                var model = new UnifiedProductViewModel
+                {
+                    ProductDetails = MapToProductViewModel(product),
+                    RelatedProducts = relatedProducts.Select(rp => MapToProductViewModel(rp)),
+                    IsInWishlist = isInWishlist,
+                    Reviews = product.Reviews
+                };
+
+                return View("Details", model);
             }
+        }
+
+        // Helper method to map a domain Product to ProductViewModel.
+        private ProductViewModel MapToProductViewModel(Product p)
+        {
+            return new ProductViewModel
+            {
+                Id = p.Id,
+                Name = p.Name,
+                Description = p.Description,
+                Price = p.Price,
+                DiscountPrice = p.DiscountPrice,
+                IsFeatured = p.IsFeatured,
+                CreatedDate = p.CreatedDate,
+                UpdatedDate = p.UpdatedDate,
+                Tag = p.Tag,
+                Brand = p.Brand,
+                CategoryId = p.CategoryId,
+                CategoryName = p.Category?.Name ?? string.Empty,
+                StockQuantity = p.StockQuantity,
+                SKU = p.SKU,
+                Specifications = p.Specifications,
+                OldPrice = p.OldPrice,
+                ImageUrl = p.ImageUrl,
+                ProductImages = p.ProductImages.Select(pi => pi.ImageUrl).ToList(),
+                // Compute average rating if reviews exist.
+                AverageRating = p.Reviews.Any() ? p.Reviews.Average(r => r.Rating) : 0,
+                ReviewCount = p.Reviews.Count(),
+                Category = p.Category != null
+                    ? new CategoryViewModel
+                    {
+                        Id = p.Category.Id,
+                        Name = p.Category.Name,
+                        ImageUrl = p.Category.ImageUrl
+                    }
+                    : null
+            };
         }
     }
 }

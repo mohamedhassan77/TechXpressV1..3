@@ -26,11 +26,12 @@ namespace TechXpress.Controllers
         {
             try
             {
-                int pageSize = 12;
+                int pageSize = 20;
 
                 // Get featured products with paging.
                 var featuredProducts = await _productService.GetFeaturedProductsAsync(page, pageSize);
 
+                // Map products to the view model.
                 var productViewModels = featuredProducts.Select(p => new ProductViewModel
                 {
                     Id = p.Id,
@@ -49,22 +50,15 @@ namespace TechXpress.Controllers
                     SKU = p.SKU,
                     Specifications = p.Specifications,
                     OldPrice = p.OldPrice,
-                    ProductImages = p.ProductImages.Any() ? p.ProductImages.Select(pi => pi.ImageUrl).ToList() : new List<string> { p.ImageUrl },
-                    AverageRating = (p.Reviews != null && p.Reviews.Any()) ? p.Reviews.Average(r => r.Rating) : 0,
+                     ProductImages = (p.ProductImages != null && p.ProductImages.Any())
+                        ? p.ProductImages.Select(pi => pi.ImageUrl).ToList()
+                        : new List<string> { p.ImageUrl },
+                    AverageRating = (p.Reviews.Any()) ? p.Reviews.Average(r => r.Rating) : 0,
                     ReviewCount = p.Reviews?.Count() ?? 0,
-                    Category = p.Category != null ? new CategoryViewModel
-                    {
-                        Id = p.Category.Id,
-                        Name = p.Category.Name,
-                        Description = p.Category.Description,
-                        ImageUrl = p.Category.ImageUrl,
-                        CreatedAt = p.Category.CreatedAt,
-                        UpdatedAt = p.Category.UpdatedAt
-                    } : new CategoryViewModel { Id = 0, Name = "Uncategorized" }
-                }).ToList();
+                 }).ToList();
 
-                // Get categories for navigation
-                var categories = await _categoryService.GetAllCategoriesAsync(1, 10, "name_asc");
+                // Get categories for navigation.
+                var categories = await _categoryService.GetAllCategoriesAsync(1, 20, "name_asc");
                 var categoryViewModels = categories.Select(c => new CategoryViewModel
                 {
                     Id = c.Id,
@@ -73,9 +67,12 @@ namespace TechXpress.Controllers
                     ImageUrl = c.ImageUrl,
                     CreatedAt = c.CreatedAt,
                     UpdatedAt = c.UpdatedAt
+                    
+                    
+
                 }).ToList();
 
-                // Build the unified view model.
+                // Build the unified home view model.
                 var viewModel = new HomeViewModel
                 {
                     HeroText = "Welcome to TechXpress",
@@ -83,10 +80,11 @@ namespace TechXpress.Controllers
                     FeaturedProducts = productViewModels,
                     Categories = categoryViewModels,
                     FeaturedProductsPage = page,
-                 };
+                    FeaturedProductsTotalPages = (int)Math.Ceiling((double)featuredProducts.ToList().Count / pageSize)
+                };
 
-                ViewData["Categories"] = categories;
-                return View(viewModel);
+                 ViewData["Categories"] = categoryViewModels;
+                 return View(viewModel);
             }
             catch (Exception ex)
             {

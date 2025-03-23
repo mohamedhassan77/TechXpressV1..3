@@ -1,1016 +1,1122 @@
 ﻿@using System.Text.Json
 @model TechXpress.Models.HomeViewModel
 @{
-    ViewData["Title"] = "Home";
-    Layout = "_Layout";
+	ViewData["Title"] = "Home";
+	Layout = "_Layout";
 }
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TechXpress - Innovation Unleashed</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-
-    @section Styles {
-        <style>
-            /* Hero Section */
-            .hero {
-                min-height: 100vh;
-                background: linear-gradient(135deg, var(--dark) 0%, #1a1a1a 100%);
-                display: flex;
-                align-items: center;
-                position: relative;
-                overflow: hidden;
-            }
-
-                .hero::after {
-                    content: '';
-                    position: absolute;
-                    width: 150%;
-                    height: 150%;
-                    background: repeating-linear-gradient(45deg, var(--primary) 0%, var(--secondary) 10%, var(--accent) 20%);
-                    opacity: 0.05;
-                    animation: backgroundMove 20s linear infinite;
-                    transform: translateZ(0);
-                }
-
-            @@keyframes backgroundMove {
-                0% {
-                    transform: translate(-50%, -50%) rotate(0deg);
-                }
-
-                100% {
-                    transform: translate(-50%, -50%) rotate(360deg);
-                }
-            }
-
-            .hero-content {
-                max-width: 1400px;
-                margin: 0 auto;
-                padding: 0 2rem;
-                position: relative;
-                z-index: 2;
-                color: white;
-            }
-
-            .hero-grid {
-                display: grid;
-                grid-template-columns: 1fr 1fr;
-                gap: 4rem;
-                align-items: center;
-            }
-
-            .hero-text h1 {
-                font-size: 5rem;
-                line-height: 1.1;
-                font-weight: 800;
-                margin-bottom: 2rem;
-                background: linear-gradient(45deg, var(--primary), var(--accent));
-                -webkit-background-clip: text;
-                -webkit-text-fill-color: transparent;
-                animation: titleGlow 3s ease-in-out infinite alternate;
-            }
-
-            @@keyframes titleGlow {
-                0% {
-                    text-shadow: 0 0 20px rgba(255, 51, 102, 0.1);
-                }
-
-                100% {
-                    text-shadow: 0 0 40px rgba(255, 51, 102, 0.3);
-                }
-            }
-
-            .hero-text p {
-                font-size: 1.25rem;
-                margin-bottom: 3rem;
-                color: rgba(255, 255, 255, 0.8);
-            }
-
-            /* Discounted Products Slider inside Hero Section */
-            .discounted-slider {
-                overflow: hidden;
-                position: relative;
-            }
-
-            .discounted-slider-inner {
-                display: flex;
-                gap: 1rem;
-                animation: slideDiscounts 20s linear infinite;
-            }
-
-            .discount-item {
-                min-width: 300px;
-                border-radius: 10px;
-                overflow: hidden;
-                position: relative;
-            }
-
-                .discount-item img {
-                    width: 100%;
-                    height: auto;
-                    object-fit: cover;
-                }
-
-            .discount-overlay {
-                position: absolute;
-                bottom: 0;
-                left: 0;
-                width: 100%;
-                background: rgba(0, 0, 0, 0.6);
-                color: #fff;
-                padding: 0.5rem;
-                text-align: center;
-            }
-
-            @@keyframes slideDiscounts {
-                0% {
-                    transform: translateX(0);
-                }
-
-                100% {
-                    transform: translateX(-50%);
-                }
-            }
-
-            .device-mockup {
-                width: 100%;
-                max-width: 600px;
-                height: 400px;
-                background: linear-gradient(45deg, #2a2a2a, #3a3a3a);
-                border-radius: 20px;
-                position: relative;
-                overflow: hidden;
-                box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-                padding: 20px;
-            }
-
-            .device-screen {
-                position: absolute;
-                top: 5%;
-                left: 5%;
-                width: 90%;
-                height: 90%;
-                border-radius: 10px;
-                overflow: hidden;
-                background: linear-gradient(135deg, var(--primary), var(--secondary));
-            }
-
-                .device-screen::after {
-                    content: '';
-                    position: absolute;
-                    top: 0;
-                    left: 0;
-                    width: 100%;
-                    height: 100%;
-                    background: linear-gradient(45deg, transparent 0%, rgba(255, 255, 255, 0.1) 50%, transparent 100%);
-                    animation: scanline 2s linear infinite;
-                    z-index: 2;
-                }
-
-            @@keyframes scanline {
-                0% {
-                    transform: translateY(-100%);
-                }
-
-                100% {
-                    transform: translateY(100%);
-                }
-            }
-
-            .device-screen img {
-                width: 100%;
-                height: 100%;
-                object-fit: cover;
-                opacity: 0.9;
-                transition: transform 0.5s ease;
-            }
-
-            .device-screen:hover img {
-                transform: scale(1.05);
-            }
-
-            .device-screen::before {
-                content: '';
-                position: absolute;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background: linear-gradient(45deg, rgba(var(--primary-rgb), 0.1), rgba(var(--secondary-rgb), 0.1));
-                z-index: 1;
-            }
-            /* Features Section */
-            .features {
-                padding: 8rem 2rem;
-                background: white;
-            }
-
-            .section-title {
-                text-align: center;
-                margin-bottom: 5rem;
-                font-size: 3rem;
-                font-weight: 800;
-                color: var(--dark);
-            }
-            /* Features Section */
-            .features {
-                padding: 8rem 2rem;
-                background: white;
-            }
-
-            .section-title {
-                text-align: center;
-                margin-bottom: 5rem;
-                font-size: 3rem;
-                font-weight: 800;
-                color: var(--dark);
-            }
-
-            .features-grid {
-                display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-                gap: 3rem;
-                max-width: 1400px;
-                margin: 0 auto;
-            }
-
-            .feature-card {
-                background: white;
-                padding: 3rem;
-                border-radius: 30px;
-                box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-                transition: all 0.3s ease;
-                position: relative;
-                overflow: hidden;
-            }
-
-                .feature-card::before {
-                    content: '';
-                    position: absolute;
-                    top: 0;
-                    left: 0;
-                    width: 100%;
-                    height: 5px;
-                    background: linear-gradient(to right, var(--primary), var(--secondary));
-                    transform: scaleX(0);
-                    transition: transform 0.3s ease;
-                }
-
-                .feature-card:hover {
-                    transform: translateY(-10px);
-                }
-
-                    .feature-card:hover::before {
-                        transform: scaleX(1);
-                    }
-
-            .feature-icon {
-                font-size: 3rem;
-                margin-bottom: 1.5rem;
-                background: linear-gradient(45deg, var(--primary), var(--secondary));
-                -webkit-background-clip: text;
-                -webkit-text-fill-color: transparent;
-            }
-            /* Products Section */
-            .products {
-                padding: 8rem 2rem;
-                background: var(--light);
-            }
-
-            .products-grid {
-                display: grid;
-                grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-                gap: 2rem;
-                max-width: 1400px;
-                margin: 0 auto;
-            }
-
-            .product-card {
-                background: white;
-                border-radius: 20px;
-                overflow: hidden;
-                position: relative;
-                transition: all 0.3s ease;
-                box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
-            }
-
-                .product-card:hover {
-                    transform: translateY(-5px);
-                    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
-                }
-
-            .product-badge {
-                position: absolute;
-                top: 1rem;
-                left: 1rem;
-                background: var(--primary);
-                color: white;
-                padding: 0.5rem 1rem;
-                border-radius: 30px;
-                font-size: 0.8rem;
-                font-weight: 600;
-                z-index: 2;
-            }
-
-            .product-image-container {
-                position: relative;
-                padding-top: 100%;
-                background: #f8f9fa;
-            }
-
-            .product-image {
-                position: absolute;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                object-fit: cover;
-                transition: transform 0.5s ease;
-            }
-
-            .product-overlay {
-                position: absolute;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background: rgba(0, 0, 0, 0.2);
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                opacity: 0;
-                transition: opacity 0.3s ease;
-            }
-
-            .product-card:hover .product-overlay {
-                opacity: 1;
-            }
-
-            .product-actions {
-                display: flex;
-                gap: 1rem;
-            }
-
-            .action-button {
-                background: white;
-                border: none;
-                width: 40px;
-                height: 40px;
-                border-radius: 50%;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                cursor: pointer;
-                transition: all 0.3s ease;
-                transform: translateY(20px);
-                opacity: 0;
-            }
-
-            .product-card:hover .action-button {
-                transform: translateY(0);
-                opacity: 1;
-            }
-
-            .action-button:hover {
-                background: var(--primary);
-                color: white;
-            }
-
-            .product-content {
-                padding: 1.5rem;
-            }
-
-            .product-category {
-                color: #666;
-                font-size: 0.9rem;
-                margin-bottom: 0.5rem;
-            }
-
-            .product-title {
-                font-size: 1.1rem;
-                font-weight: 600;
-                margin-bottom: 0.5rem;
-                color: var(--dark);
-            }
-
-            .product-rating {
-                display: flex;
-                align-items: center;
-                gap: 0.5rem;
-                margin-bottom: 1rem;
-            }
-
-            .stars {
-                color: #ffc107;
-            }
-
-            .rating-count {
-                color: #666;
-                font-size: 0.9rem;
-            }
-
-            .product-price-container {
-                display: flex;
-                align-items: center;
-                gap: 1rem;
-            }
-
-            .product-price {
-                font-size: 1.2rem;
-                font-weight: 700;
-                color: var(--primary);
-            }
-
-            .product-old-price {
-                color: #999;
-                text-decoration: line-through;
-                font-size: 0.9rem;
-            }
-            /* Modal Styles */
-            .modal {
-                display: none;
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background: rgba(0, 0, 0, 0.5);
-                z-index: 1000;
-                opacity: 0;
-                transition: opacity 0.3s ease;
-            }
-
-                .modal.active {
-                    opacity: 1;
-                }
-
-            .modal-content {
-                background: white;
-                border-radius: 20px;
-                width: 90%;
-                max-width: 1000px;
-                margin: 2rem auto;
-                position: relative;
-                padding: 2rem;
-            }
-
-            .modal-grid {
-                display: grid;
-                grid-template-columns: 1fr 1fr;
-                gap: 2rem;
-            }
-
-            .modal-gallery {
-                display: flex;
-                flex-direction: column;
-                gap: 1rem;
-            }
-
-            .main-image-container {
-                aspect-ratio: 1;
-                border-radius: 10px;
-                overflow: hidden;
-            }
-
-            .modal-product-image {
-                width: 100%;
-                height: 100%;
-                object-fit: cover;
-            }
-
-            .thumbnail-container {
-                display: flex;
-                gap: 1rem;
-            }
-
-            .thumbnail {
-                width: 80px;
-                height: 80px;
-                border-radius: 8px;
-                overflow: hidden;
-                cursor: pointer;
-                opacity: 0.6;
-                transition: opacity 0.3s ease;
-            }
-
-                .thumbnail.active {
-                    opacity: 1;
-                    border: 2px solid var(--primary);
-                }
-
-                .thumbnail img {
-                    width: 100%;
-                    height: 100%;
-                    object-fit: cover;
-                }
-
-            .modal-header {
-                margin-bottom: 1.5rem;
-            }
-
-            .modal-rating {
-                display: flex;
-                align-items: center;
-                gap: 0.5rem;
-                margin-top: 0.5rem;
-            }
-
-            .modal-price-container {
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                margin-bottom: 1.5rem;
-            }
-
-            .stock-status {
-                display: flex;
-                align-items: center;
-                gap: 0.5rem;
-                font-size: 0.9rem;
-            }
-
-                .stock-status.in-stock {
-                    color: #28a745;
-                }
-
-            .modal-options {
-                margin: 2rem 0;
-            }
-
-            .quantity-selector {
-                display: flex;
-                align-items: center;
-                gap: 1rem;
-                max-width: 150px;
-            }
-
-            .quantity-btn {
-                background: #E91E63;
-                border: none;
-                width: 40px;
-                height: 40px;
-                border-radius: 8px;
-                cursor: pointer;
-            }
-
-            .quantity-selector input {
-                width: 60px;
-                text-align: center;
-                border: 1px solid #ddd;
-                border-radius: 8px;
-                padding: 0.5rem;
-            }
-
-            .modal-actions {
-                display: flex;
-                gap: 1rem;
-                margin-bottom: 2rem;
-            }
-
-            .add-to-cart-button, .buy-now-button {
-                flex: 1;
-                padding: 1rem;
-                border: none;
-                border-radius: 10px;
-                font-weight: 600;
-                cursor: pointer;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                gap: 0.5rem;
-                transition: all 0.3s ease;
-            }
-
-            .add-to-cart-button {
-                background: #f8f9fa;
-                color: var(--dark);
-            }
-
-            .buy-now-button {
-                background: var(--primary);
-                color: white;
-            }
-
-            .product-meta {
-                border-top: 1px solid #eee;
-                padding-top: 1.5rem;
-                display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-                gap: 1rem;
-            }
-
-            .meta-item {
-                display: flex;
-                align-items: center;
-                gap: 0.5rem;
-                font-size: 0.9rem;
-                color: #666;
-            }
-
-            @@media (max-width: 768px) {
-                .modal-grid {
-                    grid-template-columns: 1fr;
-                }
-
-                .modal-content {
-                    padding: 1rem;
-                }
-
-                .product-meta {
-                    grid-template-columns: 1fr;
-                }
-            }
-
-            .toast {
-                position: fixed;
-                bottom: 20px;
-                right: 20px;
-                padding: 15px 25px;
-                border-radius: 8px;
-                color: white;
-                font-weight: 500;
-                animation: slideIn 0.3s ease-out;
-                z-index: 1000;
-            }
-
-                .toast.success {
-                    background: #28a745;
-                }
-
-                .toast.error {
-                    background: #dc3545;
-                }
-
-            @@keyframes slideIn {
-                from {
-                    transform: translateX(100%);
-                }
-
-                to {
-                    transform: translateX(0);
-                }
-            }
-
-            .product-link {
-                text-decoration: none;
-                color: var(--primary);
-                font-weight: bold;
-                transition: color 0.3s ease;
-            }
-
-                .product-link:hover {
-                    color: #FF3366;
-                    text-decoration: underline;
-                }
-
-
-
-
-
-            /* --------------------------------------------------------------------------
-                           SHOP BY CATEGORY (Cards)
-                           -------------------------------------------------------------------------- */
-            .categories {
-                padding: 4rem 0;
-            }
-
-            .categories-grid {
-                display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-                gap: 1.5rem;
-            }
-
-            .category-card {
-                display: block;
-                position: relative;
-                overflow: hidden;
-                border-radius: var(--border-radius);
-                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-                transition: transform var(--transition-speed) ease;
-            }
-
-                .category-card:hover {
-                    transform: translateY(-5px);
-                }
-
-                .category-card img {
-                    width: 100%;
-                    height: 200px;
-                    object-fit: cover;
-                }
-
-                .category-card .category-overlay {
-                    position: absolute;
-                    bottom: 0;
-                    left: 0;
-                    width: 100%;
-                    background: rgba(0,0,0,0.6);
-                    color: #fff;
-                    padding: 0.5rem;
-                    text-align: center;
-                }
-        </style>
-    }
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>TechXpress - Innovation Unleashed</title>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+	<link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 </head>
+<body>
+	<!-- Hero Section -->
+	<section class="hero" aria-label="Hero Section">
+		<div class="container">
+			<div class="hero-grid">
+				<!-- Hero Text Column -->
+				<div class="hero-text">
+					<h1>@Model.HeroText</h1>
+					<p>@Model.HeroDescription</p>
+					<a asp-controller="Product" asp-action="Index" class="cta-button btn btn-primary">
+						Shop Now <i class="fas fa-arrow-right" aria-hidden="true"></i>
+					</a>
+				</div>
+				<!-- Discounted Products Slider Column -->
+				<div class="discounted-slider">
+					<button class="slider-prev" aria-label="Previous">&lt;</button>
+					<div class="discounted-slider-inner-wrapper">
+						<div class="discounted-slider-inner" style="transition: transform 0.5s ease;">
+							@foreach (var product in Model.FeaturedProducts)
+							{
+								<div class="discount-item">
+									<a asp-controller="Product" asp-action="Details" asp-route-id="@product.Id">
+										<img src="@product.ImageUrl" alt="@product.ProductImages" />
+									</a>
+									<div class="discount-overlay">
+										<span class="discount-info">
+											Save @((product.Price - (product.DiscountPrice ?? product.Price)).ToString("C"))
+										</span>
+									</div>
+								</div>
+							}
+						</div>
+					</div>
+					<button class="slider-next" aria-label="Next">&gt;</button>
+				</div>
+			</div>
+		</div>
+	</section>
+	<!-- Featured Products Section -->
+	<section id="featured-products" class="featured-products" aria-label="Featured Products">
+		<div class="container">
+			<h2 class="section-title text-center">Featured Products</h2>
+			<div class="products-grid">
+				@foreach (var product in Model.FeaturedProducts)
+				{
+					<div class="product-card" role="article">
+						@if (!string.IsNullOrEmpty(product.Tag))
+						{
+							<div class="product-badge">@product.Tag</div>
+						}
+						<div class="product-image-container">
+							<img src="@product.ImageUrl" alt="@product.Name" class="product-image" />
+							<div class="product-overlay" aria-hidden="true">
+								<div class="product-actions">
+									<form asp-controller="Wishlist" asp-action="AddToWishlist" method="post">
+										<input type="hidden" name="productId" value="@product.Id" />
+										<button type="submit" class="action-button" title="Add to Wishlist">
+											<i class="fas fa-heart" aria-hidden="true"></i>
+										</button>
+									</form>
+									<button type="button" class="action-button"
+											data-name="@product.Name"
+											data-rating="@product.AverageRating"
+											data-reviewcount="@product.ReviewCount"
+											data-description="@product.Description"
+											data-price="@product.FinalPrice"
+											data-imageurl="@product.ImageUrl"
+											data-id="@product.Id"
+											data-images='@Html.Raw(JsonSerializer.Serialize(product.ProductImages))'
+											onclick="openModalFromData(this)"
+											title="Quick View">
+										<i class="fas fa-eye" aria-hidden="true"></i>
+									</button>
+									<form asp-controller="Cart" asp-action="AddToCart" method="post">
+										<input type="hidden" name="productId" value="@product.Id" />
+										<button type="submit" class="action-button" title="Add to Cart">
+											<i class="fas fa-shopping-cart" aria-hidden="true"></i>
+										</button>
+									</form>
+								</div>
+							</div>
+						</div>
+						<div class="product-content">
+							<div class="product-category">@product.Category?.Name</div>
+							<h3 class="product-title">
+								<a asp-controller="Product" asp-action="Details" asp-route-id="@product.Id">
+									@product.Name
+								</a>
+							</h3>
+							<div class="product-rating" aria-label="Product Rating">
+								@{
+									// Calculate the number of full stars and half star if applicable.
+									int fullStars = (int)Math.Floor(product.AverageRating);
+									bool hasHalfStar = (product.AverageRating - fullStars) >= 0.5;
+									for (int i = 1; i <= 5; i++)
+									{
+										if (i <= fullStars)
+										{
+											<i class="fas fa-star" aria-hidden="true"></i>
+										}
+										else if (i == fullStars + 1 && hasHalfStar)
+										{
+											<i class="fas fa-star-half-alt" aria-hidden="true"></i>
+										}
+										else
+										{
+											<i class="far fa-star" aria-hidden="true"></i>
+										}
+									}
+								}
+								<span class="rating-count">(@product.ReviewCount Reviews)</span>
+							</div>
+							<div class="product-price">@product.FinalPrice.ToString("C")</div>
+						</div>
+					</div>
+				}
+			</div>
+			<!-- Pagination Controls -->
+			<div class="pagination">
+				@if (Model.FeaturedProductsPage > 1)
+				{
+					<a href="@Url.Action("Index", new { page = Model.FeaturedProductsPage - 1 })" class="btn btn-outline-primary">Previous</a>
+				}
+				<span>Page @Model.FeaturedProductsPage of @Model.FeaturedProductsTotalPages</span>
+				@if (Model.FeaturedProductsPage < Model.FeaturedProductsTotalPages)
+				{
+					<a href="@Url.Action("Index", new { page = Model.FeaturedProductsPage + 1 })" class="btn btn-outline-primary">Next</a>
+				}
+			</div>
+		</div>
+	</section>
 
-<!-- Hero Section -->
-<section class="hero" aria-label="Hero Section">
-    <div class="container">
-        <div class="hero-grid">
-            <!-- Hero Text Column -->
-            <div class="hero-text">
-                <h1>@Model.HeroText</h1>
-                <p>@Model.HeroDescription</p>
-                <a asp-controller="Product" asp-action="Index" class="cta-button btn btn-primary">
-                    Shop Now <i class="fas fa-arrow-right" aria-hidden="true"></i>
-                </a>
-            </div>
-            <!-- Discounted Products Slider Column -->
-            <div class="discounted-slider">
-                <div class="discounted-slider-inner">
-                    @foreach (var product in Model.FeaturedProducts)
-                    {
-                        <div class="discount-item">
-                            <img src="@product.ImageUrl" alt="@product.ProductImages" />
-                            <div class="discount-overlay">
-                                <span class="discount-info">Save @((product.Price - (product.DiscountPrice ?? product.Price)).ToString("C"))</span>
-                            </div>
-                        </div>
-                    }
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-<!-- Featured Products Section -->
-<section id="featured-products" class="featured-products" aria-label="Featured Products">
-    <div class="container">
-        <h2 class="section-title text-center">Featured Products</h2>
-        <div class="products-grid">
-            @foreach (var product in Model.FeaturedProducts)
-            {
-                <div class="product-card" role="article">
-                    @if (!string.IsNullOrEmpty(product.Tag))
-                    {
-                        <div class="product-badge">@product.Tag</div>
-                    }
-                    <div class="product-image-container">
-                        <img src="@product.ImageUrl" alt="@product.Name" class="product-image" />
-                        <div class="product-overlay" aria-hidden="true">
-                            <div class="product-actions">
-                                <form asp-controller="Wishlist" asp-action="AddToWishlist" method="post">
-                                    <input type="hidden" name="productId" value="@product.Id" />
-                                    <button type="submit" class="action-button" title="Add to Wishlist">
-                                        <i class="fas fa-heart" aria-hidden="true"></i>
-                                    </button>
-                                </form>
-                                <button type="button" class="action-button"
-                                        data-name="@product.Name"
-                                        data-rating="@product.AverageRating"
-                                        data-reviewcount="@product.ReviewCount"
-                                        data-description="@product.Description"
-                                        data-price="@product.FinalPrice"
-                                        data-imageurl="@product.ImageUrl"
-                                        data-id="@product.Id"
-                                        data-images='@Html.Raw(JsonSerializer.Serialize(product.ProductImages))'
-                                        onclick="openModalFromData(this)"
-                                        title="Quick View">
-                                    <i class="fas fa-eye" aria-hidden="true"></i>
-                                </button>
-                                <form asp-controller="Cart" asp-action="AddToCart" method="post">
-                                    <input type="hidden" name="productId" value="@product.Id" />
-                                    <button type="submit" class="action-button" title="Add to Cart">
-                                        <i class="fas fa-shopping-cart" aria-hidden="true"></i>
-                                    </button>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="product-content">
-                        <div class="product-category">@product.Category?.Name</div>
-                        <h3 class="product-title">
-                            <a asp-controller="Product" asp-action="Details" asp-route-id="@product.Id">
-                                @product.Name
-                            </a>
-                        </h3>
-                        <div class="product-rating" aria-label="Product Rating">
-                            @{
-                                var rating = product.AverageRating;
-                                for (int i = 1; i <= 5; i++)
-                                {
-                                    <i class="fas fa-star @(i <= rating ? "active" : "")" aria-hidden="true"></i>
-                                    ;
-                                }
-                            }
-                            <span class="rating-count">(@(product.ReviewCount) Reviews)</span>
-                        </div>
-                        <div class="product-price">@product.FinalPrice.ToString("C")</div>
-                    </div>
-                </div>
-            }
-        </div>
-        <!-- Pagination Controls -->
-        <div class="pagination">
-            @if (Model.FeaturedProductsPage > 1)
-            {
-                <a href="@Url.Action("Index", new { page = Model.FeaturedProductsPage - 1 })" class="btn btn-outline-primary">Previous</a>
-            }
-            <span>Page @Model.FeaturedProductsPage of @Model.FeaturedProductsTotalPages</span>
-            @if (Model.FeaturedProductsPage < Model.FeaturedProductsTotalPages)
-            {
-                <a href="@Url.Action("Index", new { page = Model.FeaturedProductsPage + 1 })" class="btn btn-outline-primary">Next</a>
-            }
-        </div>
-    </div>
-</section>
+	<!-- Shop by Category Section -->
+	<section id="categories" class="categories" aria-label="Shop by Category">
+		<div class="container">
+			<h2 class="section-title text-center">Shop by Category</h2>
+			<div class="categories-grid">
+				@foreach (var category in Model.Categories)
+				{
+					<a class="category-card" asp-controller="Category" asp-action="Details" asp-route-id="@category.Id">
+						<img src="@category.ImageUrl" alt="@category.Name" class="category-image" />
+						<div class="category-overlay">
+							<h3>@category.Name</h3>
+						</div>
+					</a>
+				}
+			</div>
+		</div>
+	</section>
 
-<!-- Shop by Category Section -->
-<section id="categories" class="categories" aria-label="Shop by Category">
-    <div class="container">
-        <h2 class="section-title text-center">Shop by Category</h2>
-        <div class="categories-grid">
-            @foreach (var category in Model.Categories)
-            {
-                <a class="category-card" asp-controller="Category" asp-action="Details" asp-route-id="@category.Id">
-                    <img src="@category.ImageUrl" alt="@category.Name" class="category-image" />
-                    <div class="category-overlay">
-                        <h3>@category.Name</h3>
-                    </div>
-                </a>
-            }
-        </div>
-    </div>
-</section>
+	<!-- Single Quick View Modal (Shared Partial) -->
+	@await Html.PartialAsync("_QuickView")
 
-<!-- Single Quick View Modal (Shared Partial) -->
-@await Html.PartialAsync("_QuickView")
- 
-@section Scripts {
-    <script>
-           // Helper: Get the Request Verification Token
-        const getRequestVerificationToken = () => {
-            const tokenInput = document.querySelector('input[name="__RequestVerificationToken"]');
-            return tokenInput ? tokenInput.value : '';
-        };
+	@section Scripts {
+		<script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script> <!-- Ensure Swiper is included -->
+		<script>
+			// Helper: Get the Request Verification Token
+			const getRequestVerificationToken = () => {
+				const tokenInput = document.querySelector('input[name="__RequestVerificationToken"]');
+				return tokenInput ? tokenInput.value : '';
+			};
 
-        // Initialize Swiper when document is loaded
-        document.addEventListener('DOMContentLoaded', () 
-        => {
-            // Initialize Swiper if it exists on the page
-            if (document.querySelector('.swiper')) {
-                const swiper = new Swiper(".mySwiper", {
-                    pagination: {
-                        el: ".swiper-pagination",
-                        type: "progressbar",
-                    },
-                    navigation: {
-                        nextEl: ".swiper-button-next",
-                        prevEl: ".swiper-button-prev",
-                    },
-                });
-            }
-        });
+			// Open modal from button data attributes
+			function openModalFromData(button) {
+				const name = button.getAttribute("data-name");
+				const rating = button.getAttribute("data-rating");
+				const reviewCount = button.getAttribute("data-reviewcount");
+				const description = button.getAttribute("data-description");
+				const price = button.getAttribute("data-price");
+				const imageUrl = button.getAttribute("data-imageurl");
+				const productId = button.getAttribute("data-id");
+				let imageUrls = [];
+				try {
+					imageUrls = JSON.parse(button.getAttribute("data-images"));
+					if (!Array.isArray(imageUrls)) {
+						imageUrls = [];
+					}
+				} catch (e) {
+					console.error("Failed to parse product images", e);
+					imageUrls = [];
+				}
+				openModal(name, rating, reviewCount, description, price, imageUrl, productId, imageUrls);
+			}
 
-        // Open the modal and populate product details dynamically
-        function openModal(name, description, price, imageUrl, productId)
-        {
-            // References to modal elements
-            const modal = document.getElementById('productModal');
-            const swiperWrapper = document.getElementById('swiper-wrapper');
-            const thumbnailContainer = document.getElementById('thumbnail-container');
+			// Open and populate the modal
+			function openModal(name, rating, reviewCount, description, price, imageUrl, productId, imageUrls) {
+				const modal = document.getElementById('productModal');
+				modal.style.display = 'flex';
+				setTimeout(() => modal.classList.add('active'), 10);
 
-            // Clear existing slides and thumbnails
-            if (swiperWrapper) swiperWrapper.innerHTML = '';
-            if (thumbnailContainer) thumbnailContainer.innerHTML = '';
+				// Set modal text content
+				document.getElementById('modal-product-name').innerHTML =
+					`<a href="/Product/Details/${productId}" target="_blank">${name}</a>`;
+				document.getElementById('modal-product-description').innerText = description;
+				document.getElementById('modal-product-price').innerText = parseFloat(price).toLocaleString('en-US', {
+					style: 'currency',
+					currency: 'EGP'
+				});
+				document.getElementById("modalProductId").value = productId;
+				document.getElementById("modalProductIdOrder").value = productId;
 
-            // Add main image to swiper
-            if (swiperWrapper) {
-                swiperWrapper.innerHTML = `
-                    <div class="swiper-slide">
-                        <img src="${imageUrl}" alt="${name}" class="modal-product-image">
-                    </div>
-                `;
-            }
+				// Build the image gallery
+				const swiperWrapper = document.getElementById('swiper-wrapper');
+				const thumbnailContainer = document.getElementById('thumbnail-container');
+				swiperWrapper.innerHTML = "";
+				thumbnailContainer.innerHTML = "";
 
-            // Add thumbnail
-            if (thumbnailContainer) 
-            {
-                thumbnailContainer.innerHTML = `
-                    <div class="thumbnail active" data-index="0">
-                        <img src="${imageUrl}" alt="${name}">
-                    </div>
-                `;
-            }
+				if (Array.isArray(imageUrls) && imageUrls.length > 0) {
+					imageUrls.forEach((img, index) => {
+						// Create Swiper slide
+						const slide = document.createElement('div');
+						slide.className = "swiper-slide";
+						const imgElem = document.createElement('img');
+						imgElem.src = img;
+						imgElem.alt = `${name} image ${index + 1}`;
+						slide.appendChild(imgElem);
+						swiperWrapper.appendChild(slide);
 
-            // Update product details
-            document.getElementById('modal-product-name').innerText = name;
-            document.getElementById('modal-product-description').innerText = description;
-            document.getElementById('modal-product-price').innerText = parseFloat(price).toLocaleString('en-US', {
-                style: 'currency',
-                currency: 'EGP'
-            });
+						// Create thumbnail
+						const thumbDiv = document.createElement('div');
+						thumbDiv.className = `thumbnail${index === 0 ? " active" : ""}`;
+						thumbDiv.setAttribute('data-index', index);
+						thumbDiv.addEventListener("click", () => {
+							document.querySelectorAll('#thumbnail-container .thumbnail').forEach(t => t.classList.remove('active'));
+							thumbDiv.classList.add('active');
+							window.mySwiperInstance.slideTo(index);
+						});
+						const thumbImg = document.createElement('img');
+						thumbImg.src = img;
+						thumbImg.alt = `Thumbnail ${index + 1}`;
+						thumbDiv.appendChild(thumbImg);
+						thumbnailContainer.appendChild(thumbDiv);
+					});
+				} else {
+					// Fallback to primary image
+					const slide = document.createElement('div');
+					slide.className = "swiper-slide";
+					const imgElem = document.createElement('img');
+					imgElem.src = imageUrl;
+					imgElem.alt = name;
+					slide.appendChild(imgElem);
+					swiperWrapper.appendChild(slide);
 
-            // Update form hidden inputs for Add to Cart and Buy Now
-            document.getElementById("modalProductId").value = productId;
-            document.getElementById("modalProductIdOrder").value = productId;
+					const thumbDiv = document.createElement('div');
+					thumbDiv.className = "thumbnail active";
+					const thumbImg = document.createElement('img');
+					thumbImg.src = imageUrl;
+					thumbImg.alt = "Thumbnail";
+					thumbDiv.appendChild(thumbImg);
+					thumbnailContainer.appendChild(thumbDiv);
+				}
 
-            // Display modal with animation
-            modal.style.display = 'block';
-            setTimeout(() => {
-                modal.classList.add('active');
-            }, 10);
+				// Initialize or update Swiper
+				if (window.mySwiperInstance) {
+					window.mySwiperInstance.destroy(); // Destroy existing instance to reinitialize
+				}
+				window.mySwiperInstance = new Swiper('.mySwiper', {
+					navigation: {
+						nextEl: '.swiper-button-next',
+						prevEl: '.swiper-button-prev',
+					},
+					pagination: {
+						el: '.swiper-pagination',
+						clickable: true,
+					},
+				});
 
-            // Reset quantity
-            document.getElementById('quantity').value = 1;
+				// Sync thumbnails with Swiper slide changes
+				window.mySwiperInstance.on('slideChange', () => {
+					const activeIndex = window.mySwiperInstance.activeIndex;
+					document.querySelectorAll('#thumbnail-container .thumbnail').forEach((thumb, index) => {
+						thumb.classList.toggle('active', index === activeIndex);
+					});
+				});
 
-            // Generate star ratings (assuming a default rating of 4 out of 5)
-            const starsContainer = document.getElementById('modal-stars');
-            if (starsContainer) {
-                starsContainer.innerHTML = '';
-                for (let i = 0; i < 5; i++) {
-                    const star = document.createElement('i');
-                    star.className = i < 4 ? 'fas fa-star' : 'far fa-star';
-                    starsContainer.appendChild(star);
-                }
-            }
+				// Update rating
+				updateRating(rating, reviewCount);
+			}
 
-            // Set review count (example value)
-            const reviewCount = document.getElementById('modal-review-count');
-            if (reviewCount) {
-                reviewCount.innerText = '(24 Reviews)';
-            }
+			// Update star rating
+			function updateRating(rating, reviewCount) {
+				rating = parseFloat(rating) || 0;
+				const starsContainer = document.getElementById('modal-stars');
+				starsContainer.innerHTML = "";
+				for (let i = 1; i <= 5; i++) {
+					const starIcon = document.createElement('i');
+					starIcon.className = i <= rating ? "fas fa-star" : i - rating < 1 ? "fas fa-star-half-alt" : "far fa-star";
+					starsContainer.appendChild(starIcon);
+				}
+				document.getElementById('modal-review-count').innerText = reviewCount ? `(${reviewCount} reviews)` : "";
+			}
 
-            // Set in-stock status
-            document.getElementById('stock-status').innerHTML = '<i class="fas fa-check-circle"></i> In Stock';
+			// Close modal
+			function closeModal() {
+				const modal = document.getElementById('productModal');
+				modal.classList.remove('active');
+				setTimeout(() => modal.style.display = 'none', 300);
+			}
 
-            // Reinitialize Swiper if needed
-            if (typeof Swiper !== 'undefined') {
-                const swiper = new Swiper(".mySwiper", {
-                    pagination: {
-                        el: ".swiper-pagination",
-                        type: "progressbar",
-                    },
-                    navigation: {
-                        nextEl: ".swiper-button-next",
-                        prevEl: ".swiper-button-prev",
-                    },
-                });
-            }
-        }
+			// Quantity adjustment
+			function updateQuantity(change) {
+				const quantityInput = document.getElementById('quantity');
+				let currentValue = parseInt(quantityInput.value) || 1;
+				let newValue = Math.max(1, Math.min(currentValue + change, 99));
+				quantityInput.value = newValue;
+			}
 
-        // Close the modal
-        function closeModal() {
-            const modal = document.getElementById('productModal');
-            modal.classList.remove('active');
-            setTimeout(() => { modal.style.display = 'none'; }, 300);
-        }
+			// Modal close events
+			document.addEventListener('DOMContentLoaded', () => {
+				const modal = document.getElementById('productModal');
+				modal.addEventListener('click', event => {
+					if (event.target === modal) closeModal();
+				});
+				document.addEventListener('keydown', event => {
+					if (event.key === 'Escape' && modal.style.display === 'flex') closeModal();
+				});
+			});
 
-        // Update quantity ensuring it stays between 1 and 99
-        function updateQuantity(change) {
-            const quantityInput = document.getElementById('quantity');
-            let currentValue = parseInt(quantityInput.value) || 1;
-            let newValue = Math.max(1, Math.min(currentValue + change, 99));
-            quantityInput.value = newValue;
-        }
+			// Add to cart (example, adjust endpoint as needed)
+			async function addToCart(productId) {
+				try {
+					const response = await fetch('/Cart/AddToCart', {
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/json',
+							'RequestVerificationToken': getRequestVerificationToken()
+						},
+						body: JSON.stringify({
+							productId: productId,
+							quantity: document.getElementById('quantity')?.value || 1
+						})
+					});
+					if (response.ok) showToast('Product added to cart!');
+					else showToast('Failed to add to cart', 'error');
+				} catch (error) {
+					console.error('Error:', error);
+					showToast('Network error', 'error');
+				}
+			}
 
-        // Event listeners for modal
-        document.addEventListener('DOMContentLoaded', () => {
-            const modal = document.getElementById('productModal');
+			// Toast notification
+			function showToast(message, type = 'success') {
+				const toast = document.createElement('div');
+				toast.className = `toast ${type}`;
+				toast.textContent = message;
+				document.body.appendChild(toast);
+				setTimeout(() => toast.remove(), 3000);
+			}
 
-            // Close modal when clicking on the overlay
-            const overlay = document.querySelector('.modal-overlay');
-            if (overlay) {
-                overlay.addEventListener('click', closeModal);
-            }
+			// Discounted slider logic (unchanged for brevity)
+			document.addEventListener("DOMContentLoaded", () => {
+				const sliderInner = document.querySelector('.discounted-slider-inner');
+				const wrapper = document.querySelector('.discounted-slider-inner-wrapper');
+				const slideRatio = 0.5;
+				let slideDistance = wrapper.offsetWidth * slideRatio;
+				let currentTranslate = 0;
+				const maxTranslate = sliderInner.scrollWidth - wrapper.offsetWidth;
 
-            // Close modal with Escape key
-            document.addEventListener('keydown', (event) => {
-                if (event.key === 'Escape' && modal.style.display === 'block') {
-                    closeModal();
-                }
-            });
+				window.addEventListener('resize', () => {
+					slideDistance = wrapper.offsetWidth * slideRatio;
+				});
 
-            // Thumbnail click handling
-            const thumbnailContainer = document.getElementById('thumbnail-container');
-            if (thumbnailContainer) {
-                thumbnailContainer.addEventListener('click', (e) => {
-                    const thumbnail = e.target.closest('.thumbnail');
-                    if (thumbnail) {
-                        const index = thumbnail.dataset.index;
-                        // Update active thumbnail
-                        document.querySelectorAll('.thumbnail').forEach(t => t.classList.remove('active'));
-                        thumbnail.classList.add('active');
-                        // Slide to the corresponding slide
-                        if (typeof swiper !== 'undefined') {
-                            swiper.slideTo(index);
-                        }
-                    }
-                });
-            }
-        });
-    </script>
-}
+				function autoSlide() {
+					currentTranslate += slideDistance;
+					if (currentTranslate > maxTranslate) currentTranslate = 0;
+					sliderInner.style.transform = `translateX(-${currentTranslate}px)`;
+				}
+				setInterval(autoSlide, 3000);
+			});
+		</script>
+	}
 
+	@section Styles {
+		<style>
+			/* Hero Section */
+			.hero {
+				min-height: 100vh;
+				background: linear-gradient(135deg, var(--dark) 0%, #1a1a1a 100%);
+				display: flex;
+				align-items: center;
+				position: relative;
+				overflow: hidden;
+			}
+
+				.hero::after {
+					content: '';
+					position: absolute;
+					width: 150%;
+					height: 150%;
+					background: repeating-linear-gradient(45deg, var(--primary) 0%, var(--secondary) 10%, var(--accent) 20%);
+					opacity: 0.05;
+					animation: backgroundMove 20s linear infinite;
+					transform: translateZ(0);
+				}
+
+			@@keyframes backgroundMove {
+				0% {
+					transform: translate(-50%, -50%) rotate(0deg);
+				}
+
+				100% {
+					transform: translate(-50%, -50%) rotate(360deg);
+				}
+			}
+
+			.hero-content {
+				max-width: 1400px;
+				margin: 0 auto;
+				padding: 0 2rem;
+				position: relative;
+				z-index: 2;
+				color: white;
+			}
+
+			.hero-grid {
+				display: grid;
+				grid-template-columns: 1fr 1fr;
+				gap: 4rem;
+				align-items: center;
+			}
+
+			.hero-text h1 {
+				font-size: 5rem;
+				line-height: 1.1;
+				font-weight: 800;
+				margin-bottom: 2rem;
+				background: linear-gradient(45deg, var(--primary), var(--accent));
+				-webkit-background-clip: text;
+				-webkit-text-fill-color: transparent;
+				animation: titleGlow 3s ease-in-out infinite alternate;
+			}
+
+			@@keyframes titleGlow {
+				0% {
+					text-shadow: 0 0 20px rgba(255, 51, 102, 0.1);
+				}
+
+				100% {
+					text-shadow: 0 0 40px rgba(255, 51, 102, 0.3);
+				}
+			}
+
+			.hero-text p {
+				font-size: 1.25rem;
+				margin-bottom: 3rem;
+				color: rgba(255, 255, 255, 0.8);
+			}
+			/* Container for the slider */
+			.discounted-slider {
+				position: relative;
+				padding: 20px;
+				background: #f8f8f8;
+			}
+
+			/* Wrapper to hide overflow */
+			.discounted-slider-inner-wrapper {
+				overflow: hidden;
+			}
+
+			/* Inner slider layout using flex */
+			.discounted-slider-inner {
+				display: flex;
+				gap: 15px;
+				transition: transform 0.5s ease;
+			}
+
+			/* Individual discount item styles */
+			.discount-item {
+				flex: 0 0 auto;
+				width: 200px;
+				border: 1px solid #ddd;
+				border-radius: 8px;
+				overflow: hidden;
+				box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+				background: #fff;
+				transition: transform 0.3s ease, box-shadow 0.3s ease;
+			}
+
+				.discount-item:hover {
+					transform: translateY(-5px);
+					box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+				}
+
+				.discount-item img {
+					display: block;
+					width: 100%;
+					height: auto;
+					border-bottom: 1px solid #ddd;
+				}
+
+			.discount-overlay {
+				position: absolute;
+				bottom: 0;
+				left: 0;
+				width: 100%;
+				background: rgba(255, 0, 0, 0.85);
+				color: #fff;
+				text-align: center;
+				padding: 8px 0;
+				font-weight: bold;
+				font-size: 14px;
+			}
+
+			.discount-info {
+				display: inline-block;
+				padding: 0 10px;
+			}
+
+			/* Slider arrow buttons */
+			.slider-prev,
+			.slider-next {
+				position: absolute;
+				top: 50%;
+				transform: translateY(-50%);
+				background: rgba(0, 0, 0, 0.5);
+				color: #fff;
+				border: none;
+				padding: 10px;
+				cursor: pointer;
+				font-size: 18px;
+				z-index: 1;
+				border-radius: 50%;
+			}
+
+			.slider-prev {
+				left: 10px;
+			}
+
+			.slider-next {
+				right: 10px;
+			}
+
+			/* Container styles for the slider */
+			.discounted-slider {
+				overflow: hidden;
+				position: relative;
+				padding: 20px;
+				background: #f8f8f8;
+			}
+
+			/* Inner slider layout using flex */
+			.discounted-slider-inner {
+				display: flex;
+				gap: 15px;
+				transition: transform 0.5s ease;
+			}
+
+			/* Individual discount item styles */
+			.discount-item {
+				position: relative;
+				flex: 0 0 auto;
+				width: 200px;
+				border: 1px solid #ddd;
+				border-radius: 8px;
+				overflow: hidden;
+				box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+				background: #fff;
+				transition: transform 0.3s ease, box-shadow 0.3s ease;
+			}
+
+				/* Hover effect for discount items */
+				.discount-item:hover {
+					transform: translateY(-5px);
+					box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+				}
+
+				/* Styling for the image inside each discount item */
+				.discount-item img {
+					display: block;
+					width: 100%;
+					height: auto;
+					border-bottom: 1px solid #ddd;
+				}
+
+			/* Discount overlay that appears at the bottom of the item */
+			.discount-overlay {
+				position: absolute;
+				bottom: 0;
+				left: 0;
+				width: 100%;
+				background: rgba(255, 0, 0, 0.85);
+				color: #fff;
+				text-align: center;
+				padding: 8px 0;
+				font-weight: bold;
+				font-size: 14px;
+			}
+
+			/* Additional styling for the discount info text */
+			.discount-info {
+				display: inline-block;
+				padding: 0 10px;
+			}
+			/* Features Section */
+			.features {
+				padding: 8rem 2rem;
+				background: white;
+			}
+
+			.section-title {
+				text-align: center;
+				margin-bottom: 5rem;
+				font-size: 3rem;
+				font-weight: 800;
+				color: var(--dark);
+			}
+			/* Features Section */
+			.features {
+				padding: 8rem 2rem;
+				background: white;
+			}
+
+			.section-title {
+				text-align: center;
+				margin-bottom: 5rem;
+				font-size: 3rem;
+				font-weight: 800;
+				color: var(--dark);
+			}
+
+			.features-grid {
+				display: grid;
+				grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+				gap: 3rem;
+				max-width: 1400px;
+				margin: 0 auto;
+			}
+
+			.feature-card {
+				background: white;
+				padding: 3rem;
+				border-radius: 30px;
+				box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+				transition: all 0.3s ease;
+				position: relative;
+				overflow: hidden;
+			}
+
+				.feature-card::before {
+					content: '';
+					position: absolute;
+					top: 0;
+					left: 0;
+					width: 100%;
+					height: 5px;
+					background: linear-gradient(to right, var(--primary), var(--secondary));
+					transform: scaleX(0);
+					transition: transform 0.3s ease;
+				}
+
+				.feature-card:hover {
+					transform: translateY(-10px);
+				}
+
+					.feature-card:hover::before {
+						transform: scaleX(1);
+					}
+
+			.feature-icon {
+				font-size: 3rem;
+				margin-bottom: 1.5rem;
+				background: linear-gradient(45deg, var(--primary), var(--secondary));
+				-webkit-background-clip: text;
+				-webkit-text-fill-color: transparent;
+			}
+			/* Products Section */
+			.products {
+				padding: 8rem 2rem;
+				background: var(--light);
+			}
+
+			.products-grid {
+				display: grid;
+				grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+				gap: 2rem;
+				max-width: 1400px;
+				margin: 0 auto;
+			}
+
+			.product-card {
+				background: white;
+				border-radius: 20px;
+				overflow: hidden;
+				position: relative;
+				transition: all 0.3s ease;
+				box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+			}
+
+				.product-card:hover {
+					transform: translateY(-5px);
+					box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+				}
+
+			.product-badge {
+				position: absolute;
+				top: 1rem;
+				left: 1rem;
+				background: var(--primary);
+				color: white;
+				padding: 0.5rem 1rem;
+				border-radius: 30px;
+				font-size: 0.8rem;
+				font-weight: 600;
+				z-index: 2;
+			}
+
+			.product-image-container {
+				position: relative;
+				padding-top: 100%;
+				background: #f8f9fa;
+			}
+
+			.product-image {
+				position: absolute;
+				top: 0;
+				left: 0;
+				width: 100%;
+				height: 100%;
+				object-fit: cover;
+				transition: transform 0.5s ease;
+			}
+
+			.product-overlay {
+				position: absolute;
+				top: 0;
+				left: 0;
+				width: 100%;
+				height: 100%;
+				background: rgba(0, 0, 0, 0.2);
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				opacity: 0;
+				transition: opacity 0.3s ease;
+			}
+
+			.product-card:hover .product-overlay {
+				opacity: 1;
+			}
+
+			.product-actions {
+				display: flex;
+				gap: 1rem;
+			}
+
+			.action-button {
+				background: white;
+				border: none;
+				width: 40px;
+				height: 40px;
+				border-radius: 50%;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				cursor: pointer;
+				transition: all 0.3s ease;
+				transform: translateY(20px);
+				opacity: 0;
+			}
+
+			.product-card:hover .action-button {
+				transform: translateY(0);
+				opacity: 1;
+			}
+
+			.action-button:hover {
+				background: var(--primary);
+				color: white;
+			}
+
+			.product-content {
+				padding: 1.5rem;
+			}
+
+			.product-category {
+				color: #666;
+				font-size: 0.9rem;
+				margin-bottom: 0.5rem;
+			}
+
+			.product-title {
+				font-size: 1.1rem;
+				font-weight: 600;
+				margin-bottom: 0.5rem;
+				color: var(--dark);
+			}
+
+			.product-rating {
+				display: flex;
+				align-items: center;
+				gap: 0.5rem;
+				margin-bottom: 1rem;
+			}
+
+			.stars {
+				color: #ffc107;
+			}
+
+			.rating-count {
+				color: #666;
+				font-size: 0.9rem;
+			}
+
+			.product-price-container {
+				display: flex;
+				align-items: center;
+				gap: 1rem;
+			}
+
+			.product-price {
+				font-size: 1.2rem;
+				font-weight: 700;
+				color: var(--primary);
+			}
+
+			.product-old-price {
+				color: #999;
+				text-decoration: line-through;
+				font-size: 0.9rem;
+			}
+			/* Modal Styles */
+			.modal {
+				display: none;
+				position: fixed;
+				top: 0;
+				left: 0;
+				width: 100%;
+				height: 100%;
+				background: rgba(0, 0, 0, 0.5);
+				z-index: 1000;
+				opacity: 0;
+				transition: opacity 0.3s ease;
+			}
+
+				.modal.active {
+					opacity: 1;
+				}
+
+			.modal-content {
+				background: white;
+				border-radius: 20px;
+				width: 90%;
+				max-width: 1000px;
+				margin: 2rem auto;
+				position: relative;
+				padding: 2rem;
+			}
+
+			.modal-grid {
+				display: grid;
+				grid-template-columns: 1fr 1fr;
+				gap: 2rem;
+			}
+
+			.modal-gallery {
+				display: flex;
+				flex-direction: column;
+				gap: 1rem;
+			}
+
+			.main-image-container {
+				aspect-ratio: 1;
+				border-radius: 10px;
+				overflow: hidden;
+			}
+
+			.modal-product-image {
+				width: 100%;
+				height: 100%;
+				object-fit: cover;
+			}
+
+			.thumbnail-container {
+				display: flex;
+				gap: 1rem;
+			}
+
+			.thumbnail {
+				width: 80px;
+				height: 80px;
+				border-radius: 8px;
+				overflow: hidden;
+				cursor: pointer;
+				opacity: 0.6;
+				transition: opacity 0.3s ease;
+			}
+
+				.thumbnail.active {
+					opacity: 1;
+					border: 2px solid var(--primary);
+				}
+
+				.thumbnail img {
+					width: 100%;
+					height: 100%;
+					object-fit: cover;
+				}
+
+			.modal-header {
+				margin-bottom: 1.5rem;
+			}
+
+			.modal-rating {
+				display: flex;
+				align-items: center;
+				gap: 0.5rem;
+				margin-top: 0.5rem;
+			}
+
+			.modal-price-container {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				margin-bottom: 1.5rem;
+			}
+
+			.stock-status {
+				display: flex;
+				align-items: center;
+				gap: 0.5rem;
+				font-size: 0.9rem;
+			}
+
+				.stock-status.in-stock {
+					color: #28a745;
+				}
+
+			.modal-options {
+				margin: 2rem 0;
+			}
+
+			.quantity-selector {
+				display: flex;
+				align-items: center;
+				gap: 1rem;
+				max-width: 150px;
+			}
+
+			.quantity-btn {
+				background: #E91E63;
+				border: none;
+				width: 40px;
+				height: 40px;
+				border-radius: 8px;
+				cursor: pointer;
+			}
+
+			.quantity-selector input {
+				width: 60px;
+				text-align: center;
+				border: 1px solid #ddd;
+				border-radius: 8px;
+				padding: 0.5rem;
+			}
+
+			.modal-actions {
+				display: flex;
+				gap: 1rem;
+				margin-bottom: 2rem;
+			}
+
+			.add-to-cart-button, .buy-now-button {
+				flex: 1;
+				padding: 1rem;
+				border: none;
+				border-radius: 10px;
+				font-weight: 600;
+				cursor: pointer;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				gap: 0.5rem;
+				transition: all 0.3s ease;
+			}
+
+			.add-to-cart-button {
+				background: #f8f9fa;
+				color: var(--dark);
+			}
+
+			.buy-now-button {
+				background: var(--primary);
+				color: white;
+			}
+
+			.product-meta {
+				border-top: 1px solid #eee;
+				padding-top: 1.5rem;
+				display: grid;
+				grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+				gap: 1rem;
+			}
+
+			.meta-item {
+				display: flex;
+				align-items: center;
+				gap: 0.5rem;
+				font-size: 0.9rem;
+				color: #666;
+			}
+
+			@@media (max-width: 768px) {
+				.modal-grid {
+					grid-template-columns: 1fr;
+				}
+
+				.modal-content {
+					padding: 1rem;
+				}
+
+				.product-meta {
+					grid-template-columns: 1fr;
+				}
+			}
+
+			.toast {
+				position: fixed;
+				bottom: 20px;
+				right: 20px;
+				padding: 15px 25px;
+				border-radius: 8px;
+				color: white;
+				font-weight: 500;
+				animation: slideIn 0.3s ease-out;
+				z-index: 1000;
+			}
+
+				.toast.success {
+					background: #28a745;
+				}
+
+				.toast.error {
+					background: #dc3545;
+				}
+
+			@@keyframes slideIn {
+				from {
+					transform: translateX(100%);
+				}
+
+				to {
+					transform: translateX(0);
+				}
+			}
+
+			.product-link {
+				text-decoration: none;
+				color: var(--primary);
+				font-weight: bold;
+				transition: color 0.3s ease;
+			}
+
+				.product-link:hover {
+					color: #FF3366;
+					text-decoration: underline;
+				}
+
+
+
+
+
+			/* --------------------------------------------------------------------------
+											   SHOP BY CATEGORY (Cards)
+											   -------------------------------------------------------------------------- */
+			.categories {
+				padding: 4rem 0;
+			}
+
+			.categories-grid {
+				display: grid;
+				grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+				gap: 1.5rem;
+			}
+
+			.category-card {
+				display: block;
+				position: relative;
+				overflow: hidden;
+				border-radius: var(--border-radius);
+				box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+				transition: transform var(--transition-speed) ease;
+			}
+
+				.category-card:hover {
+					transform: translateY(-5px);
+				}
+
+				.category-card img {
+					width: 100%;
+					height: 200px;
+					object-fit: cover;
+				}
+
+				.category-card .category-overlay {
+					position: absolute;
+					bottom: 0;
+					left: 0;
+					width: 100%;
+					background: rgba(0,0,0,0.6);
+					color: #fff;
+					padding: 0.5rem;
+					text-align: center;
+				}
+		</style>
+	}
+</body>
+</html>

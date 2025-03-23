@@ -71,52 +71,40 @@ namespace TechXpress.Controllers
         // Order details mapped to a view model
         public async Task<IActionResult> Details(int id)
         {
-            try
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var order = await _orderService.GetOrderByIdAsync(id);
+            if (order == null)
+                return NotFound();
+
+            var user = await _userProfileService.GetUserProfileAsync(userId);
+            var defaultAddress = user.Addresses.FirstOrDefault();
+            var shippingAddress = order.ApplicationUser?.Addresses?.FirstOrDefault() ?? defaultAddress;
+            var billingAddress = order.ApplicationUser?.Addresses?.FirstOrDefault() ?? defaultAddress;
+
+            var viewModel = new OrderDetailsViewModel
             {
-                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-                var order = await _orderService.GetOrderByIdAsync(id);
-                if (order == null)
-                    return NotFound();
-                 var user = await _userProfileService.GetUserProfileAsync( userId);
-                var defaultAddress =  user.Addresses.FirstOrDefault();
+                OrderId = order.OrderNumber,
+                OrderDate = order.OrderDate,
+                CurrentStatus = order.Status.ToString(),
+                StatusHistory = new List<OrderStatusHistory>(),
+                Items = order.OrderItems?.ToList() ?? new List<OrderItem>(),
+                ShippingAddress = shippingAddress,
+                BillingAddress = billingAddress,
+                PaymentMethod = order.PaymentMethod,
+                PaymentDetails = !string.IsNullOrEmpty(order.CardType)
+                    ? $"{order.CardType} ending in {order.LastFourDigits}"
+                    : $"Transaction ID: {order.TransactionId}",
+                Subtotal = order.TotalPrice,
+                ShippingCost = 15,
+                Tax = 5,
+                Discount = order.Discount,  
+                Total = order.Total,
+                TrackingNumber = order.TrackingNumber,
+                EstimatedDeliveryDate = order.OrderDate.AddDays(6)
+            };
 
-
-                var shippingAddress = order.ApplicationUser?.Addresses?.FirstOrDefault() ?? defaultAddress;
-                var billingAddress = order.ApplicationUser?.Addresses?.FirstOrDefault() ?? defaultAddress;
-
-                // Map domain order to OrderDetailsViewModel
-                var viewModel = new OrderDetailsViewModel
-                {
-                    OrderId = order.OrderNumber,
-                    OrderDate = order.OrderDate,
-                    CurrentStatus = order.Status.ToString(),
-                    StatusHistory = new List<OrderStatusHistory>(), 
-                    Items = order.OrderItems?.ToList() ?? new List<OrderItem>(),
-                    ShippingAddress = shippingAddress,
-                    BillingAddress = billingAddress,
-                    PaymentMethod = order.PaymentMethod,
-                    PaymentDetails = !string.IsNullOrEmpty(order.CardType)
-                        ? $"{order.CardType} ending in {order.LastFourDigits}"
-                        : $"Transaction ID: {order.TransactionId}",
-                    Subtotal = order.TotalPrice,
-                    ShippingCost = 15,
-                    Tax = 5,
-                    Discount = order.Discount,
-                    Total = order.Total,
-                    TrackingNumber = order.TrackingNumber,
-                    EstimatedDeliveryDate = order.OrderDate.AddDays(6)
-                };
-
-                return View(viewModel);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error retrieving order details");
-                TempData["ErrorMessage"] = "Failed to load order details";
-                return RedirectToAction(nameof(Index));
-            }
+            return View(viewModel);
         }
-
 
         [HttpPost]
         [ValidateAntiForgeryToken]
