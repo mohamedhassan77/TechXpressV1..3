@@ -101,7 +101,7 @@ namespace TechXpress_application.Services
         public async Task<int> GetCartItemCountAsync(string userId)
         {
             var cart = await _cartRepository.GetCartByUserIdAsync(userId);
-            return cart?.CartItems?.Sum(ci => ci.Quantity) ?? 0;
+            return cart?.CartItems?.Sum(ci => ci.Quantity) ?? 1;
         }
     }
 }

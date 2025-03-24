@@ -82,14 +82,50 @@ namespace TechXpress.Controllers
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> PlaceOrder(string paymentMethod, string transactionId)
+        public async Task<IActionResult> PlaceOrder(int productId, int quantity, string paymentMethod, string transactionId)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            // Retrieve the user's cart
+            var cart = await _cartService.GetCartByUserIdAsync(userId);
+            if (cart == null)
+            {
+                // If no cart exists, you might want to create one.
+                cart = new Cart { UserId = userId };
+                // Optionally persist the new cart here if necessary.
+            }
+
+            // Check if the product already exists in the cart
+            var cartItem = cart.CartItems.FirstOrDefault(ci => ci.Product.Id == productId);
+            if (cartItem == null)
+            {
+                // Directly add the product with the specified quantity since cartItem is null
+                var addResult = await _cartService.AddToCartAsync(userId, "", productId, quantity);
+                if (addResult.StartsWith("Error"))
+                {
+                    TempData["ErrorMessage"] = addResult;
+                    return RedirectToAction("Index", "Cart");
+                }
+            }
+            else
+            {
+                // Update the existing product's quantity (increase by the specified amount)
+                cartItem.Quantity += quantity;
+                var updateResult = await _cartService.UpdateCartQuantityAsync(userId, productId, cartItem.Quantity);
+                if (updateResult.StartsWith("Error"))
+                {
+                    TempData["ErrorMessage"] = updateResult;
+                    return RedirectToAction("Index", "Cart");
+                }
+            }
+
+            // Refresh the cart (if needed)
+            cart = await _cartService.GetCartByUserIdAsync(userId);
+
             try
             {
-                // Consider using a structured result from the checkout service
+                // Proceed to checkout with all products in the cart
                 var result = await _checkoutService.ProcessCheckoutAsync(userId, paymentMethod, transactionId);
-              
                 if (result.StartsWith("Error"))
                 {
                     TempData["ErrorMessage"] = result;
@@ -105,5 +141,7 @@ namespace TechXpress.Controllers
                 return RedirectToAction(nameof(Index));
             }
         }
+
+
     }
 }

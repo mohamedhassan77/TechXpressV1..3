@@ -50,14 +50,18 @@
                     </div>
                 </div>
                 <div class="modal-actions">
-                    <form asp-controller="Cart" asp-action="AddToCart" method="post" class="d-inline">
+                    <!-- Add to Cart Form -->
+                    <form asp-controller="Cart" asp-action="AddToCart" method="post" class="d-inline" id="addToCartForm">
                         <input type="hidden" id="modalProductId" name="productId" value="" />
+                        <input type="hidden" id="modalQuantityCart" name="quantity" value="1" />
                         <button type="submit" class="add-to-cart-button">
                             <i class="fas fa-shopping-cart"></i> Add to Cart
                         </button>
                     </form>
-                    <form asp-controller="CheckOut" asp-action="PlaceOrder" method="post" class="d-inline">
+                    <!-- Buy Now Form -->
+                    <form asp-controller="CheckOut" asp-action="placeOrder" method="post" class="d-inline" id="buyNowForm">
                         <input type="hidden" id="modalProductIdOrder" name="productId" value="" />
+                        <input type="hidden" id="modalQuantityOrder" name="quantity" value="1" />
                         <button type="submit" class="buy-now-button">
                             <i class="fas fa-bolt"></i> Buy Now
                         </button>
@@ -341,15 +345,36 @@
           const activeThumb = document.querySelector(`.thumbnail[data-index="${realIndex}"]`);
           if (activeThumb) activeThumb.classList.add('active');
         });
-        // Reset quantity
+        // Reset quantity input to 1
         document.getElementById('quantity').value = 1;
+        // Update hidden quantity inputs in the forms
+        document.getElementById('modalQuantityCart').value = 1;
+        document.getElementById('modalQuantityOrder').value = 1;
         // Display the modal
         document.getElementById('productModal').style.display = 'flex';
       };
+
+      // Update hidden quantity inputs on quantity change before form submission
+      document.getElementById('addToCartForm').addEventListener('submit', function(){
+        document.getElementById('modalQuantityCart').value = document.getElementById('quantity').value;
+      });
+      document.getElementById('buyNowForm').addEventListener('submit', function(){
+        document.getElementById('modalQuantityOrder').value = document.getElementById('quantity').value;
+      });
     });
 
     // Dummy closeModal function (implement as needed)
     function closeModal() {
       document.getElementById('productModal').style.display = 'none';
+    }
+
+    // Update quantity via the quantity selector buttons
+    function updateQuantity(change) {
+      var qtyInput = document.getElementById('quantity');
+      var currentValue = parseInt(qtyInput.value) || 1;
+      var newValue = currentValue + change;
+      if(newValue < parseInt(qtyInput.min)) newValue = parseInt(qtyInput.min);
+      if(newValue > parseInt(qtyInput.max)) newValue = parseInt(qtyInput.max);
+      qtyInput.value = newValue;
     }
 </script>

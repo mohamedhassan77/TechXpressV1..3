@@ -56,9 +56,7 @@ namespace TechXpress_application.Services
                 TotalPrice = cart.CartItems.Sum(ci => ci.Quantity * ci.Product.Price),
                 PaymentMethod = paymentMethod,
                 TransactionId = transactionId,
-                Status =  TechXpress_domain.Enums.OrderStatus.Pending,
-
-
+                Status = TechXpress_domain.Enums.OrderStatus.Pending,
             };
 
             await _orderRepository.AddOrderAsync(order);
@@ -81,5 +79,22 @@ namespace TechXpress_application.Services
 
             return "Order cancelled successfully.";
         }
+
+        public async Task<string> DeleteOrderAsync(int orderId, string userId)
+        {
+            var order = await _orderRepository.GetOrderByIdAsync(orderId);
+            if (order == null)
+                return "Order not found.";
+            if (order.UserId != userId)
+                return "You can only delete your own orders.";
+            if (order.Status != TechXpress_domain.Enums.OrderStatus.Cancelled)
+                return "Only cancelled orders can be deleted.";
+
+            await _orderRepository.DeleteOrderAsync(order.Id);
+            await _orderRepository.SaveChangesAsync();
+
+            return "Order deleted successfully.";
+        }
+
     }
 }

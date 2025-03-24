@@ -176,5 +176,24 @@ namespace TechXpress.Controllers
                 return RedirectToAction(nameof(Details), new { id });
             }
         }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Delete(int id)
+        {
+            try
+            {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                var result = await _orderService.DeleteOrderAsync(id, userId);
+                TempData["SuccessMessage"] = result;
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting order with id {OrderId}", id);
+                TempData["ErrorMessage"] = "Failed to delete order.";
+                return RedirectToAction(nameof(Details), new { id });
+            }
+        }
+
     }
 }
