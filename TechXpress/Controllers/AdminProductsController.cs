@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using TechXpress_domain.DTOs;
 using TechXpress_domain.Interfaces.Services;
 using TechXpress.Models;
-using Microsoft.AspNetCore.Authentication;
+using TechXpress_domain.Entities;
 
 namespace TechXpress.Controllers
 {
@@ -33,44 +33,31 @@ namespace TechXpress.Controllers
             _logger = logger;
         }
 
-        private async Task<string> GetAccessTokenAsync()
+        // Helper method to retrieve the admin token from session.
+        private string GetAccessToken()
         {
-            // Retrieve token from session first
             var token = HttpContext.Session.GetString("AdminToken");
             if (string.IsNullOrEmpty(token))
             {
-                // Fallback: try to get token from authentication tokens
-                token = await HttpContext.GetTokenAsync("access_token");
-                if (string.IsNullOrEmpty(token))
-                {
-                    token = await HttpContext.GetTokenAsync("id_token");
-                }
+                _logger.LogWarning("No admin token found in session.");
             }
-            _logger.LogInformation("Retrieved token: {Token}",
-                !string.IsNullOrEmpty(token) ? token.Substring(0, 20) + "..." : "None");
             return token;
         }
 
+        // GET: /AdminProducts/Index
         public async Task<IActionResult> Index()
         {
             try
             {
-                var token = await GetAccessTokenAsync();
+                var token = GetAccessToken();
+                if (string.IsNullOrEmpty(token))
+                    return RedirectToAction("Login", "Account");
+
                 _productApiService.SetToken(token);
-                if (!string.IsNullOrEmpty(token))
-                {
-                    _logger.LogInformation("Access token set successfully.");
-                }
-                else
-                {
-                    _logger.LogWarning("Token is missing; cookie will be forwarded if available.");
-                }
 
-                var productDtos = await _productApiService.GetAllProductsAsync();
-                _logger.LogInformation("API returned {Count} products", productDtos?.Count() ?? 0);
-
-                var categories = await _categoryService.GetAllCategoriesAsync(1, 20, "name_asc");
-                var categoryDict = categories.ToDictionary(c => c.Id);
+                var productDtos = await _productApiService.GetAllProductsAsync() ?? Enumerable.Empty<ProductResponseDto>();
+                var categories = await _categoryService.GetAllCategoriesAsync(1, 20, "name_asc") ?? Enumerable.Empty<Category>();
+                var categoryDict = categories.ToDictionary(c => c.Id, c => c.Name);
 
                 var productViewModels = productDtos.Select(p => new ProductViewModel
                 {
@@ -85,7 +72,7 @@ namespace TechXpress.Controllers
                     IsFeatured = p.IsFeatured,
                     Specifications = p.Specifications,
                     CategoryId = p.CategoryId,
-                    CategoryName = categoryDict.ContainsKey(p.CategoryId) ? categoryDict[p.CategoryId].Name : "N/A"
+                    CategoryName = categoryDict.ContainsKey(p.CategoryId) ? categoryDict[p.CategoryId] : "N/A"
                 }).ToList();
 
                 return View(productViewModels);
@@ -98,30 +85,29 @@ namespace TechXpress.Controllers
             }
         }
 
+        // GET: /AdminProducts/Create
         [HttpGet]
         public async Task<IActionResult> Create()
         {
-            var token = await GetAccessTokenAsync();
-            _productApiService.SetToken(token);
+            var token = GetAccessToken();
             if (string.IsNullOrEmpty(token))
-            {
-                _logger.LogWarning("Token missing on Create action.");
-            }
+                return RedirectToAction("Login", "Account");
 
+            _productApiService.SetToken(token);
             await PopulateCategories();
             return View(new ProductViewModel());
         }
 
+        // POST: /AdminProducts/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(ProductViewModel model)
         {
-            var token = await GetAccessTokenAsync();
-            _productApiService.SetToken(token);
+            var token = GetAccessToken();
             if (string.IsNullOrEmpty(token))
-            {
-                _logger.LogWarning("Token missing on Create POST action.");
-            }
+                return RedirectToAction("Login", "Account");
+
+            _productApiService.SetToken(token);
 
             if (!ModelState.IsValid)
             {
@@ -145,15 +131,15 @@ namespace TechXpress.Controllers
             }
         }
 
+        // GET: /AdminProducts/Edit/5
         [HttpGet]
         public async Task<IActionResult> Edit(int id)
         {
-            var token = await GetAccessTokenAsync();
-            _productApiService.SetToken(token);
+            var token = GetAccessToken();
             if (string.IsNullOrEmpty(token))
-            {
-                _logger.LogWarning("Token missing on Edit GET action.");
-            }
+                return RedirectToAction("Login", "Account");
+
+            _productApiService.SetToken(token);
 
             try
             {
@@ -175,16 +161,16 @@ namespace TechXpress.Controllers
             }
         }
 
+        // POST: /AdminProducts/Edit
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(ProductViewModel model)
         {
-            var token = await GetAccessTokenAsync();
-            _productApiService.SetToken(token);
+            var token = GetAccessToken();
             if (string.IsNullOrEmpty(token))
-            {
-                _logger.LogWarning("Token missing on Edit POST action.");
-            }
+                return RedirectToAction("Login", "Account");
+
+            _productApiService.SetToken(token);
 
             if (!ModelState.IsValid)
             {
@@ -208,34 +194,35 @@ namespace TechXpress.Controllers
             }
         }
 
+        // POST: /AdminProducts/Delete/5
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
         {
-            var token = await GetAccessTokenAsync();
-            _productApiService.SetToken(token);
+            var token = GetAccessToken();
             if (string.IsNullOrEmpty(token))
-            {
-                _logger.LogWarning("Token missing on Delete action.");
-            }
+                return RedirectToAction("Login", "Account");
+
+            _productApiService.SetToken(token);
 
             try
             {
                 await _productApiService.DeleteProductAsync(id);
                 TempData["SuccessMessage"] = "Product deleted successfully.";
-                return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error deleting product with ID {id}", id);
                 TempData["ErrorMessage"] = "An error occurred while deleting the product.";
-                return RedirectToAction(nameof(Index));
             }
+            return RedirectToAction(nameof(Index));
         }
 
+        // Helper method to populate category select list.
         private async Task PopulateCategories(object selectedValue = null)
         {
-            var categories = await _categoryService.GetAllCategoriesAsync(1, 20, "name_asc");
+            var categories = await _categoryService.GetAllCategoriesAsync(1, 20, "name_asc")
+                ?? Enumerable.Empty<Category>();
             ViewBag.Categories = new SelectList(categories, "Id", "Name", selectedValue);
         }
     }

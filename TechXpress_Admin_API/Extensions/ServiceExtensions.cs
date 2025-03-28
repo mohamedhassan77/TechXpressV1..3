@@ -32,6 +32,7 @@ namespace TechXpress_Admin_API.Extensions
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<ICategoryService, CategoryService>();
             services.AddScoped<IReviewService, ReviewService>();
+            services.AddScoped<ICategoryApiService, CategoryApiService>();
 
 
 

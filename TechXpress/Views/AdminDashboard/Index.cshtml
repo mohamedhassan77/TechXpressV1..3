@@ -4,83 +4,92 @@
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
-<div class="dashboard">
-    <!-- Overview Cards -->
-    <div class="row g-4 mb-4">
-        <!-- Total Users Card -->
-        <div class="col-xxl-3 col-md-6">
-            <div class="card stat-card users-card">
+<div class="container-fluid dashboard">
+    <!-- Error Message -->
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show mt-3" role="alert">
+            @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- Statistic Cards -->
+    <div class="row g-4 my-4">
+        <!-- Total Users -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card stat-card users-card shadow-sm">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
-                        <div class="icon">
-                            <i class="fas fa-users"></i>
+                        <div class="icon text-white bg-primary rounded-circle p-3">
+                            <i class="fas fa-users fa-2x"></i>
                         </div>
-                        <div class="ms-auto">
-                            <h2>@Model.TotalUsers</h2>
-                            <span>Total Users</span>
+                        <div class="ms-auto text-end">
+                            <h2 class="mb-0">@Model.TotalUsers</h2>
+                            <small>Total Users</small>
                         </div>
                     </div>
-                    <div class="trend positive">
+                    <div class="trend positive mt-2">
                         <i class="fas fa-arrow-up"></i> 5.2%
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Total Orders Card -->
-        <div class="col-xxl-3 col-md-6">
-            <div class="card stat-card orders-card">
+        <!-- Total Orders -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card stat-card orders-card shadow-sm">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
-                        <div class="icon">
-                            <i class="fas fa-shopping-cart"></i>
+                        <div class="icon text-white bg-success rounded-circle p-3">
+                            <i class="fas fa-shopping-cart fa-2x"></i>
                         </div>
-                        <div class="ms-auto">
-                            <h2>@Model.TotalOrders</h2>
-                            <span>Total Orders</span>
+                        <div class="ms-auto text-end">
+                            <h2 class="mb-0">@Model.TotalOrders</h2>
+                            <small>Total Orders</small>
                         </div>
                     </div>
-                    <div class="trend positive">
+                    <div class="trend positive mt-2">
                         <i class="fas fa-arrow-up"></i> 8.1%
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Pending Orders Card -->
-        <div class="col-xxl-3 col-md-6">
-            <div class="card stat-card pending-card">
+        <!-- Pending Orders -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card stat-card pending-card shadow-sm">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
-                        <div class="icon">
-                            <i class="fas fa-hourglass-half"></i>
+                        <div class="icon text-white bg-warning rounded-circle p-3">
+                            <i class="fas fa-hourglass-half fa-2x"></i>
                         </div>
-                        <div class="ms-auto">
-                            <h2>@Model.PendingOrders</h2>
-                            <span>Pending Orders</span>
+                        <div class="ms-auto text-end">
+                            <h2 class="mb-0">@Model.PendingOrders</h2>
+                            <small>Pending Orders</small>
                         </div>
                     </div>
-                    <div class="trend negative">
+                    <div class="trend negative mt-2">
                         <i class="fas fa-arrow-down"></i> 2.4%
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Total Revenue Card -->
-        <div class="col-xxl-3 col-md-6">
-            <div class="card stat-card revenue-card">
+        <!-- Total Revenue -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card stat-card revenue-card shadow-sm">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
-                        <div class="icon">
-                            <i class="fas fa-dollar-sign"></i>
+                        <div class="icon text-white bg-danger rounded-circle p-3">
+                            <i class="fas fa-dollar-sign fa-2x"></i>
                         </div>
-                        <div class="ms-auto">
-                            <h2>@Model.TotalRevenue.ToString("C")</h2>
-                            <span>Total Revenue</span>
+                        <div class="ms-auto text-end">
+                            <h2 class="mb-0">@Model.TotalRevenue.ToString("C")</h2>
+                            <small>Total Revenue</small>
                         </div>
                     </div>
-                    <div class="trend positive">
+                    <div class="trend positive mt-2">
                         <i class="fas fa-arrow-up"></i> 12.6%
                     </div>
                 </div>
@@ -90,12 +99,12 @@
 
     <!-- Recent Sections -->
     <div class="row g-4">
-        <!-- Recent Products -->
+        <!-- Recent Products Section -->
         <div class="col-xl-4">
-            <div class="card recent-table">
-                <div class="card-header">
-                    <h3><i class="fas fa-box me-2"></i>Recent Products</h3>
-                    <a href="@Url.Action("Index", "AdminProducts")" class="btn btn-sm btn-light">
+            <div class="card recent-section shadow-sm">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h3 class="mb-0"><i class="fas fa-box me-2"></i>Recent Products</h3>
+                    <a href="@Url.Action("Index", "AdminProducts")" class="btn btn-sm btn-outline-secondary">
                         View All <i class="fas fa-arrow-right"></i>
                     </a>
                 </div>
@@ -103,23 +112,25 @@
                     @if (Model.RecentProducts.Any())
                     {
                         <div class="table-responsive">
-                            <table class="table">
+                            <table class="table table-borderless">
                                 <tbody>
                                     @foreach (var product in Model.RecentProducts.Take(5))
                                     {
                                         <tr>
                                             <td>
-                                                <div class="product-info">
-                                                    <div class="icon bg-primary">
+                                                <div class="d-flex align-items-center">
+                                                    <div class="icon bg-primary text-white rounded-circle p-2 me-2">
                                                         <i class="fas fa-box"></i>
                                                     </div>
                                                     <div>
-                                                        <h5>@product.Name</h5>
+                                                        <h5 class="mb-0">@product.Name</h5>
                                                         <small>@product.CategoryName</small>
                                                     </div>
                                                 </div>
                                             </td>
-                                            <td class="text-end">@product.Price.ToString("C")</td>
+                                            <td class="text-end">
+                                                @product.Price.ToString("C")
+                                            </td>
                                         </tr>
                                     }
                                 </tbody>
@@ -128,28 +139,29 @@
                     }
                     else
                     {
-                        <div class="empty-state">
-                            <i class="fas fa-box-open"></i>
-                            <p>No recent products</p>
+                        <div class="text-center py-4">
+                            <i class="fas fa-box-open fa-3x text-muted mb-3"></i>
+                            <p class="text-muted">No recent products</p>
+                            <a href="@Url.Action("Create", "AdminProducts")" class="btn btn-primary btn-sm">Add a Product</a>
                         </div>
                     }
                 </div>
             </div>
         </div>
 
-        <!-- Recent Categories -->
+        <!-- Recent Categories Section -->
         <div class="col-xl-4">
-            <div class="card recent-table">
-                <div class="card-header">
-                    <h3><i class="fas fa-tags me-2"></i>Recent Categories</h3>
+            <div class="card recent-section shadow-sm">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h3 class="mb-0"><i class="fas fa-tags me-2"></i>Recent Categories</h3>
                     <div class="dropdown">
-                        <button class="btn btn-sm btn-light" data-bs-toggle="dropdown">
+                        <button class="btn btn-sm btn-light" data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="fas fa-ellipsis-v"></i>
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end">
                             <li><a class="dropdown-item" href="#"><i class="fas fa-sync-alt me-2"></i>Refresh</a></li>
                             <li><a class="dropdown-item" href="#"><i class="fas fa-download me-2"></i>Export</a></li>
-                            <li><hr class="dropdown-divider"></li>
+                            <li><hr class="dropdown-divider" /></li>
                             <li><a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i>Settings</a></li>
                         </ul>
                     </div>
@@ -158,13 +170,13 @@
                     @if (Model.RecentCategories.Any())
                     {
                         <div class="table-responsive">
-                            <table class="table">
+                            <table class="table table-borderless">
                                 <tbody>
                                     @foreach (var category in Model.RecentCategories.Take(5))
                                     {
                                         <tr>
                                             <td>
-                                                <span class="badge bg-warning bg-opacity-10 text-warning">@category.Name</span>
+                                                <span class="badge bg-warning text-dark">@category.Name</span>
                                             </td>
                                             <td class="text-end">
                                                 <small class="text-muted">ID: @category.Id</small>
@@ -177,13 +189,14 @@
                     }
                     else
                     {
-                        <div class="empty-state">
-                            <i class="fas fa-folder-open"></i>
-                            <p>No recent categories</p>
+                        <div class="text-center py-4">
+                            <i class="fas fa-folder-open fa-3x text-muted mb-3"></i>
+                            <p class="text-muted">No recent categories</p>
+                            <a href="@Url.Action("Create", "AdminCategories")" class="btn btn-warning btn-sm">Add a Category</a>
                         </div>
                     }
                 </div>
-                <div class="card-footer bg-transparent">
+                <div class="card-footer bg-transparent text-center">
                     <a href="@Url.Action("Index", "AdminCategories")" class="btn btn-warning w-100">
                         <i class="fas fa-external-link-alt me-2"></i>Manage Categories
                     </a>
@@ -191,19 +204,19 @@
             </div>
         </div>
 
-        <!-- Recent Reviews -->
+        <!-- Recent Reviews Section -->
         <div class="col-xl-4">
-            <div class="card recent-table">
-                <div class="card-header">
-                    <h3><i class="fas fa-comments me-2"></i>Recent Reviews</h3>
+            <div class="card recent-section shadow-sm">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h3 class="mb-0"><i class="fas fa-comments me-2"></i>Recent Reviews</h3>
                     <div class="dropdown">
-                        <button class="btn btn-sm btn-light" data-bs-toggle="dropdown">
+                        <button class="btn btn-sm btn-light" data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="fas fa-ellipsis-v"></i>
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end">
                             <li><a class="dropdown-item" href="#"><i class="fas fa-sync-alt me-2"></i>Refresh</a></li>
                             <li><a class="dropdown-item" href="#"><i class="fas fa-download me-2"></i>Export</a></li>
-                            <li><hr class="dropdown-divider"></li>
+                            <li><hr class="dropdown-divider" /></li>
                             <li><a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i>Settings</a></li>
                         </ul>
                     </div>
@@ -212,19 +225,23 @@
                     @if (Model.RecentReviews.Any())
                     {
                         <div class="table-responsive">
-                            <table class="table">
+                            <table class="table table-borderless">
                                 <tbody>
                                     @foreach (var review in Model.RecentReviews.Take(5))
                                     {
                                         <tr>
                                             <td>
-                                                <div class="user-info d-flex align-items-center">
-                                                    <div class="avatar bg-info text-white rounded-circle me-2">
-                                                        @review.UserName.Substring(0, 1)
+                                                <div class="d-flex align-items-center">
+                                                    <div class="avatar bg-info text-white rounded-circle me-2 p-2" style="width:40px; height:40px;">
+                                                        @(string.IsNullOrEmpty(review.UserName) ? "?" : review.UserName.Substring(0, 1))
                                                     </div>
                                                     <div>
-                                                        <h5>@review.UserName</h5>
-                                                        <small>@review.ProductName</small>
+                                                        <h5 class="mb-0">
+                                                            @(string.IsNullOrEmpty(review.UserName) ? "Unknown User" : review.UserName)
+                                                        </h5>
+                                                        <small class="text-muted">
+                                                            @(string.IsNullOrEmpty(review.ProductName) ? "Unknown Product" : review.ProductName)
+                                                        </small>
                                                     </div>
                                                 </div>
                                             </td>
@@ -232,7 +249,7 @@
                                                 <div class="rating-stars">
                                                     @for (int i = 1; i <= 5; i++)
                                                     {
-                                                        <i class="@(i <= review.Rating ? "fas" : "far") fa-star @(i <= review.Rating ? "text-warning" : "text-muted")"></i>
+                                                        <i class="@(i <= review.Rating ? "fas fa-star text-warning" : "far fa-star text-muted")"></i>
                                                     }
                                                 </div>
                                             </td>
@@ -244,13 +261,14 @@
                     }
                     else
                     {
-                        <div class="empty-state">
-                            <i class="fas fa-comment-slash"></i>
-                            <p>No recent reviews</p>
+                        <div class="text-center py-4">
+                            <i class="fas fa-comment-slash fa-3x text-muted mb-3"></i>
+                            <p class="text-muted">No recent reviews</p>
+                            <a href="@Url.Action("Index", "AdminReviews")" class="btn btn-info btn-sm">View All Reviews</a>
                         </div>
                     }
                 </div>
-                <div class="card-footer bg-transparent">
+                <div class="card-footer bg-transparent text-center">
                     <a href="@Url.Action("Index", "AdminReviews")" class="btn btn-info w-100">
                         <i class="fas fa-external-link-alt me-2"></i>Manage Reviews
                     </a>
@@ -259,3 +277,55 @@
         </div>
     </div>
 </div>
+
+@section Styles {
+    <style>
+        /* Dashboard and Cards */
+        .dashboard .card {
+            border: none;
+            border-radius: 10px;
+        }
+
+        .dashboard .stat-card .icon {
+            font-size: 1.5rem;
+        }
+
+        .stat-card {
+            position: relative;
+            overflow: hidden;
+        }
+
+            .stat-card .trend {
+                position: absolute;
+                bottom: 15px;
+                right: 15px;
+                font-size: 0.9rem;
+            }
+
+                .stat-card .trend.positive {
+                    color: #28a745;
+                }
+
+                .stat-card .trend.negative {
+                    color: #dc3545;
+                }
+        /* Recent Sections */
+        .recent-section .card-header {
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .recent-section .card-body {
+            padding: 1rem;
+        }
+
+        .recent-section .table-borderless td {
+            border: none;
+        }
+
+        .recent-section .avatar {
+            font-size: 1.2rem;
+            line-height: 1;
+        }
+    </style>
+}

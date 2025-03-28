@@ -1,67 +1,84 @@
-﻿//using Microsoft.AspNetCore.Authorization;
-//using Microsoft.AspNetCore.Mvc;
-//using System.Threading;
-//using System.Threading.Tasks;
-//using TechXpress_domain.DTOs;
-//using TechXpress_application.Services;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using System.Threading;
+using System.Threading.Tasks;
+using TechXpress_domain.DTOs;
+using TechXpress_domain.Entities;
+using TechXpress_domain.Interfaces.Services;
 
-//namespace TechXpress_Admin_API.Controllers
-//{
-//    [ApiController]
-//    [Route("api/admin/categories")]
-//    [Authorize(Policy = "AdminOnly")]
-//    public class CategoriesController : ControllerBase
-//    {
-//        private readonly CategoryApiService _categoryApiService;
+namespace TechXpress_Admin_API.Controllers
+{
+    [ApiController]
+    [Route("api/admin/categories")]
+    [Authorize(Policy = "AdminOnly")]
+    public class CategoriesController : ControllerBase
+    {
+        private readonly ICategoryService _categoryService;
+        private readonly IMapper _mapper;
 
-//        public CategoriesController(CategoryApiService categoryApiService)
-//        {
-//            _categoryApiService = categoryApiService;
-//        }
+        public CategoriesController(ICategoryService categoryService, IMapper mapper)
+        {
+            _categoryService = categoryService;
+            _mapper = mapper;
+        }
 
-//        [HttpGet]
-//        public async Task<IActionResult> GetAllCategories(int page = 1, int pageSize = 10, string sortBy = "name", CancellationToken cancellationToken = default)
-//        {
-//            var categories = await _categoryApiService.GetAllCategoriesAsync(page, pageSize, sortBy, cancellationToken);
-//            return Ok(categories);
-//        }
+        // GET: api/admin/categories?page=1&pageSize=10&sortBy=name
+        [HttpGet]
+        public async Task<IActionResult> GetAllCategories(
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 10,
+            [FromQuery] string sortBy = "name",
+            CancellationToken cancellationToken = default)
+        {
+            var categories = await _categoryService.GetAllCategoriesAsync(page, pageSize, sortBy);
+            return Ok(categories);
+        }
 
-//        [HttpGet("{id}")]
-//        public async Task<IActionResult> GetCategory(int id, CancellationToken cancellationToken)
-//        {
-//            var category = await _categoryApiService.GetCategoryByIdAsync(id, cancellationToken);
-//            if (category == null)
-//                return NotFound();
-//            return Ok(category);
-//        }
+        // GET: api/admin/categories/{id}
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetCategory(int id, CancellationToken cancellationToken)
+        {
+            var category = await _categoryService.GetCategoryByIdAsync(id);
+            if (category == null)
+                return NotFound();
+            return Ok(category);
+        }
 
-//        [HttpPost]
-//        public async Task<IActionResult> CreateCategory([FromBody] CategoryCreateDto dto, CancellationToken cancellationToken)
-//        {
-//            if (!ModelState.IsValid)
-//                return BadRequest(ModelState);
+        // POST: api/admin/categories
+        [HttpPost]
+        public async Task<IActionResult> CreateCategory([FromBody] CategoryCreateDto dto, CancellationToken cancellationToken = default)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
 
-//            var createdCategory = await _categoryApiService.CreateCategoryAsync(dto, cancellationToken);
-//            return CreatedAtAction(nameof(GetCategory), new { id = createdCategory.Id }, createdCategory);
-//        }
+            // Map the DTO to the Category entity.
+            var categoryEntity = _mapper.Map<Category>(dto);
+            await _categoryService.AddCategoryAsync(categoryEntity);
+            return CreatedAtAction(nameof(GetCategory), new { id = categoryEntity.Id }, categoryEntity);
+        }
 
-//        [HttpPut("{id}")]
-//        public async Task<IActionResult> UpdateCategory(int id, [FromBody] CategoryUpdateDto dto, CancellationToken cancellationToken)
-//        {
-//            if (id != dto.Id)
-//                return BadRequest("ID mismatch");
-//            if (!ModelState.IsValid)
-//                return BadRequest(ModelState);
+        // PUT: api/admin/categories/{id}
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateCategory(int id, [FromBody] CategoryUpdateDto dto, CancellationToken cancellationToken = default)
+        {
+            if (id != dto.Id)
+                return BadRequest("ID mismatch");
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
 
-//            var updatedCategory = await _categoryApiService.UpdateCategoryAsync(id, dto, cancellationToken);
-//            return Ok(updatedCategory);
-//        }
+            // Map the update DTO to the Category entity.
+            var categoryEntity = _mapper.Map<Category>(dto);
+            await _categoryService.UpdateCategoryAsync(categoryEntity);
+            return Ok(categoryEntity);
+        }
 
-//        [HttpDelete("{id}")]
-//        public async Task<IActionResult> DeleteCategory(int id, CancellationToken cancellationToken)
-//        {
-//            await _categoryApiService.DeleteCategoryAsync(id, cancellationToken);
-//            return NoContent();
-//        }
-//    }
-//}
+        // DELETE: api/admin/categories/{id}
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteCategory(int id, CancellationToken cancellationToken = default)
+        {
+            await _categoryService.DeleteCategoryAsync(id);
+            return NoContent();
+        }
+    }
+}

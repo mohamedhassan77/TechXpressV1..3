@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using TechXpress_application.Services;
 using TechXpress_infrastructure.Data;
 using TechXpress_domain.Interfaces.Services;
 using TechXpress_domain.Interfaces.Repositories;
@@ -13,10 +12,11 @@ using Microsoft.OpenApi.Models;
 using TechXpress_application.Mappings;
 using System.Text.Json.Serialization;
 using System.Security.Claims;
+using TechXpress_application.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
- var config = builder.Configuration.SetBasePath(Directory.GetCurrentDirectory())
+var config = builder.Configuration.SetBasePath(Directory.GetCurrentDirectory())
     .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
     .AddEnvironmentVariables()
     .Build();
@@ -54,7 +54,7 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 
 // Register an HttpClient for the IProductApiService implementation.
 builder.Services.AddHttpClient<IProductApiService, ProductApiService>();
- 
+
 // Configure CORS
 builder.Services.AddCors(options =>
 {

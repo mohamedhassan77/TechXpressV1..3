@@ -1,9 +1,6 @@
-﻿using System;
-using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
+﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
@@ -110,10 +107,8 @@ namespace TechXpress_application.Services
 
         private async Task<string> GenerateJwtToken(ApplicationUser user)
         {
-            var secret = _configuration["Jwt:Secret"];
-            if (string.IsNullOrEmpty(secret))
-                throw new InvalidOperationException("JWT Secret is missing in configuration.");
-
+            var secret = _configuration["Jwt:Secret"]
+                         ?? throw new InvalidOperationException("JWT Secret is missing in configuration.");
             var key = Encoding.UTF8.GetBytes(secret);
             var issuer = _configuration["Jwt:Issuer"];
             var audience = _configuration["Jwt:Audience"];
@@ -124,7 +119,9 @@ namespace TechXpress_application.Services
                 new Claim(JwtRegisteredClaimNames.Sub, user.Id),
                 new Claim(JwtRegisteredClaimNames.Email, user.Email),
                 new Claim(ClaimTypes.Name, user.UserName),
-            }.Concat(roles.Select(role => new Claim(ClaimTypes.Role, role))).ToArray();
+            }
+            .Concat(roles.Select(role => new Claim(ClaimTypes.Role, role)))
+            .ToArray();
 
             var tokenDescriptor = new SecurityTokenDescriptor
             {

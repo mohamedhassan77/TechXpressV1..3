@@ -20,7 +20,9 @@ namespace TechXpress_infrastructure.Repositories
         public async Task<IEnumerable<Review>> GetReviewsByProductIdAsync(int productId)
         {
             return await _context.Reviews
+
                 .Where(r => r.ProductId == productId)
+                 .Include(r => r.Product)
                 .Include(r => r.ApplicationUser)
                 .ToListAsync();
         }
@@ -29,6 +31,7 @@ namespace TechXpress_infrastructure.Repositories
         {
             return await _context.Reviews
                 .Include(r => r.ApplicationUser)
+                 .Include(r => r.Product)
                 .FirstOrDefaultAsync(r => r.Id == id);
         }
 
@@ -61,9 +64,13 @@ namespace TechXpress_infrastructure.Repositories
             await _context.SaveChangesAsync();
         }
 
-        public Task<IEnumerable<Review>> GetAllAsync()
+        public async Task<IEnumerable<Review>> GetAllAsync()
         {
-            return Task.FromResult(_context.Reviews.AsEnumerable());
+             return await _context.Reviews
+                .Include(r => r.ApplicationUser)
+                .Include(r => r.Product)
+                .ToListAsync();
         }
+
     }
 }

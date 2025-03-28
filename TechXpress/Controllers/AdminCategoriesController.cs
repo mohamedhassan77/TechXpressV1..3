@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Linq;
@@ -9,7 +10,6 @@ using TechXpress_domain.DTOs;
 using TechXpress_domain.Entities;
 using TechXpress_domain.Interfaces.Services;
 using TechXpress.Models;
-using Microsoft.AspNetCore.Authentication;
 
 namespace TechXpress.Controllers
 {
@@ -30,10 +30,27 @@ namespace TechXpress.Controllers
             _logger = logger;
         }
 
+        // Helper method to retrieve the admin token from session.
+        private string GetAccessToken()
+        {
+            var token = HttpContext.Session.GetString("AdminToken");
+            if (string.IsNullOrEmpty(token))
+            {
+                _logger.LogWarning("No admin token found in session.");
+            }
+            return token;
+        }
+
         public async Task<IActionResult> Index()
         {
             try
             {
+                // (Optional) If your category service requires token forwarding,
+                // you can retrieve it using GetAccessToken() here.
+                var token = GetAccessToken();
+                // For example, if your service had a SetToken method:
+                // _categoryService.SetToken(token);
+
                 var categories = await _categoryService.GetAllCategoriesAsync(1, 100, "name_asc");
                 var model = categories.Select(c => _mapper.Map<CategoryViewModel>(c)).ToList();
                 return View(model);

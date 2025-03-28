@@ -27,7 +27,11 @@ namespace TechXpress_application.Services
         private readonly IHttpContextAccessor _httpContextAccessor;
         private string _jwtToken;
 
-        public CategoryApiService(HttpClient httpClient, IConfiguration configuration, ILogger<CategoryApiService> logger, IHttpContextAccessor httpContextAccessor)
+        public CategoryApiService(
+            HttpClient httpClient,
+            IConfiguration configuration,
+            ILogger<CategoryApiService> logger,
+            IHttpContextAccessor httpContextAccessor)
         {
             _httpClient = httpClient;
             _logger = logger;
@@ -42,26 +46,37 @@ namespace TechXpress_application.Services
             _retryPolicy = HttpPolicyExtensions
                 .HandleTransientHttpError()
                 .OrResult(msg => msg.StatusCode == HttpStatusCode.TooManyRequests)
-                .WaitAndRetryAsync(2, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)),
-                    onRetry: (_, timespan, retryCount, _) =>
+                .WaitAndRetryAsync(
+                    retryCount: 2,
+                    retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)),
+                    onRetry: (outcome, timespan, retryCount, context) =>
                     {
-                        _logger.LogWarning("Retry {RetryCount} after {TimeSpan}", retryCount, timespan);
+                        _logger.LogWarning("Retry {RetryCount} after {TimeSpan} due to {Reason}",
+                            retryCount, timespan, outcome.Result?.StatusCode);
                     });
 
             var baseUrl = configuration["ApiSettings:BaseUrl"]
-                ?? throw new ArgumentNullException(nameof(configuration));
+                ?? throw new ArgumentNullException(nameof(configuration), "BaseUrl is missing in configuration");
             _httpClient.BaseAddress = new Uri(baseUrl);
             _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
         }
 
+        /// <summary>
+        /// Sets the JWT token on the HttpClient Authorization header.
+        /// If token is empty, attempts to forward a cookie header.
+        /// </summary>
         public void SetToken(string token)
         {
             if (!string.IsNullOrWhiteSpace(token))
             {
                 _jwtToken = token;
+                if (_httpClient.DefaultRequestHeaders.Contains("Authorization"))
+                {
+                    _httpClient.DefaultRequestHeaders.Remove("Authorization");
+                }
                 _httpClient.DefaultRequestHeaders.Authorization =
                     new AuthenticationHeaderValue("Bearer", _jwtToken);
-                _logger.LogInformation("Token forwarded: {TokenSnippet}", _jwtToken.Substring(0, 20));
+                _logger.LogInformation("Token forwarded: {TokenSnippet}", _jwtToken.Substring(0, Math.Min(20, _jwtToken.Length)));
             }
             else
             {
@@ -69,7 +84,8 @@ namespace TechXpress_application.Services
                 var cookie = _httpContextAccessor.HttpContext?.Request.Headers["Cookie"].ToString();
                 if (!string.IsNullOrEmpty(cookie))
                 {
-                    _httpClient.DefaultRequestHeaders.Remove("Cookie");
+                    if (_httpClient.DefaultRequestHeaders.Contains("Cookie"))
+                        _httpClient.DefaultRequestHeaders.Remove("Cookie");
                     _httpClient.DefaultRequestHeaders.Add("Cookie", cookie);
                 }
             }
@@ -143,7 +159,9 @@ namespace TechXpress_application.Services
                 {
                     using var request = new HttpRequestMessage(method, uri);
                     if (content != null)
+                    {
                         request.Content = JsonContent.Create(content, options: _jsonOptions);
+                    }
                     return await _httpClient.SendAsync(request, cancellationToken);
                 });
 
@@ -174,8 +192,12 @@ namespace TechXpress_application.Services
             var content = await response.Content.ReadAsStringAsync();
             try
             {
-                return JsonSerializer.Deserialize<T>(content, _jsonOptions)
-                    ?? throw new JsonException("Deserialization returned null");
+                var result = JsonSerializer.Deserialize<T>(content, _jsonOptions);
+                if (result == null)
+                {
+                    throw new JsonException("Deserialization returned null");
+                }
+                return result;
             }
             catch (JsonException ex)
             {
@@ -191,6 +213,7 @@ namespace TechXpress_application.Services
                 context, response.StatusCode, errorContent);
         }
 
+        // Overload to get all categories with default paging and sorting values.
         public async Task<IEnumerable<CategoryResponseDto>> GetAllCategoriesAsync(CancellationToken cancellationToken = default)
         {
             return await GetAllCategoriesAsync(1, 10, "name", cancellationToken);

@@ -27,14 +27,12 @@ namespace TechXpress_Admin_API.Controllers
             _userManager = userManager;
         }
 
-        // DTO for login request.
         public class LoginDto
         {
             public string Email { get; set; }
             public string Password { get; set; }
         }
 
-        // DTO for token response.
         public class TokenResponse
         {
             public string Token { get; set; }
@@ -43,27 +41,23 @@ namespace TechXpress_Admin_API.Controllers
         [HttpPost("token")]
         public async Task<IActionResult> GenerateToken([FromBody] LoginDto model)
         {
-            // Use the AuthService to verify credentials.
             var authResult = await _authService.LoginAsync(model.Email, model.Password, false);
             if (!authResult.Success)
             {
                 return Unauthorized(new { message = "Invalid credentials." });
             }
 
-            // Get the user object.
             var user = await _userManager.FindByEmailAsync(model.Email);
             if (user == null)
             {
                 return Unauthorized(new { message = "User not found." });
             }
 
-            // Check if the user is in the "Admin" role.
             if (!await _userManager.IsInRoleAsync(user, "Admin"))
             {
-                return Forbid(); // Not authorized to receive an admin token.
+                return Forbid();
             }
 
-            // Generate the JWT token.
             var tokenHandler = new JwtSecurityTokenHandler();
             var secret = _configuration.GetValue<string>("Jwt:Secret");
             if (string.IsNullOrEmpty(secret))
@@ -72,10 +66,10 @@ namespace TechXpress_Admin_API.Controllers
             var key = Encoding.UTF8.GetBytes(secret);
             var tokenDescriptor = new SecurityTokenDescriptor
             {
-                Subject = new ClaimsIdentity(new Claim[]
+                Subject = new ClaimsIdentity(new[]
                 {
                     new Claim(ClaimTypes.Name, model.Email),
-                    new Claim("role", "Admin")
+                    new Claim(ClaimTypes.Role, "Admin")
                 }),
                 Expires = DateTime.UtcNow.AddHours(2),
                 Issuer = _configuration["Jwt:Issuer"],

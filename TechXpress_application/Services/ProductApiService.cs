@@ -9,7 +9,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
 using Polly;
 using Polly.Extensions.Http;
 using Polly.Retry;
@@ -21,16 +20,14 @@ namespace TechXpress_application.Services
     public class ProductApiService : IProductApiService
     {
         private readonly HttpClient _httpClient;
-        private readonly ILogger<ProductApiService> _logger;
         private readonly AsyncRetryPolicy<HttpResponseMessage> _retryPolicy;
         private readonly JsonSerializerOptions _jsonOptions;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private string _jwtToken;
 
-        public ProductApiService(HttpClient httpClient, IConfiguration configuration, ILogger<ProductApiService> logger, IHttpContextAccessor httpContextAccessor)
+        public ProductApiService(HttpClient httpClient, IConfiguration configuration, IHttpContextAccessor httpContextAccessor)
         {
             _httpClient = httpClient;
-            _logger = logger;
             _httpContextAccessor = httpContextAccessor;
 
             _jsonOptions = new JsonSerializerOptions
@@ -42,11 +39,7 @@ namespace TechXpress_application.Services
             _retryPolicy = HttpPolicyExtensions
                 .HandleTransientHttpError()
                 .OrResult(msg => msg.StatusCode == HttpStatusCode.TooManyRequests)
-                .WaitAndRetryAsync(2, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)),
-                    onRetry: (_, timespan, retryCount, _) =>
-                    {
-                        _logger.LogWarning("Retry {RetryCount} after {TimeSpan}", retryCount, timespan);
-                    });
+                .WaitAndRetryAsync(2, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)));
 
             var baseUrl = configuration["ApiSettings:BaseUrl"]
                 ?? throw new ArgumentNullException(nameof(configuration));
@@ -54,8 +47,6 @@ namespace TechXpress_application.Services
             _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
         }
 
-        // SetToken now checks if a token is available.
-        // If not, it will try to forward the authentication cookie.
         public void SetToken(string token)
         {
             if (!string.IsNullOrWhiteSpace(token))
@@ -63,11 +54,9 @@ namespace TechXpress_application.Services
                 _jwtToken = token;
                 _httpClient.DefaultRequestHeaders.Authorization =
                     new AuthenticationHeaderValue("Bearer", _jwtToken);
-                _logger.LogInformation("Token forwarded: {TokenSnippet}", _jwtToken.Substring(0, 20));
             }
             else
             {
-                _logger.LogWarning("No token available; attempting to forward authentication cookie.");
                 var cookie = _httpContextAccessor.HttpContext?.Request.Headers["Cookie"].ToString();
                 if (!string.IsNullOrEmpty(cookie))
                 {
@@ -143,6 +132,7 @@ namespace TechXpress_application.Services
         }
 
         #region Helper Methods
+
         private async Task<T> ExecuteWithPolicyAsync<T>(
             HttpMethod method,
             string uri,
@@ -170,14 +160,13 @@ namespace TechXpress_application.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "{ErrorContext}: {Message}", errorContext, ex.Message);
                 throw new ApplicationException(errorContext, ex);
             }
         }
 
         private async Task<T> ProcessResponse<T>(HttpResponseMessage response)
         {
-            if (response.StatusCode == System.Net.HttpStatusCode.NoContent)
+            if (response.StatusCode == HttpStatusCode.NoContent)
             {
                 if (typeof(T) == typeof(object))
                     return default!;
@@ -192,7 +181,6 @@ namespace TechXpress_application.Services
             }
             catch (JsonException ex)
             {
-                _logger.LogError(ex, "Failed to deserialize response: {Content}", content);
                 throw new ApplicationException("Error processing API response", ex);
             }
         }
@@ -200,8 +188,7 @@ namespace TechXpress_application.Services
         private async Task LogErrorDetails(HttpResponseMessage response, string context)
         {
             var errorContent = await response.Content.ReadAsStringAsync();
-            _logger.LogError("{Context} | Status: {StatusCode} | Response: {Response}",
-                context, response.StatusCode, errorContent);
+            // You can log this error content or take additional actions as needed.
         }
 
         private void ValidateDto<T>(T dto) where T : class
