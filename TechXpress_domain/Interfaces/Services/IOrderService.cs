@@ -11,7 +11,6 @@ namespace TechXpress_domain.Interfaces.Services
         Task<Order?> GetOrderByIdAsync(int orderId);
         Task<string> PlaceOrderAsync(string userId, string paymentMethod, string transactionId);
         Task<string> CancelOrderAsync(int orderId, string userId);
-        // Added method for deleting a cancelled order
-        Task<string> DeleteOrderAsync(int orderId, string userId);
+         Task<string> DeleteOrderAsync(int orderId, string userId);
     }
 }

@@ -13,20 +13,23 @@ namespace TechXpress_infrastructure.Repositories
         {
             _context = context;
         }
+
         public async Task<IEnumerable<Order>> GetAllOrdersAsync()
         {
             return await _context.Orders
                 .Include(o => o.ApplicationUser)
                 .Include(o => o.OrderItems)
-                .ThenInclude(oi => oi.Product)
+                    .ThenInclude(oi => oi.Product)
+                    .ThenInclude(p => p.Category)
                 .ToListAsync();
         }
+
         public async Task<IEnumerable<Order>> GetOrdersByUserIdAsync(string userId)
         {
             return await _context.Orders
                 .Where(o => o.UserId == userId)
                 .Include(o => o.OrderItems)
-                .ThenInclude(oi => oi.Product)
+                    .ThenInclude(oi => oi.Product)
                 .Include(o => o.Shipping)
                 .ToListAsync();
         }
@@ -35,7 +38,7 @@ namespace TechXpress_infrastructure.Repositories
         {
             return await _context.Orders
                 .Include(o => o.OrderItems)
-                .ThenInclude(oi => oi.Product)
+                    .ThenInclude(oi => oi.Product)
                 .Include(o => o.Shipping)
                 .FirstOrDefaultAsync(o => o.Id == orderId);
         }

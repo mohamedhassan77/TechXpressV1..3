@@ -52,7 +52,6 @@ namespace TechXpress_Admin_API.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            // Map the DTO to the Category entity.
             var categoryEntity = _mapper.Map<Category>(dto);
             await _categoryService.AddCategoryAsync(categoryEntity);
             return CreatedAtAction(nameof(GetCategory), new { id = categoryEntity.Id }, categoryEntity);
@@ -67,7 +66,6 @@ namespace TechXpress_Admin_API.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            // Map the update DTO to the Category entity.
             var categoryEntity = _mapper.Map<Category>(dto);
             await _categoryService.UpdateCategoryAsync(categoryEntity);
             return Ok(categoryEntity);

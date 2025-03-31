@@ -1,7 +1,4 @@
-﻿using TechXpress_domain.DTOs;
-using TechXpress_domain.Entities;
-
-namespace TechXpress.Models
+﻿namespace TechXpress_domain.DTOs
 {
     public class DashboardData
     {
@@ -9,8 +6,8 @@ namespace TechXpress.Models
         public int TotalOrders { get; set; }
         public decimal TotalRevenue { get; set; }
         public int PendingOrders { get; set; }
-        public IEnumerable<ProductResponseDto> RecentProducts { get; set; }
-        public IEnumerable<CategoryResponseDto> RecentCategories { get; set; }
-        public IEnumerable<Review> RecentReviews { get; set; }
+        public List<ProductResponseDto> RecentProducts { get; set; }
+        public List<CategoryResponseDto> RecentCategories { get; set; }
+        public List<ReviewDashboardDto> RecentReviews { get; set; }
     }
 }

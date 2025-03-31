@@ -1,155 +1,73 @@
-﻿using AutoMapper;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Linq;
-using System.Threading;
+﻿using Microsoft.AspNetCore.Mvc;
+using System.Net.Http;
+using System.Net.Http.Json;
 using System.Threading.Tasks;
-using TechXpress_domain.Entities;
-using TechXpress_domain.Enums;
-using TechXpress_domain.Interfaces.Services;
-using TechXpress_domain.DTOs;
 using TechXpress.Models;
+using Microsoft.Extensions.Configuration;
+using AutoMapper;
+using System.Collections.Generic;
+using TechXpress_domain.DTOs;
 
 namespace TechXpress.Controllers
 {
-    [Authorize(Roles = "Admin")]
     public class AdminDashboardController : Controller
     {
-        private readonly IAdminService _adminService;
-        private readonly IProductApiService _productApiService;
-        private readonly ICategoryService _categoryService;
-        private readonly IReviewService _reviewService;
+        private readonly IHttpClientFactory _httpClientFactory;
+        private readonly IConfiguration _configuration;
         private readonly IMapper _mapper;
-        private readonly ILogger<AdminDashboardController> _logger;
 
-        public AdminDashboardController(
-            IAdminService adminService,
-            IProductApiService productApiService,
-            ICategoryService categoryService,
-            IReviewService reviewService,
-            IMapper mapper,
-            ILogger<AdminDashboardController> logger)
+        public AdminDashboardController(IHttpClientFactory httpClientFactory, IConfiguration configuration, IMapper mapper)
         {
-            _adminService = adminService;
-            _productApiService = productApiService;
-            _categoryService = categoryService;
-            _reviewService = reviewService;
+            _httpClientFactory = httpClientFactory;
+            _configuration = configuration;
             _mapper = mapper;
-            _logger = logger;
         }
 
-        // Helper method to retrieve the admin token from session.
-        private string GetAccessToken()
+        // GET: /AdminDashboard/Index
+        public async Task<IActionResult> Index()
         {
+            var client = _httpClientFactory.CreateClient("AdminApiClient");
+
+            // Retrieve token from session (or wherever you store it)
             var token = HttpContext.Session.GetString("AdminToken");
+
+            // If token is not found, redirect to login.
             if (string.IsNullOrEmpty(token))
             {
-                _logger.LogWarning("No admin token found in session.");
+                TempData["ErrorMessage"] = "No token found. Please log in as admin.";
+                return RedirectToAction("Login", "Account");
             }
-            return token;
-        }
-
-        public async Task<IActionResult> Index(CancellationToken cancellationToken)
-        {
-            var model = new AdminDashboardViewModel();
-            try
+            else
             {
-                _logger.LogInformation("Starting dashboard load...");
-                var adminToken = GetAccessToken();
-                if (string.IsNullOrEmpty(adminToken))
+                // Attach the token to the API request header.
+                client.DefaultRequestHeaders.Authorization =
+                    new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+            }
+
+            var response = await client.GetAsync("api/admin/dashboard");
+            if (response.IsSuccessStatusCode)
+            {
+                var dashboardData = await response.Content.ReadFromJsonAsync<DashboardData>();
+
+                var viewModel = new AdminDashboardViewModel
                 {
-                    _logger.LogWarning("No admin token found, redirecting to login.");
-                    return RedirectToAction("Login", "Account");
-                }
-                _logger.LogInformation("Token retrieved: {TokenSnippet}", adminToken.Substring(0, Math.Min(10, adminToken.Length)) + "...");
+                    TotalUsers = dashboardData.TotalUsers,
+                    TotalOrders = dashboardData.TotalOrders,
+                    TotalRevenue = dashboardData.TotalRevenue,
+                    PendingOrders = dashboardData.PendingOrders,
+                    RecentProducts = _mapper.Map<List<ProductViewModel>>(dashboardData.RecentProducts),
+                    RecentCategories = _mapper.Map<List<CategoryViewModel>>(dashboardData.RecentCategories),
+                    RecentReviews = _mapper.Map<List<ReviewViewModel>>(dashboardData.RecentReviews)
+                };
 
-                // Set token on the product API service.
-                _productApiService.SetToken(adminToken);
-
-                var users = (await _adminService.GetAllUsersAsync()) ?? Enumerable.Empty<UserProfile>();
-                var orders = (await _adminService.GetAllOrdersAsync()) ?? Enumerable.Empty<Order>();
-                var products = (await _productApiService.GetAllProductsAsync(cancellationToken)) ?? Enumerable.Empty<ProductResponseDto>();
-                var categories = (await _categoryService.GetAllCategoriesAsync(1, 20, "name_asc")) ?? Enumerable.Empty<Category>();
-                var reviews = (await _reviewService.GetAllReviewsAsync()) ?? Enumerable.Empty<Review>();
-
-                _logger.LogInformation("Users: {Count}, Orders: {Count}, Products: {Count}, Categories: {Count}, Reviews: {Count}",
-                    users.Count(), orders.Count(), products.Count(), categories.Count(), reviews.Count());
-
-                model.TotalUsers = users.Count();
-                model.TotalOrders = orders.Count();
-                model.TotalRevenue = orders.Sum(o => o.TotalPrice);
-                model.PendingOrders = orders.Count(o => o.Status == OrderStatus.Pending);
-
-                // Map recent products from DTOs to view models using AutoMapper.
-                var recentProducts = products.OrderByDescending(p => p.Id).Take(5).ToList();
-                model.RecentProducts = _mapper.Map<System.Collections.Generic.List<ProductViewModel>>(recentProducts);
-
-                // Map recent reviews using AutoMapper.
-                model.RecentReviews = _mapper.Map<System.Collections.Generic.List<ReviewViewModel>>(reviews.OrderByDescending(r => r.Id).Take(5).ToList());
-
-                // Map recent categories using AutoMapper.
-                model.RecentCategories = categories.OrderByDescending(c => c.Id).Take(5)
-                    .Select(c => _mapper.Map<CategoryViewModel>(c))
-                    .ToList();
-
-                _logger.LogInformation("Dashboard data loaded successfully.");
-                return View(model);
+                return View(viewModel);
             }
-            catch (Exception ex)
+            else
             {
-                _logger.LogError(ex, "Failed to load dashboard data: {Message}", ex.Message);
-                TempData["ErrorMessage"] = $"Failed to load dashboard data: {ex.Message}";
-                return View(model);
+                var errorContent = await response.Content.ReadAsStringAsync();
+                TempData["ErrorMessage"] = $"Failed to load dashboard data from API. Status: {response.StatusCode}. Error: {errorContent}";
+                return View(new AdminDashboardViewModel());
             }
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> Users()
-        {
-            var users = (await _adminService.GetAllUsersAsync()) ?? Enumerable.Empty<UserProfile>();
-            var model = users.Select(u => _mapper.Map<UserProfileViewModel>(u)).ToList();
-            return View(model);
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> Orders()
-        {
-            var orders = (await _adminService.GetAllOrdersAsync()) ?? Enumerable.Empty<Order>();
-            var model = orders.Select(o => new OrderDetailsViewModel
-            {
-                OrderId = o.Id.ToString(),
-                OrderDate = o.OrderDate,
-                CurrentStatus = o.Status.ToString(),
-                PaymentMethod = o.PaymentMethod,
-                Discount = o.Discount,
-                Total = o.Total,
-                TrackingNumber = o.TrackingNumber
-            }).ToList();
-            return View(model);
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> Reviews()
-        {
-            try
-            {
-                var reviews = (await _reviewService.GetAllReviewsAsync()) ?? Enumerable.Empty<Review>();
-                var model = _mapper.Map<System.Collections.Generic.List<ReviewViewModel>>(reviews.ToList());
-                return View(model);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error loading reviews: {Message}", ex.Message);
-                return StatusCode(500, $"An error occurred while loading reviews: {ex.Message}");
-            }
-        }
-
-        [HttpGet]
-        public IActionResult Settings()
-        {
-            return View();
         }
     }
 }

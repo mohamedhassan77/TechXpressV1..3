@@ -66,8 +66,7 @@ namespace TechXpress_Admin_API.Controllers
             var key = Encoding.UTF8.GetBytes(secret);
             var tokenDescriptor = new SecurityTokenDescriptor
             {
-                Subject = new ClaimsIdentity(new[]
-                {
+                Subject = new ClaimsIdentity(new[] {
                     new Claim(ClaimTypes.Name, model.Email),
                     new Claim(ClaimTypes.Role, "Admin")
                 }),

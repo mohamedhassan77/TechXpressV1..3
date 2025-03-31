@@ -18,8 +18,11 @@ var builder = WebApplication.CreateBuilder(args);
 // Enable console logging
 builder.Logging.AddConsole();
 
-// Register AutoMapper with specific profile
+// Register AutoMapper with specific profile.
+// The first AddAutoMapper call registers types from the assembly that contains WebMappingProfile,
+// and the second call ensures any additional profiles in that assembly are picked up.
 builder.Services.AddAutoMapper(typeof(WebMappingProfile));
+builder.Services.AddAutoMapper(typeof(WebMappingProfile).Assembly);
 
 // Register Distributed Memory Cache for session state
 builder.Services.AddDistributedMemoryCache();
@@ -27,7 +30,7 @@ builder.Services.AddDistributedMemoryCache();
 // Add MVC services
 builder.Services.AddControllersWithViews();
 
-// Configure the database context
+// Configure the database context using the connection string "DefaultConnection" from configuration.
 builder.Services.AddDbContext<TechXpress_context>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
@@ -36,7 +39,7 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddEntityFrameworkStores<TechXpress_context>()
     .AddDefaultTokenProviders();
 
-// Configure authentication
+// Configure external authentication (Google and Facebook)
 builder.Services.AddAuthentication()
     .AddGoogle(googleOptions =>
     {
@@ -49,7 +52,7 @@ builder.Services.AddAuthentication()
         facebookOptions.AppSecret = builder.Configuration["Authentication:Facebook:AppSecret"];
     });
 
-// Register repositories
+// Register repositories (for dependency injection)
 builder.Services.AddScoped<IUserProfileRepository, UserProfileRepository>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
@@ -77,8 +80,9 @@ builder.Services.AddScoped<ILoginHistoryService, LoginHistoryService>();
 builder.Services.AddScoped<IPaymentService, FakePaymentService>(); // Use FakePaymentService instead of PaymentService
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<ICheckoutService, CheckoutService>();
+builder.Services.AddScoped<IOrderAdminService, OrderAdminService>();
 
-// Register API services
+// Register API services (for calling external APIs)
 builder.Services.AddHttpClient<IProductApiService, ProductApiService>();
 builder.Services.AddHttpClient<ICategoryApiService, CategoryApiService>();
 
@@ -90,11 +94,18 @@ builder.Services.AddSession(options =>
     options.IdleTimeout = TimeSpan.FromMinutes(30);
 });
 
+// Register a named HttpClient for admin API calls, using the BaseUrl from configuration.
+builder.Services.AddHttpClient("AdminApiClient", client =>
+{
+    client.BaseAddress = new Uri(builder.Configuration["ApiSettings:BaseUrl"]); // Ensure this value is set correctly in appsettings.json (e.g., "https://localhost:7276/")
+});
+
+// Add HTTP context accessor (required for session access in controllers)
 builder.Services.AddHttpContextAccessor();
 
 var app = builder.Build();
 
-// Seed roles
+// Seed roles for Identity (e.g., Admin, User)
 using (var scope = app.Services.CreateScope())
 {
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
@@ -129,6 +140,7 @@ app.UseSession();
 app.UseAuthentication();
 app.UseAuthorization();
 
+// Default routing
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");

@@ -24,8 +24,8 @@
                     <p>Joined: @user.CreatedAt.ToString("MMM dd, yyyy")</p>
                 </div>
                 <div class="card-footer text-center">
-                    <a href="@Url.Action("Details", "UserProfile", new { id = user.UserId })" class="btn btn-sm btn-primary">View</a>
-                    <a href="@Url.Action("Edit", "UserProfile", new { id = user.UserId })" class="btn btn-sm btn-warning">Edit</a>
+                    <a href="@Url.Action("Details", "AdminUsers", new { id = user.UserId })" class="btn btn-sm btn-primary">View</a>
+                    <a href="@Url.Action("Edit", "AdminUsers", new { id = user.UserId })" class="btn btn-sm btn-warning">Edit</a>
                     <form asp-action="DeleteUser" method="post" class="d-inline">
                         @Html.AntiForgeryToken()
                         <input type="hidden" name="id" value="@user.UserId" />

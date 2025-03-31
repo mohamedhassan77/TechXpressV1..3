@@ -3,12 +3,12 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using TechXpress_domain.Entities;
 using TechXpress_domain.Interfaces.Services;
 using TechXpress.Models;
-using System.Collections.Generic;
 
 namespace TechXpress.Controllers
 {
@@ -48,6 +48,7 @@ namespace TechXpress.Controllers
         {
             try
             {
+                // Consider using a service method that gets a user by id, if available.
                 IEnumerable<UserProfile> users = await _adminService.GetAllUsersAsync();
                 var user = users.FirstOrDefault(u => u.ApplicationUserId == id);
                 if (user == null)
@@ -71,6 +72,7 @@ namespace TechXpress.Controllers
         {
             try
             {
+                // Consider using a service method that gets a user by id, if available.
                 IEnumerable<UserProfile> users = await _adminService.GetAllUsersAsync();
                 var user = users.FirstOrDefault(u => u.ApplicationUserId == id);
                 if (user == null)
@@ -106,8 +108,7 @@ namespace TechXpress.Controllers
 
             try
             {
-                // Update logic should be implemented in your service layer.
-                // Example: await _adminService.UpdateUserProfileAsync(_mapper.Map<UserProfile>(model));
+                 await _adminService.UpdateUserProfileAsync(_mapper.Map<UserProfile>(model));
                 TempData["SuccessMessage"] = "User profile updated successfully!";
                 return RedirectToAction(nameof(Index));
             }

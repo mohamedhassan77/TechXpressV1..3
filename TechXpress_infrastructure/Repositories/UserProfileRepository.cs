@@ -45,7 +45,13 @@ namespace TechXpress_infrastructure.Repositories
             return await _context.UserProfiles
                 .Include(up => up.ApplicationUser)
                 .Include(up => up.Addresses)
-                .FirstOrDefaultAsync(up => up.ApplicationUser.Email == email);
+                 .Include(up => up.ApplicationUser.Wishlist)
+                .Include(up => up.ApplicationUser.Orders)
+                .Include(UserProfile => UserProfile.ApplicationUser.Addresses)
+ 
+                    
+
+                 .FirstOrDefaultAsync(up => up.ApplicationUser.Email == email);
         }
 
         public async Task AddAsync(UserProfile userProfile)

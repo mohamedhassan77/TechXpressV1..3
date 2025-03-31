@@ -106,10 +106,13 @@
                     }
                     <li><hr class="dropdown-divider" /></li>
                     <li>
-                        <form asp-controller="Account" asp-action="Logout" method="post">
-                            <button type="submit" class="dropdown-item">Logout</button>
+                        <form asp-controller="Account" asp-action="Logout" method="post" class="w-100">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-danger w-100">
+                                <i class="fas fa-sign-out-alt"></i> Logout
+                            </button>
                         </form>
-                    </li>
+
                 </ul>
             }
             else

@@ -1,8 +1,37 @@
-<!DOCTYPE html>
+@using TechXpress_domain.Entities
+@using Microsoft.AspNetCore.Identity
+@using System.Security.Claims
+@using Microsoft.EntityFrameworkCore
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+
 @{
-    ViewData["Title"] = "Dashboard";
-    Layout = null;
+    // Retrieve current user information and store in ViewBag for use in layout.
+    ApplicationUser currentUser = null;
+    string firstName = "Guest";
+    string profileImageUrl = "https://www.pngarts.com/files/10/Default-Profile-Picture-Download-PNG-Image.png";
+    bool isAdmin = false;
+    if (SignInManager.IsSignedIn(User))
+    {
+        currentUser = await UserManager.Users
+            .Include(u => u.UserProfile)
+            .FirstOrDefaultAsync(u => u.Id == User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+        if (currentUser != null)
+        {
+            firstName = !string.IsNullOrEmpty(currentUser.FirstName) ? currentUser.FirstName : currentUser.UserName;
+            if (currentUser.UserProfile != null && !string.IsNullOrEmpty(currentUser.UserProfile.ProfileImageUrl))
+            {
+                profileImageUrl = currentUser.UserProfile.ProfileImageUrl;
+            }
+            isAdmin = await UserManager.IsInRoleAsync(currentUser, "Admin");
+        }
+    }
+    ViewBag.AdminFirstName = firstName;
+    ViewBag.ProfileImageUrl = profileImageUrl;
 }
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -31,6 +60,7 @@
             font-family: 'Inter', sans-serif;
         }
 
+        /* Sidebar Styles */
         .admin-sidebar {
             background: linear-gradient(195deg, var(--dark), #1a1e21);
             width: var(--sidebar-width);
@@ -44,6 +74,31 @@
         .sidebar-header {
             padding: 1.5rem;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+        }
+
+        /* Updated Logo Styles */
+        .logo {
+            font-size: 2rem;
+            font-weight: bold;
+            text-decoration: none;
+            color: #fff;
+        }
+
+            .logo i {
+                color: var(--warning);
+                margin-right: 0.5rem;
+            }
+
+        .sidebar-header h3 {
+            margin: 0;
+            font-size: 1.75rem;
+        }
+
+        .sidebar-header p {
+            margin: 0;
+            font-size: 0.9rem;
+            opacity: 0.8;
         }
 
         .sidebar-nav {
@@ -59,6 +114,7 @@
             align-items: center;
             gap: 1rem;
             transition: all 0.2s ease;
+            text-decoration: none;
         }
 
             .nav-link:hover,
@@ -90,86 +146,19 @@
             font-size: 1.25rem;
         }
 
-        .stat-card {
-            border: none;
-            border-radius: 0.75rem;
-            overflow: hidden;
-            transition: transform 0.2s ease;
-        }
-
-            .stat-card:hover {
-                transform: translateY(-3px);
-            }
-
-        .users-card {
-            background: var(--primary);
-        }
-
-        .orders-card {
-            background: var(--success);
-        }
-
-        .revenue-card {
-            background: var(--warning);
-        }
-
-        .pending-card {
-            background: var(--danger);
-        }
-
-        .stat-card .card-body {
-            color: #fff;
+        .header-actions .btn {
             position: relative;
         }
 
-        .stat-card .icon {
-            font-size: 2.5rem;
-            opacity: 0.2;
+        .header-actions .badge {
+            font-size: 0.75rem;
         }
 
-        .stat-card h2 {
-            font-size: 2.2rem;
-            margin-bottom: 0;
+        .wrapper {
+            transition: margin-left 0.3s ease;
         }
 
-        .recent-table {
-            border: none;
-            border-radius: 0.75rem;
-            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.03);
-        }
-
-            .recent-table .card-header {
-                background: #fff;
-                border: none;
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                padding: 1.25rem;
-            }
-
-        .table {
-            border-collapse: separate;
-            border-spacing: 0 0.5rem;
-        }
-
-            .table tr {
-                background: #fff;
-            }
-
-                .table tr td {
-                    border: none;
-                    vertical-align: middle;
-                    padding: 1rem;
-                }
-
-        .product-info .icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 0.5rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
+        /* Responsive adjustments */
         @@media (max-width: 768px) {
             .admin-sidebar
 
@@ -181,7 +170,7 @@
             margin-left: 0;
         }
 
-        .sidebar-active .admin-sidebar {
+        .wrapper.sidebar-active .admin-sidebar {
             margin-left: 0;
         }
 
@@ -193,14 +182,16 @@
         <!-- Sidebar -->
         <aside class="admin-sidebar" aria-label="Admin Sidebar">
             <div class="sidebar-header">
-                <h3>TechXpress</h3>
+                <a class="logo" asp-controller="Home" asp-action="Index">
+                    <i class="fas fa-bolt"></i> TechXpress
+                </a>
                 <p>Admin Panel</p>
             </div>
             <nav class="sidebar-nav">
-                <a href="@Url.Action("Index", "AdminDashboard")" class="nav-link @(ViewContext.RouteData.Values["Action"]?.ToString() == "Index" ? "active" : "")">
+                <a href="@Url.Action("Index", "AdminDashboard")" class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "AdminDashboard" ? "active" : "")">
                     <i class="fas fa-chart-line"></i> Dashboard
                 </a>
-                <a href="@Url.Action("Users", "AdminDashboard")" class="nav-link @(ViewContext.RouteData.Values["Action"]?.ToString() == "Users" ? "active" : "")">
+                <a href="@Url.Action("Index", "AdminUsers")" class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "AdminUsers" ? "active" : "")">
                     <i class="fas fa-users"></i> Users
                 </a>
                 <a href="@Url.Action("Index", "AdminProducts")" class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "AdminProducts" ? "active" : "")">
@@ -209,21 +200,24 @@
                 <a href="@Url.Action("Index", "AdminCategories")" class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "AdminCategories" ? "active" : "")">
                     <i class="fas fa-tags"></i> Categories
                 </a>
-                <a href="@Url.Action("Orders", "AdminDashboard")" class="nav-link @(ViewContext.RouteData.Values["Action"]?.ToString() == "Orders" ? "active" : "")">
+                <a href="@Url.Action("Index", "AdminOrders")" class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "AdminOrders" ? "active" : "")">
                     <i class="fas fa-shopping-cart"></i> Orders
                 </a>
-                <a href="@Url.Action("Reviews", "AdminDashboard")" class="nav-link @(ViewContext.RouteData.Values["Action"]?.ToString() == "Reviews" ? "active" : "")">
+                <a href="@Url.Action("Index", "AdminReviewDashboard")" class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "AdminReviewDashboard" ? "active" : "")">
                     <i class="fas fa-comments"></i> Reviews
                 </a>
-                <div class="sidebar-divider"></div>
-                <a href="@Url.Action("Settings", "AdminDashboard")" class="nav-link @(ViewContext.RouteData.Values["Action"]?.ToString() == "Settings" ? "active" : "")">
+                <div class="sidebar-divider mt-3"></div>
+                <a href="@Url.Action("Settings", "AdminDashboard")" class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "AdminDashboard" && ViewContext.RouteData.Values["Action"]?.ToString() == "Settings" ? "active" : "")">
                     <i class="fas fa-cog"></i> Settings
                 </a>
             </nav>
             <div class="sidebar-footer p-3">
-                <a href="@Url.Action("Logout", "Account")" class="btn btn-danger w-100">
-                    <i class="fas fa-sign-out-alt"></i> Logout
-                </a>
+                <form asp-controller="Account" asp-action="Logout" method="post" class="w-100">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-danger w-100">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </form>
             </div>
         </aside>
 
@@ -237,16 +231,39 @@
                 <div class="header-actions d-flex align-items-center gap-3">
                     <button class="btn btn-light position-relative" aria-label="Notifications">
                         <i class="fas fa-bell"></i>
-                        @if (ViewBag.UnreadNotifications > 0)
+                        @if (ViewBag.UnreadNotifications != null && ViewBag.UnreadNotifications > 0)
                         {
                             <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
                                 @ViewBag.UnreadNotifications
                             </span>
                         }
                     </button>
-                    <div class="user-profile d-flex align-items-center gap-2">
-                        <div class="avatar bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">A</div>
-                        <span class="username">Admin</span>
+                    <!-- Account Dropdown with real data -->
+                    <div class="dropdown ms-3">
+                        @if (SignInManager.IsSignedIn(User))
+                        {
+                            <a class="d-flex align-items-center text-decoration-none" href="#" id="accountDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                <img src="@ViewBag.ProfileImageUrl" alt="Profile Picture" class="rounded-circle" width="40" height="40">
+                                <span class="ms-2 text-dark">Hello, @ViewBag.AdminFirstName</span>
+                                <i class="fas fa-chevron-down ms-1"></i>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="accountDropdown">
+                                <li>
+                                    <a class="dropdown-item" asp-controller="Account" asp-action="Profile">My Account</a>
+                                </li>
+                                <li><hr class="dropdown-divider" /></li>
+                                <li>
+                                    <form asp-controller="Account" asp-action="Logout" method="post">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="dropdown-item">Logout</button>
+                                    </form>
+                                </li>
+                            </ul>
+                        }
+                        else
+                        {
+                            <a class="btn btn-outline-primary" asp-controller="Account" asp-action="Login">Login</a>
+                        }
                     </div>
                 </div>
             </header>

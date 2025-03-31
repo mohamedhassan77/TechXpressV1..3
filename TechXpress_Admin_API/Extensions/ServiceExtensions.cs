@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using System;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using TechXpress_domain.Interfaces.Repositories;
 using TechXpress_domain.Interfaces.Services;
 using TechXpress_infrastructure.Repositories;
@@ -17,6 +18,7 @@ namespace TechXpress_Admin_API.Extensions
                 options.UseSqlServer(
                     config.GetConnectionString("AdminConnection"),
                     b => b.MigrationsAssembly("TechXpress_Infrastructure")));
+
             // Repositories
             services.AddScoped<IProductRepository, ProductRepository>();
             services.AddScoped<IOrderRepository, OrderRepository>();
@@ -28,13 +30,13 @@ namespace TechXpress_Admin_API.Extensions
             // Services
             services.AddScoped<IProductService, ProductService>();
             services.AddScoped<IOrderService, OrderService>();
+            // Register admin-specific order service
+            services.AddScoped<IOrderAdminService, OrderAdminService>();
             services.AddScoped<IAdminService, AdminService>();
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<ICategoryService, CategoryService>();
             services.AddScoped<IReviewService, ReviewService>();
             services.AddScoped<ICategoryApiService, CategoryApiService>();
-
-
 
             return services;
         }

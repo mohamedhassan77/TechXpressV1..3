@@ -3,43 +3,48 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using TechXpress_domain.Entities;
-using TechXpress_domain.DTOs;
 using TechXpress_domain.Interfaces.Services;
+using TechXpress.Models;
+using TechXpress_domain.DTOs;
 
-namespace TechXpress_Admin_API.Controllers
+namespace TechXpress.Controllers
 {
-    [ApiController]
-    [Route("api/admin/reviewdashboard")]
-    [Authorize(Policy = "AdminOnly")]
-    public class AdminReviewDashboardController : ControllerBase
+    [Authorize(Roles = "Admin")]
+    [Route("[controller]")]
+    public class AdminReviewDashboardController : Controller
     {
         private readonly IReviewService _reviewService;
+        private readonly IAdminService _adminService;
         private readonly ILogger<AdminReviewDashboardController> _logger;
         private readonly IMapper _mapper;
 
         public AdminReviewDashboardController(
             IReviewService reviewService,
+            IAdminService adminService,
             ILogger<AdminReviewDashboardController> logger,
             IMapper mapper)
         {
             _reviewService = reviewService;
+            _adminService = adminService;
             _logger = logger;
             _mapper = mapper;
         }
 
-        // GET: api/admin/reviewdashboard
-        [HttpGet]
-        [HttpGet]
-        public async Task<IActionResult> GetReviewDashboardData()
+        // GET: /AdminReviewDashboard/Index
+        [HttpGet("Index")]
+        public async Task<IActionResult> Index()
         {
             try
             {
-                var reviews = await _reviewService.GetAllReviewsAsync() ?? Enumerable.Empty<Review>();
-                var totalReviews = reviews.Count();
-                var averageRating = totalReviews > 0 ? reviews.Average(r => r.Rating) : 0;
+                IEnumerable<Review> reviews = await _reviewService.GetAllReviewsAsync() ?? Enumerable.Empty<Review>();
+                IEnumerable<UserProfile> users = await _adminService.GetAllUsersAsync() ?? Enumerable.Empty<UserProfile>();
+
+                int totalReviews = reviews.Count();
+                double averageRating = totalReviews > 0 ? reviews.Average(r => r.Rating) : 0;
 
                 var recentReviews = reviews
                     .OrderByDescending(r => r.Id)
@@ -54,21 +59,28 @@ namespace TechXpress_Admin_API.Controllers
                         CreatedAt = r.CreatedAt
                     }).ToList();
 
-                var dashboardData = new ReviewDashboardResponseDto
+                var userProfiles = _mapper.Map<IEnumerable<UserProfileViewModel>>(users).ToList();
+
+                var compositeModel = new AdminReviewPageViewModel
                 {
                     TotalReviews = totalReviews,
                     AverageRating = Math.Round(averageRating, 1),
-                    RecentReviews = recentReviews
+                    RecentReviews = recentReviews,
+                    UserProfiles = userProfiles
                 };
 
-                return Ok(dashboardData);
+                return View(compositeModel);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error loading review dashboard data");
-                return StatusCode(500, "Failed to load review dashboard data");
+                _logger.LogError(ex, "Error loading composite review dashboard data.");
+                TempData["ErrorMessage"] = "Failed to load review dashboard data.";
+                return View(new AdminReviewPageViewModel
+                {
+                    RecentReviews = new List<ReviewDashboardDto>(),
+                    UserProfiles = new List<UserProfileViewModel>()
+                });
             }
         }
-
     }
 }

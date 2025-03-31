@@ -3,12 +3,13 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using TechXpress_domain.Entities;
 using TechXpress_domain.DTOs;
 using TechXpress_domain.Interfaces.Services;
-
+    
 namespace TechXpress_Admin_API.Controllers
 {
     [ApiController]
@@ -17,15 +18,18 @@ namespace TechXpress_Admin_API.Controllers
     public class AdminReviewDashboardController : ControllerBase
     {
         private readonly IReviewService _reviewService;
+        private readonly IAdminService _adminService;
         private readonly ILogger<AdminReviewDashboardController> _logger;
         private readonly IMapper _mapper;
 
         public AdminReviewDashboardController(
             IReviewService reviewService,
+            IAdminService adminService,
             ILogger<AdminReviewDashboardController> logger,
             IMapper mapper)
         {
             _reviewService = reviewService;
+            _adminService = adminService;
             _logger = logger;
             _mapper = mapper;
         }
@@ -36,9 +40,9 @@ namespace TechXpress_Admin_API.Controllers
         {
             try
             {
-                var reviews = await _reviewService.GetAllReviewsAsync() ?? Enumerable.Empty<Review>();
-                var totalReviews = reviews.Count();
-                var averageRating = totalReviews > 0 ? reviews.Average(r => r.Rating) : 0;
+                IEnumerable<Review> reviews = await _reviewService.GetAllReviewsAsync() ?? Enumerable.Empty<Review>();
+                int totalReviews = reviews.Count();
+                double averageRating = totalReviews > 0 ? reviews.Average(r => r.Rating) : 0;
 
                 var recentReviews = reviews
                     .OrderByDescending(r => r.Id)
@@ -53,14 +57,18 @@ namespace TechXpress_Admin_API.Controllers
                         CreatedAt = r.CreatedAt
                     }).ToList();
 
-                var dashboardData = new ReviewDashboardResponseDto
+                IEnumerable<UserProfile> users = await _adminService.GetAllUsersAsync() ?? Enumerable.Empty<UserProfile>();
+                var userProfiles = _mapper.Map<IEnumerable<UserProfileDto>>(users).ToList();
+
+                var dashboardDto = new ReviewDashboardResponseDto
                 {
                     TotalReviews = totalReviews,
                     AverageRating = Math.Round(averageRating, 1),
-                    RecentReviews = recentReviews
+                    RecentReviews = recentReviews,
+                    UserProfiles = userProfiles
                 };
 
-                return Ok(dashboardData);
+                return Ok(dashboardDto);
             }
             catch (Exception ex)
             {

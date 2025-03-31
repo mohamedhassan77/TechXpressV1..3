@@ -1,0 +1,32 @@
+﻿@model TechXpress.Models.UserProfileViewModel
+
+@{
+    ViewData["Title"] = "User Details";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<h2>User Details</h2>
+
+<div class="card">
+    <div class="card-header">
+        <h3>@Model.FirstName @Model.LastName</h3>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-3">
+                <img src="@(string.IsNullOrEmpty(Model.ProfilePictureUrl) ? "/images/default-avatar.png" : Model.ProfilePictureUrl)"
+                     alt="Profile Picture" class="img-thumbnail" style="width:100px; height:100px;" />
+            </div>
+            <div class="col-md-9">
+                <p><strong>Email:</strong> @Model.Email</p>
+                <p><strong>Phone:</strong> @Model.PhoneNumber</p>
+                <p><strong>Joined:</strong> @Model.CreatedAt.ToString("MMM dd, yyyy")</p>
+                <p><strong> Country :</strong> @(Model.Addresses.FirstOrDefault().Country.ToString())</p>
+            </div>
+        </div>
+    </div>
+    <div class="card-footer">
+        <a href="@Url.Action("Index", "AdminUsers")" class="btn btn-secondary">Back to Users</a>
+        <a href="@Url.Action("Edit", "AdminUsers", new { id = Model.UserId })" class="btn btn-warning">Edit</a>
+    </div>
+</div>
