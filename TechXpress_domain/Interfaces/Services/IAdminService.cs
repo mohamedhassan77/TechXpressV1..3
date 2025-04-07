@@ -6,6 +6,8 @@ namespace TechXpress_domain.Interfaces.Services
 {
     public interface IAdminService
     {
+        Task<UserProfile?> GetUserProfileByIdAsync(string id);
+        Task AddUserProfileAsync(UserProfile userProfile);
 
         Task<IEnumerable<UserProfile>> GetAllUsersAsync();
         Task UpdateUserProfileAsync(UserProfile updatedProfile);

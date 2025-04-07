@@ -1,38 +1,238 @@
-﻿@model TechXpress.Models.ProductViewModel
+﻿@model TechXpress.Models.OrderDetailsViewModel
 @{
-    ViewData["Title"] = "Delete Product";
+    ViewData["Title"] = $"Order #{Model.OrderId}";
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
-<div class="container-fluid p-4">
-    <div class="card shadow mb-4 border-danger">
-        <div class="card-header py-3 bg-danger text-white">
-            <h6 class="m-0 fw-bold">Delete Product</h6>
+<div class="container-fluid px-4">
+    <div class="card shadow mb-4">
+        <div class="card-header bg-primary text-white py-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h5 class="m-0">Order Details</h5>
+                    <div class="text-sm">#@Model.OrderId</div>
+                </div>
+                <span class="badge bg-white text-primary">@Model.CurrentStatus</span>
+            </div>
         </div>
+
         <div class="card-body">
-            <h5>Are you sure you want to delete this product?</h5>
-            <div class="mb-3">
-                <strong>Product Name:</strong> @Model.Name
+            <!-- Order Status Section -->
+            <div class="row mb-4">
+                <div class="col-md-8">
+                    <div class="timeline-steps">
+                        <div class="timeline-step @(Model.CurrentStatus == "Pending" ? "active" : "")">
+                            <div class="timeline-content">
+                                <div class="circle"></div>
+                                <h6>Pending</h6>
+                                <small>Order received</small>
+                            </div>
+                        </div>
+                        <div class="timeline-step @(Model.CurrentStatus == "Processing" ? "active" : "")">
+                            <div class="timeline-content">
+                                <div class="circle"></div>
+                                <h6>Processing</h6>
+                                <small>Preparing order</small>
+                            </div>
+                        </div>
+                        <div class="timeline-step @(Model.CurrentStatus == "Shipped" ? "active" : "")">
+                            <div class="timeline-content">
+                                <div class="circle"></div>
+                                <h6>Shipped</h6>
+                                <small>On the way</small>
+                            </div>
+                        </div>
+                        <div class="timeline-step @(Model.CurrentStatus == "Delivered" ? "active" : "")">
+                            <div class="timeline-content">
+                                <div class="circle"></div>
+                                <h6>Delivered</h6>
+                                <small>Order complete</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="mb-3">
-                <strong>Price:</strong> @Model.Price.ToString("C")
+
+            <!-- Order Items Section -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="m-0">Order Items (@Model.Items.Count)</h6>
+                </div>
+                <div class="card-body p-0">
+                    <div class="list-group list-group-flush">
+                        @foreach (var item in Model.Items)
+                        {
+                            <div class="list-group-item">
+                                <div class="row align-items-center">
+                                    <div class="col-md-2">
+                                        <img src="@item.Product.ImageUrl" class="img-fluid rounded" alt="@item.Product.Name">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <h6>@item.Product.Name</h6>
+                                        <small class="text-muted">SKU: @item.Product.SKU</small>
+                                    </div>
+                                    <div class="col-md-4 text-end">
+                                        <div class="d-flex justify-content-between">
+                                            <span>@item.Quantity x @item.PriceAtPurchase.ToString("C")</span>
+                                            <strong>@((item.Quantity * item.PriceAtPurchase).ToString("C"))</strong>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
             </div>
-            <div class="mb-3">
-                <strong>Category:</strong> @Model.CategoryName
+
+            <!-- Order Summary Section -->
+            <div class="row">
+                <div class="col-lg-8">
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h6 class="m-0">Order Summary</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-borderless">
+                                    <tbody>
+                                        <tr>
+                                            <td>Subtotal</td>
+                                            <td class="text-end">@Model.Subtotal.ToString("C")</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Shipping</td>
+                                            <td class="text-end">@Model.ShippingCost.ToString("C")</td>
+                                        </tr>
+                                        @if (Model.Discount > 0)
+                                        {
+                                            <tr class="text-danger">
+                                                <td>Discount</td>
+                                                <td class="text-end">-@Model.Discount.ToString("C")</td>
+                                            </tr>
+                                        }
+                                        <tr>
+                                            <td>Tax</td>
+                                            <td class="text-end">@Model.Tax.ToString("C")</td>
+                                        </tr>
+                                        <tr class="fw-bold">
+                                            <td>Total</td>
+                                            <td class="text-end">@Model.Total.ToString("C")</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Customer Information -->
+                <div class="col-lg-4">
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h6 class="m-0">Customer Information</h6>
+                        </div>
+                        <div class="card-body">
+                            <h6>Shipping Address</h6>
+                            <p class="mb-0">@Model.ShippingAddress.Street</p>
+                            <p class="mb-0">@Model.ShippingAddress.City, @Model.ShippingAddress.State</p>
+                            <p class="mb-4">@Model.ShippingAddress.Country</p>
+
+                            <h6>Payment Method</h6>
+                            <p class="mb-0">@Model.PaymentMethod</p>
+                            <small class="text-muted">@Model.PaymentDetails</small>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="mb-3">
-                <strong>Description:</strong> @Model.Description
-            </div>
-            <form asp-action="DeleteConfirmed" method="post">
-                <input type="hidden" asp-for="Id" />
-                @Html.AntiForgeryToken()
-                <button type="submit" class="btn btn-danger">
-                    <i class="fas fa-trash"></i> Delete
-                </button>
-                <a asp-action="Index" class="btn btn-secondary ms-2">
-                    <i class="fas fa-arrow-left"></i> Cancel
+
+            <!-- Admin Actions -->
+            <div class="d-flex justify-content-between align-items-center mt-4">
+                <a asp-action="Index" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Back to Orders
                 </a>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#updateStatusModal">
+                        Update Status
+                    </button>
+                    <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteOrderModal">
+                        Delete Order
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Update Status Modal -->
+<div class="modal fade" id="updateStatusModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form asp-action="UpdateStatus" method="post">
+                <div class="modal-header">
+                    <h5 class="modal-title">Update Order Status</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="id" value="@Model.OrderId" />
+                    <select name="newStatus" class="form-select">
+                        <option value="Pending">Pending</option>
+                        <option value="Processing">Processing</option>
+                        <option value="Shipped">Shipped</option>
+                        <option value="Delivered">Delivered</option>
+                        <option value="Cancelled">Cancelled</option>
+                    </select>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
             </form>
         </div>
     </div>
 </div>
+
+@section Styles {
+    <style>
+        .timeline-steps {
+            display: flex;
+            justify-content: space-between;
+            padding: 2rem 0;
+        }
+
+        .timeline-step {
+            flex: 1;
+            position: relative;
+            text-align: center;
+        }
+
+            .timeline-step .circle {
+                width: 30px;
+                height: 30px;
+                background: #e9ecef;
+                border-radius: 50%;
+                margin: 0 auto 10px;
+                position: relative;
+                z-index: 2;
+            }
+
+            .timeline-step.active .circle {
+                background: var(--primary);
+                color: white;
+            }
+
+            .timeline-step::before {
+                content: '';
+                position: absolute;
+                top: 15px;
+                left: -50%;
+                right: 50%;
+                height: 2px;
+                background: #dee2e6;
+                z-index: 1;
+            }
+
+            .timeline-step:first-child::before {
+                display: none;
+            }
+    </style>
+}

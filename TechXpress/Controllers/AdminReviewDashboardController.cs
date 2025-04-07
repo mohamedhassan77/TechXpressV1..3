@@ -1,15 +1,15 @@
-﻿using AutoMapper;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using TechXpress_domain.Entities;
-using TechXpress_domain.Interfaces.Services;
+using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using TechXpress.Models;
 using TechXpress_domain.DTOs;
+using TechXpress_domain.Entities;
+using TechXpress_domain.Interfaces.Services;
 
 namespace TechXpress.Controllers
 {
@@ -22,11 +22,7 @@ namespace TechXpress.Controllers
         private readonly ILogger<AdminReviewDashboardController> _logger;
         private readonly IMapper _mapper;
 
-        public AdminReviewDashboardController(
-            IReviewService reviewService,
-            IAdminService adminService,
-            ILogger<AdminReviewDashboardController> logger,
-            IMapper mapper)
+        public AdminReviewDashboardController(IReviewService reviewService, IAdminService adminService, ILogger<AdminReviewDashboardController> logger, IMapper mapper)
         {
             _reviewService = reviewService;
             _adminService = adminService;
@@ -60,12 +56,13 @@ namespace TechXpress.Controllers
                     }).ToList();
 
                 var userProfiles = _mapper.Map<IEnumerable<UserProfileViewModel>>(users).ToList();
+                var recentReviewss = _mapper.Map<IEnumerable<ReviewDashboardDto>>(reviews);
 
                 var compositeModel = new AdminReviewPageViewModel
                 {
                     TotalReviews = totalReviews,
                     AverageRating = Math.Round(averageRating, 1),
-                    RecentReviews = recentReviews,
+                    RecentReviews = recentReviewss,
                     UserProfiles = userProfiles
                 };
 

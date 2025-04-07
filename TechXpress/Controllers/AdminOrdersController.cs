@@ -1,17 +1,22 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
-using TechXpress.Models; // Contains OrderDetailsViewModel
-using Microsoft.Extensions.Configuration;
 using AutoMapper;
-using System.Collections.Generic;
-using TechXpress_domain.DTOs;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
+using TechXpress.Models;
+using TechXpress_domain.DTOs;
+using TechXpress_domain.Enums;
 
 namespace TechXpress.Controllers
 {
-    [Microsoft.AspNetCore.Authorization.Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin")]
     public class AdminOrdersController : Controller
     {
         private readonly IHttpClientFactory _httpClientFactory;
@@ -94,7 +99,43 @@ namespace TechXpress.Controllers
             }
         }
 
+        // POST: /AdminOrders/UpdateStatus
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateStatus(int id, OrderStatus newStatus)
+        {
+            var token = HttpContext.Session.GetString("AdminToken");
+            if (string.IsNullOrEmpty(token))
+            {
+                TempData["ErrorMessage"] = "No token found. Please log in as admin.";
+                return RedirectToAction("Login", "Account");
+            }
 
+            var client = _httpClientFactory.CreateClient("AdminApiClient");
+            client.DefaultRequestHeaders.Authorization =
+                new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
+            var updateDto = new OrderUpdateDto
+            {
+                OrderId = id,
+                ExpectedDeliveryDate = DateTime.UtcNow.AddDays(2),
+                NewStatus = newStatus
+            };
+
+            var response = await client.PutAsJsonAsync($"api/admin/orders/{id}/status", updateDto);
+            if (response.IsSuccessStatusCode)
+            {
+                TempData["SuccessMessage"] = $"Order status updated to {newStatus} successfully.";
+            }
+            else
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                _logger.LogError("Failed to update order status for Order ID {OrderId}. Status: {StatusCode}. Error: {Error}",
+                    id, response.StatusCode, errorContent);
+                TempData["ErrorMessage"] = $"Failed to update order status. Status: {response.StatusCode}.";
+            }
+            return RedirectToAction("OrderDetails", new { id });
+        }
 
         // POST: /AdminOrders/Cancel/{id}
         [HttpPost]
@@ -123,7 +164,7 @@ namespace TechXpress.Controllers
             return RedirectToAction("Index");
         }
 
-        // POST: /AdminOrders/Delete/{id}?userId=...
+        // POST: /AdminOrders/Delete/{id}
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id, string userId)

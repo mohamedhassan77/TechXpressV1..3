@@ -13,7 +13,7 @@
     </div>
     <div class="card-body">
         <div class="row">
-            <div class="col-md-3">
+            <div class="col-md-3 text-center">
                 <img src="@(string.IsNullOrEmpty(Model.ProfilePictureUrl) ? "/images/default-avatar.png" : Model.ProfilePictureUrl)"
                      alt="Profile Picture" class="img-thumbnail" style="width:100px; height:100px;" />
             </div>
@@ -21,7 +21,10 @@
                 <p><strong>Email:</strong> @Model.Email</p>
                 <p><strong>Phone:</strong> @Model.PhoneNumber</p>
                 <p><strong>Joined:</strong> @Model.CreatedAt.ToString("MMM dd, yyyy")</p>
-                <p><strong> Country :</strong> @(Model.Addresses.FirstOrDefault().Country.ToString())</p>
+                <p>
+                    <strong>Country:</strong>
+                    @(Model.Addresses.FirstOrDefault()?.Country ?? "Unknown")
+                </p>
             </div>
         </div>
     </div>

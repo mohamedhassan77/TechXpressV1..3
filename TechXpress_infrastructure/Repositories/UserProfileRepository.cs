@@ -21,20 +21,22 @@ namespace TechXpress_infrastructure.Repositories
              return await _context.UserProfiles
                 .Include(up => up.Addresses)
                 .Include(up => up.ApplicationUser)
+                .Include(up => up.ApplicationUser.Orders)
                    .ToListAsync();
         }
 
         public async Task<UserProfile?> GetByIdAsync(string applicationUserId)
         {
             return await _context.UserProfiles
-                .Include(up => up.ApplicationUser) 
-                .Include(up => up.Addresses)       
+                .Include(up => up.ApplicationUser)
+                .ThenInclude(u => u.Orders)
 
+                .Include(up => up.Addresses)       
                 .Include(up => up.ApplicationUser.Cart)
                 .Include(up => up.ApplicationUser.Wishlist)
-                .Include(up => up.ApplicationUser.Orders)
                 .Include(UserProfile => UserProfile.ApplicationUser.Addresses)
 
+                    
                     
 
                 .FirstOrDefaultAsync(up => up.ApplicationUserId == applicationUserId);
@@ -44,6 +46,7 @@ namespace TechXpress_infrastructure.Repositories
         {
             return await _context.UserProfiles
                 .Include(up => up.ApplicationUser)
+                .ThenInclude(u=>u.Orders)
                 .Include(up => up.Addresses)
                  .Include(up => up.ApplicationUser.Wishlist)
                 .Include(up => up.ApplicationUser.Orders)

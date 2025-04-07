@@ -23,6 +23,8 @@ namespace TechXpress_infrastructure.Repositories
                 .Where(r => r.ProductId == productId)
                 .Include(r => r.Product)
                 .Include(r => r.ApplicationUser)
+                .Include(r => r.ApplicationUser.UserProfile)
+                 .AsNoTracking()
                 .ToListAsync();
         }
 
@@ -31,17 +33,21 @@ namespace TechXpress_infrastructure.Repositories
             return await _context.Reviews
                 .Include(r => r.ApplicationUser)
                 .Include(r => r.Product)
+                .Include(r => r.ApplicationUser.UserProfile)
+                 .AsNoTracking()
                 .FirstOrDefaultAsync(r => r.Id == id);
         }
 
         public async Task AddReviewAsync(Review review)
         {
             await _context.Reviews.AddAsync(review);
+            await SaveChangesAsync(); 
         }
 
         public async Task UpdateReviewAsync(Review review)
         {
             _context.Reviews.Update(review);
+            await SaveChangesAsync(); 
         }
 
         public async Task DeleteReviewAsync(int id)
@@ -50,12 +56,15 @@ namespace TechXpress_infrastructure.Repositories
             if (review != null)
             {
                 _context.Reviews.Remove(review);
+                await SaveChangesAsync(); 
             }
         }
 
         public async Task<bool> UserHasReviewedProductAsync(string userId, int productId)
         {
-            return await _context.Reviews.AnyAsync(r => r.UserId == userId && r.ProductId == productId);
+            return await _context.Reviews
+                .AsNoTracking()
+                .AnyAsync(r => r.UserId == userId && r.ProductId == productId);
         }
 
         public async Task SaveChangesAsync()
@@ -68,6 +77,7 @@ namespace TechXpress_infrastructure.Repositories
             return await _context.Reviews
                 .Include(r => r.ApplicationUser)
                 .Include(r => r.Product)
+                .AsNoTracking()
                 .ToListAsync();
         }
     }

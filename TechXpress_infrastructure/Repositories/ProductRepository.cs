@@ -209,10 +209,13 @@ namespace TechXpress_infrastructure.Repositories
             }
         }
 
+
         public async Task AddProductAsync(Product product)
         {
             await _context.Products.AddAsync(product);
+            await _context.SaveChangesAsync();
         }
+
 
         public async Task SaveChangesAsync()
         {

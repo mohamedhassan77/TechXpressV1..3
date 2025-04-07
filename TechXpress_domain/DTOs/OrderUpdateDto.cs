@@ -5,8 +5,9 @@ namespace TechXpress_domain.DTOs
 {
     public class OrderUpdateDto
     {
-        public OrderStatus Status { get; set; }
-
+        public int OrderId { get; set; }
+        public OrderStatus NewStatus { get; set; }
+ 
           public DateTime? ExpectedDeliveryDate { get; set; }
     }
 }

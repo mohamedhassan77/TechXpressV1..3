@@ -256,9 +256,11 @@ namespace TechXpress.Controllers
                 Addresses = profile.Addresses.ToList(),
                 CreatedAt = profile.CreatedAt,
                 Gender = profile.Gender.ToString(),
-                ProfilePictureUrl = profile.ProfileImageUrl,
-                Orders = profile.ApplicationUser.Orders.ToList(),
-                UserId = userId
+                ProfileImageUrl = profile.ProfileImageUrl,
+                 UserId = userId,
+                 Orders= profile.ApplicationUser.Orders.ToList(),
+                 ProfileImageData = profile.ProfileImageData,
+                ProfilePictureUrl=profile.ProfileImageUrl
 
             };
             return View(viewModel);

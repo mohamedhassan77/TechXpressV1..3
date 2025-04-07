@@ -1,15 +1,16 @@
-﻿using AutoMapper;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
-using TechXpress_domain.DTOs;
-using TechXpress_domain.Interfaces.Services;
 using TechXpress.Models;
+using TechXpress_domain.DTOs;
 using TechXpress_domain.Entities;
+using TechXpress_domain.Interfaces.Services;
 
 namespace TechXpress.Controllers
 {
@@ -21,11 +22,7 @@ namespace TechXpress.Controllers
         private readonly IMapper _mapper;
         private readonly ILogger<AdminProductsController> _logger;
 
-        public AdminProductsController(
-            IProductApiService productApiService,
-            ICategoryService categoryService,
-            IMapper mapper,
-            ILogger<AdminProductsController> logger)
+        public AdminProductsController(IProductApiService productApiService, ICategoryService categoryService, IMapper mapper, ILogger<AdminProductsController> logger)
         {
             _productApiService = productApiService;
             _categoryService = categoryService;
@@ -54,7 +51,6 @@ namespace TechXpress.Controllers
                     return RedirectToAction("Login", "Account");
 
                 _productApiService.SetToken(token);
-
                 var productDtos = await _productApiService.GetAllProductsAsync() ?? Enumerable.Empty<ProductResponseDto>();
                 var categories = await _categoryService.GetAllCategoriesAsync(1, 20, "name_asc") ?? Enumerable.Empty<Category>();
                 var categoryDict = categories.ToDictionary(c => c.Id, c => c.Name);
@@ -108,7 +104,6 @@ namespace TechXpress.Controllers
                 return RedirectToAction("Login", "Account");
 
             _productApiService.SetToken(token);
-
             if (!ModelState.IsValid)
             {
                 await PopulateCategories(model.CategoryId);
@@ -131,7 +126,7 @@ namespace TechXpress.Controllers
             }
         }
 
-        // GET: /AdminProducts/Edit/5
+        // GET: /AdminProducts/Edit/{id}
         [HttpGet]
         public async Task<IActionResult> Edit(int id)
         {
@@ -140,7 +135,6 @@ namespace TechXpress.Controllers
                 return RedirectToAction("Login", "Account");
 
             _productApiService.SetToken(token);
-
             try
             {
                 var productDto = await _productApiService.GetProductByIdAsync(id);
@@ -171,7 +165,6 @@ namespace TechXpress.Controllers
                 return RedirectToAction("Login", "Account");
 
             _productApiService.SetToken(token);
-
             if (!ModelState.IsValid)
             {
                 await PopulateCategories(model.CategoryId);
@@ -194,7 +187,7 @@ namespace TechXpress.Controllers
             }
         }
 
-        // POST: /AdminProducts/Delete/5
+        // POST: /AdminProducts/Delete/{id}
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
@@ -204,7 +197,6 @@ namespace TechXpress.Controllers
                 return RedirectToAction("Login", "Account");
 
             _productApiService.SetToken(token);
-
             try
             {
                 await _productApiService.DeleteProductAsync(id);

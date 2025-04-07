@@ -142,24 +142,17 @@
     <!-- Display Reviews -->
     <div class="mt-5">
         <h3 class="mb-4">Customer Reviews</h3>
-        @if (Model.Reviews != null && Model.Reviews.Any())
+        @if (Model?.Reviews != null && Model.Reviews.Any())
         {
             @foreach (var review in Model.Reviews)
             {
                 <div class="card mb-3">
                     <div class="card-body d-flex">
-                        @if (review.ApplicationUser != null)
-                        {
-                            <img src="@review.ApplicationUser.UserProfile.ProfileImageUrl" class="rounded-circle me-3" alt="Profile Picture" width="50" height="50" />
-                        }
-                        else
-                        {
-                            <img src="~/IMG/CoP.jpg" class="rounded-circle me-3" alt="Default Profile Picture" width="50" height="50" />
-                        }
+                        <img src="@(review.ApplicationUser?.UserProfile?.ProfileImageUrl ?? "~/IMG/CoP.jpg")" class="rounded-circle me-3" alt="Profile Picture" width="50" height="50" />
                         <div class="w-100">
                             <div class="d-flex justify-content-between align-items-center">
                                 <div>
-                                    <strong>@(review.ApplicationUser?.UserProfile.ApplicationUser.FirstName ?? "Anonymous")</strong>
+                                    <strong>@(review.ApplicationUser?.FirstName ?? "Anonymous")</strong>
                                     <small class="text-muted ms-2">@review.CreatedAt.ToString("MMM dd, yyyy")</small>
                                 </div>
                                 <div>

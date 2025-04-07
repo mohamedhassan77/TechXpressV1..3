@@ -4,7 +4,7 @@ namespace TechXpress_domain.DTOs
 {
     public class OrderDto
     {
-        public int orderId { get; set; }
+        public int orderId { get; set; }    
         public string OrderNumber { get; set; }
         public DateTime OrderDate { get; set; }
         public decimal TotalPrice { get; set; }

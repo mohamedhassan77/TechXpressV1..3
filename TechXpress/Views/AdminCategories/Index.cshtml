@@ -22,11 +22,11 @@
                 <td>@category.Name</td>
                 <td>@(category.Description ?? "")</td>
                 <td>
-                    <a href="@Url.Action("EditCategory", "Categories", new { id = category.Id })" class="btn btn-warning btn-sm">Edit</a>
-                    <a href="@Url.Action("DeleteCategory", "Categories", new { id = category.Id })" class="btn btn-danger btn-sm">Delete</a>
+                    <a href="@Url.Action("Edit", "AdminCategories", new { id = category.Id })" class="btn btn-warning btn-sm">Edit</a>
+                    <a href="@Url.Action("Delete", "AdminCategories", new { id = category.Id })" class="btn btn-danger btn-sm">Delete</a>
                 </td>
             </tr>
         }
     </tbody>
 </table>
-<a href="@Url.Action("CreateCategory", "Categories")" class="btn btn-primary mt-3">Add New Category</a>
+<a href="@Url.Action("Create", "AdminCategories")" class="btn btn-primary mt-3">Add New Category</a>

@@ -7,18 +7,18 @@
 
 <h2>Edit User</h2>
 
-@using (Html.BeginForm("Edit", "AdminUsers", new { id = Model.UserId }, FormMethod.Post, null, new { enctype = "multipart/form-data" }))
+@using (Html.BeginForm("Edit", "AdminUsers", new { id = Model.UserId }, FormMethod.Post ))
 {
     @Html.AntiForgeryToken()
-    @Html.HiddenFor(model => model.UserId) 
-    
+    @Html.HiddenFor(model => model.UserId)
+
     <div class="form-group">
         @Html.LabelFor(model => model.FirstName)
         @Html.TextBoxFor(model => model.FirstName, new { @class = "form-control" })
         @Html.ValidationMessageFor(model => model.FirstName)
     </div>
     <div class="form-group">
-        @Html.LabelFor(model => model.LastName) 
+        @Html.LabelFor(model => model.LastName)
         @Html.TextBoxFor(model => model.LastName, new { @class = "form-control" })
         @Html.ValidationMessageFor(model => model.LastName)
     </div>
@@ -33,8 +33,14 @@
         @Html.ValidationMessageFor(model => model.PhoneNumber)
     </div>
     <div class="form-group">
+        @Html.LabelFor(model => model.ProfilePictureUrl)
         @Html.Label("Profile Picture")
         <input type="file" name="ProfilePicture" class="form-control" />
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(model => model.IsAdmin, "Administrator")
+        @Html.CheckBoxFor(model => model.IsAdmin)
+        @Html.ValidationMessageFor(model => model.IsAdmin)
     </div>
     <button type="submit" class="btn btn-primary">Save Changes</button>
     <a href="@Url.Action("Index", "AdminUsers")" class="btn btn-secondary">Cancel</a>

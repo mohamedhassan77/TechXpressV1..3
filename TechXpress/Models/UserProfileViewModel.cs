@@ -56,12 +56,14 @@ namespace TechXpress.Models
         public DateTime CreatedAt { get; set; }
 
         public bool IsBlocked { get; set; }
+        public bool IsAdmin { get; set; }
 
          public List<Order> Orders { get; set; } = new List<Order>();
 
         public bool NewsletterSubscribed { get; set; }
 
         public List<Address> Addresses { get; set; } = new List<Address>();
+
 
 
     }

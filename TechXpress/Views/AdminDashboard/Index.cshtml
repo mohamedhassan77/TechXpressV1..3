@@ -4,279 +4,267 @@
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
-<!-- Dashboard Header as a Link -->
-<a href="@Url.Action("Index", "AdminDashboard")" class="text-decoration-none text-dark">
-    <h2>Dashboard</h2>
-</a>
-
-<div class="container-fluid dashboard">
-    <!-- Error Message -->
-    @if (TempData["ErrorMessage"] != null)
-    {
-        <div class="alert alert-danger alert-dismissible fade show mt-3" role="alert">
-            @TempData["ErrorMessage"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+<div class="container-fluid px-4">
+    <!-- Dashboard Header -->
+    <div class="d-flex justify-content-between align-items-center py-4">
+        <h1 class="mb-0">
+            <i class="fas fa-tachometer-alt me-2 text-primary"></i>Dashboard
+        </h1>
+        <div class="d-flex align-items-center gap-3">
+            <div class="date-picker">
+                <input type="text" class="form-control flatpickr" placeholder="Select Date Range">
+            </div>
+            <button class="btn btn-light">
+                <i class="fas fa-download"></i> Export
+            </button>
         </div>
-    }
+    </div>
 
-    <!-- Statistic Cards -->
-    <div class="row g-4 my-4">
-        <!-- Total Users -->
-        <div class="col-xl-3 col-md-6">
-            <div class="card stat-card users-card shadow-sm">
+    <!-- Stats Grid -->
+    <div class="row g-4 mb-4">
+        <!-- Users Card -->
+        <div class="col-xxl-3 col-md-6">
+            <div class="card stat-card bg-gradient-users shadow">
                 <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="icon text-white bg-primary rounded-circle p-3">
-                            <i class="fas fa-users fa-2x"></i>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h2 class="card-title text-white">@Model.TotalUsers</h2>
+                            <p class="card-text text-white-50 mb-0">Total Users</p>
                         </div>
-                        <div class="ms-auto text-end">
-                            <h2 class="mb-0">@Model.TotalUsers</h2>
-                            <small>Total Users</small>
+                        <div class="icon-circle bg-white-10">
+                            <i class="fas fa-users fa-2x text-white"></i>
                         </div>
                     </div>
-                    <div class="trend positive mt-2">
-                        <i class="fas fa-arrow-up"></i> 5.2%
+                    <div class="mt-3">
+                        <span class="badge bg-white-20 text-white">
+                            <i class="fas fa-arrow-up me-1"></i>5.2% vs last month
+                        </span>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Total Orders -->
-        <div class="col-xl-3 col-md-6">
-            <div class="card stat-card orders-card shadow-sm">
+        <!-- Orders Card -->
+        <div class="col-xxl-3 col-md-6">
+            <div class="card stat-card bg-gradient-orders shadow">
                 <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="icon text-white bg-success rounded-circle p-3">
-                            <i class="fas fa-shopping-cart fa-2x"></i>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h2 class="card-title text-white">@Model.TotalOrders</h2>
+                            <p class="card-text text-white-50 mb-0">Total Orders</p>
                         </div>
-                        <div class="ms-auto text-end">
-                            <h2 class="mb-0">@Model.TotalOrders</h2>
-                            <small>Total Orders</small>
+                        <div class="icon-circle bg-white-10">
+                            <i class="fas fa-shopping-cart fa-2x text-white"></i>
                         </div>
                     </div>
-                    <div class="trend positive mt-2">
-                        <i class="fas fa-arrow-up"></i> 8.1%
+                    <div class="mt-3">
+                        <span class="badge bg-white-20 text-white">
+                            <i class="fas fa-arrow-up me-1"></i>8.1% vs last month
+                        </span>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Pending Orders -->
-        <div class="col-xl-3 col-md-6">
-            <div class="card stat-card pending-card shadow-sm">
+        <!-- Revenue Card -->
+        <div class="col-xxl-3 col-md-6">
+            <div class="card stat-card bg-gradient-revenue shadow">
                 <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="icon text-white bg-warning rounded-circle p-3">
-                            <i class="fas fa-hourglass-half fa-2x"></i>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h2 class="card-title text-white">@Model.TotalRevenue.ToString("C")</h2>
+                            <p class="card-text text-white-50 mb-0">Total Revenue</p>
                         </div>
-                        <div class="ms-auto text-end">
-                            <h2 class="mb-0">@Model.PendingOrders</h2>
-                            <small>Pending Orders</small>
+                        <div class="icon-circle bg-white-10">
+                            <i class="fas fa-chart-line fa-2x text-white"></i>
                         </div>
                     </div>
-                    <div class="trend negative mt-2">
-                        <i class="fas fa-arrow-down"></i> 2.4%
+                    <div class="mt-3">
+                        <span class="badge bg-white-20 text-white">
+                            <i class="fas fa-arrow-up me-1"></i>12.6% vs last month
+                        </span>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Total Revenue -->
-        <div class="col-xl-3 col-md-6">
-            <div class="card stat-card revenue-card shadow-sm">
+        <!-- Pending Card -->
+        <div class="col-xxl-3 col-md-6">
+            <div class="card stat-card bg-gradient-pending shadow">
                 <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="icon text-white bg-danger rounded-circle p-3">
-                            <i class="fas fa-dollar-sign fa-2x"></i>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h2 class="card-title text-white">@Model.PendingOrders</h2>
+                            <p class="card-text text-white-50 mb-0">Pending Orders</p>
                         </div>
-                        <div class="ms-auto text-end">
-                            <h2 class="mb-0">@Model.TotalRevenue.ToString("C")</h2>
-                            <small>Total Revenue</small>
+                        <div class="icon-circle bg-white-10">
+                            <i class="fas fa-clock fa-2x text-white"></i>
                         </div>
                     </div>
-                    <div class="trend positive mt-2">
-                        <i class="fas fa-arrow-up"></i> 12.6%
+                    <div class="mt-3">
+                        <span class="badge bg-white-20 text-white">
+                            <i class="fas fa-arrow-down me-1"></i>2.4% vs last month
+                        </span>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Recent Sections -->
+    <!-- Content Sections -->
     <div class="row g-4">
-        <!-- Recent Products Section -->
+        <!-- Recent Products -->
         <div class="col-xl-4">
-            <div class="card recent-section shadow-sm">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h3 class="mb-0"><i class="fas fa-box me-2"></i>Recent Products</h3>
-                    <a href="@Url.Action("Index", "AdminProducts")" class="btn btn-sm btn-outline-secondary">
-                        View All <i class="fas fa-arrow-right"></i>
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-transparent d-flex justify-content-between align-items-center py-3">
+                    <h5 class="mb-0">
+                        <i class="fas fa-boxes me-2 text-primary"></i>Recent Products
+                    </h5>
+                    <a href="@Url.Action("Index", "AdminProducts")" class="btn btn-sm btn-outline-primary">
+                        View All <i class="fas fa-arrow-right ms-2"></i>
                     </a>
                 </div>
                 <div class="card-body">
                     @if (Model.RecentProducts.Any())
                     {
-                        <div class="table-responsive">
-                            <table class="table table-borderless">
-                                <tbody>
-                                    @foreach (var product in Model.RecentProducts.Take(5))
-                                    {
-                                        <tr>
-                                            <td>
-                                                <div class="d-flex align-items-center">
-                                                    <div class="icon bg-primary text-white rounded-circle p-2 me-2">
-                                                        <i class="fas fa-box"></i>
-                                                    </div>
-                                                    <div>
-                                                        <h5 class="mb-0">@product.Name</h5>
-                                                        <small>@product.CategoryName</small>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td class="text-end">
-                                                @product.Price.ToString("C")
-                                            </td>
-                                        </tr>
-                                    }
-                                </tbody>
-                            </table>
+                        <div class="list-group list-group-flush">
+                            @foreach (var product in Model.RecentProducts.Take(5))
+                            {
+                                <div class="list-group-item border-0 py-3">
+                                    <div class="d-flex align-items-center">
+                                        <div class="icon-shape bg-light-primary rounded-circle p-3 me-3">
+                                            <i class="fas fa-box text-primary"></i>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <h6 class="mb-1">@product.Name</h6>
+                                            <small class="text-muted">@product.CategoryName</small>
+                                        </div>
+                                        <div class="text-end">
+                                            <span class="badge bg-light text-dark">@product.Price.ToString("C")</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
                         </div>
                     }
                     else
                     {
-                        <div class="text-center py-4">
-                            <i class="fas fa-box-open fa-3x text-muted mb-3"></i>
-                            <p class="text-muted">No recent products</p>
-                            <a href="@Url.Action("Create", "AdminProducts")" class="btn btn-primary btn-sm">Add a Product</a>
+                        <div class="text-center py-5">
+                            <i class="fas fa-box-open fa-4x text-muted mb-4"></i>
+                            <p class="text-muted mb-4">No products found</p>
+                            <a href="@Url.Action("Create", "AdminProducts")" class="btn btn-primary">
+                                <i class="fas fa-plus me-2"></i>Add Product
+                            </a>
                         </div>
                     }
                 </div>
             </div>
         </div>
 
-        <!-- Recent Categories Section -->
+        <!-- Recent Categories -->
         <div class="col-xl-4">
-            <div class="card recent-section shadow-sm">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h3 class="mb-0"><i class="fas fa-tags me-2"></i>Recent Categories</h3>
-                    <div class="dropdown">
-                        <button class="btn btn-sm btn-light" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="fas fa-ellipsis-v"></i>
-                        </button>
-                        <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" href="#"><i class="fas fa-sync-alt me-2"></i>Refresh</a></li>
-                            <li><a class="dropdown-item" href="#"><i class="fas fa-download me-2"></i>Export</a></li>
-                            <li><hr class="dropdown-divider" /></li>
-                            <li><a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i>Settings</a></li>
-                        </ul>
-                    </div>
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-transparent d-flex justify-content-between align-items-center py-3">
+                    <h5 class="mb-0">
+                        <i class="fas fa-tags me-2 text-warning"></i>Recent Categories
+                    </h5>
+                    <a href="@Url.Action("Index", "AdminCategories")" class="btn btn-sm btn-outline-warning">
+                        View All <i class="fas fa-arrow-right ms-2"></i>
+                    </a>
                 </div>
                 <div class="card-body">
                     @if (Model.RecentCategories.Any())
                     {
-                        <div class="table-responsive">
-                            <table class="table table-borderless">
-                                <tbody>
-                                    @foreach (var category in Model.RecentCategories.Take(5))
-                                    {
-                                        <tr>
-                                            <td>
-                                                <span class="badge bg-warning text-dark">@category.Name</span>
-                                            </td>
-                                            <td class="text-end">
-                                                <small class="text-muted">ID: @category.Id</small>
-                                            </td>
-                                        </tr>
-                                    }
-                                </tbody>
-                            </table>
+                        <div class="list-group list-group-flush">
+                            @foreach (var category in Model.RecentCategories.Take(5))
+                            {
+                                <div class="list-group-item border-0 py-3">
+                                    <div class="d-flex align-items-center">
+                                        <div class="icon-shape bg-light-warning rounded-circle p-3 me-3">
+                                            <i class="fas fa-folder text-warning"></i>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <h6 class="mb-1">@category.Name</h6>
+                                            <small class="text-muted">@category.Products.Count</small>
+                                        </div>
+                                        <div class="text-end">
+                                            <span class="badge bg-light text-dark">ID: @category.Id</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
                         </div>
                     }
                     else
                     {
-                        <div class="text-center py-4">
-                            <i class="fas fa-folder-open fa-3x text-muted mb-3"></i>
-                            <p class="text-muted">No recent categories</p>
-                            <a href="@Url.Action("Create", "AdminCategories")" class="btn btn-warning btn-sm">Add a Category</a>
+                        <div class="text-center py-5">
+                            <i class="fas fa-folder-open fa-4x text-muted mb-4"></i>
+                            <p class="text-muted mb-4">No categories found</p>
+                            <a href="@Url.Action("Create", "AdminCategories")" class="btn btn-warning">
+                                <i class="fas fa-plus me-2"></i>Add Category
+                            </a>
                         </div>
                     }
-                </div>
-                <div class="card-footer bg-transparent text-center">
-                    <a href="@Url.Action("Index", "AdminCategories")" class="btn btn-warning w-100">
-                        <i class="fas fa-external-link-alt me-2"></i>Manage Categories
-                    </a>
                 </div>
             </div>
         </div>
 
-        <!-- Recent Reviews Section -->
+        <!-- Recent Reviews -->
         <div class="col-xl-4">
-            <div class="card recent-section shadow-sm">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h3 class="mb-0"><i class="fas fa-comments me-2"></i>Recent Reviews</h3>
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-transparent d-flex justify-content-between align-items-center py-3">
+                    <h5 class="mb-0">
+                        <i class="fas fa-comments me-2 text-success"></i>Recent Reviews
+                    </h5>
                     <div class="dropdown">
-                        <button class="btn btn-sm btn-light" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="fas fa-ellipsis-v"></i>
+                        <button class="btn btn-sm btn-outline-success" data-bs-toggle="dropdown">
+                            <i class="fas fa-ellipsis-h"></i>
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" href="#"><i class="fas fa-sync-alt me-2"></i>Refresh</a></li>
+                            <li><a class="dropdown-item" href="#"><i class="fas fa-sync me-2"></i>Refresh</a></li>
                             <li><a class="dropdown-item" href="#"><i class="fas fa-download me-2"></i>Export</a></li>
-                            <li><hr class="dropdown-divider" /></li>
-                            <li><a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i>Settings</a></li>
                         </ul>
                     </div>
                 </div>
                 <div class="card-body">
                     @if (Model.RecentReviews.Any())
                     {
-                        <div class="table-responsive">
-                            <table class="table table-borderless">
-                                <tbody>
-                                    @foreach (var review in Model.RecentReviews.Take(5))
-                                    {
-                                        <tr>
-                                            <td>
-                                                <div class="d-flex align-items-center">
-                                                    <div class="avatar bg-info text-white rounded-circle me-2 p-2" style="width:40px; height:40px;">
-                                                        @(string.IsNullOrEmpty(review.UserName) ? "?" : review.UserName.Substring(0, 1))
-                                                    </div>
-                                                    <div>
-                                                        <h5 class="mb-0">
-                                                            @(string.IsNullOrEmpty(review.UserName) ? "Unknown User" : review.UserName)
-                                                        </h5>
-                                                        <small class="text-muted">
-                                                            @(string.IsNullOrEmpty(review.ProductName) ? "Unknown Product" : review.ProductName)
-                                                        </small>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td class="text-end">
-                                                <div class="rating-stars">
-                                                    @for (int i = 1; i <= 5; i++)
+                        <div class="list-group list-group-flush">
+                            @foreach (var review in Model.RecentReviews.Take(5))
+                            {
+                                <div class="list-group-item border-0 py-3">
+                                    <div class="d-flex align-items-start">
+                                        <div class="avatar bg-light-success rounded-circle me-3">
+                                            @(review.UserName?.Substring(0, 1).ToUpper() ?? "U")
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <div class="d-flex justify-content-between mb-2">
+                                                <h6 class="mb-0">@(review.UserName ?? "Anonymous")</h6>
+                                                <div class="rating">
+                                                    @for (int i = 0; i < 5; i++)
                                                     {
-                                                        <i class="@(i <= review.Rating ? "fas fa-star text-warning" : "far fa-star text-muted")"></i>
+                                                        <i class="fas fa-star @(i < review.Rating ? "text-warning" : "text-muted")"></i>
                                                     }
                                                 </div>
-                                            </td>
-                                        </tr>
-                                    }
-                                </tbody>
-                            </table>
+                                            </div>
+                                            <p class="text-muted mb-0">@review.Comment</p>
+                                            <small class="text-muted">On @review.ProductName</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
                         </div>
                     }
                     else
                     {
-                        <div class="text-center py-4">
-                            <i class="fas fa-comment-slash fa-3x text-muted mb-3"></i>
-                            <p class="text-muted">No recent reviews</p>
-                            <a href="@Url.Action("Index", "AdminReviewDashboardController")" class="btn btn-info btn-sm">View All Reviews</a>
+                        <div class="text-center py-5">
+                            <i class="fas fa-comment-slash fa-4x text-muted mb-4"></i>
+                            <p class="text-muted mb-4">No reviews found</p>
+                            <a href="@Url.Action("Index", "AdminReviewDashboard")" class="btn btn-success">
+                                <i class="fas fa-comments me-2"></i>View Reviews
+                            </a>
                         </div>
                     }
-                </div>
-                <div class="card-footer bg-transparent text-center">
-                    <a href="@Url.Action("Index", "AdminReviewDashboardController")" class="btn btn-info w-100">
-                        <i class="fas fa-external-link-alt me-2"></i>Manage Reviews
-                    </a>
                 </div>
             </div>
         </div>
@@ -285,52 +273,119 @@
 
 @section Styles {
     <style>
-        /* Dashboard and Cards */
-        .dashboard .card {
-            border: none;
-            border-radius: 10px;
-        }
-
-        .dashboard .stat-card .icon {
-            font-size: 1.5rem;
-        }
-
         .stat-card {
-            position: relative;
+            border: none;
+            border-radius: 1rem;
             overflow: hidden;
+            transition: transform 0.3s ease;
         }
 
-            .stat-card .trend {
-                position: absolute;
-                bottom: 15px;
-                right: 15px;
-                font-size: 0.9rem;
+            .stat-card:hover {
+                transform: translateY(-5px);
             }
 
-                .stat-card .trend.positive {
-                    color: #28a745;
-                }
-
-                .stat-card .trend.negative {
-                    color: #dc3545;
-                }
-        /* Recent Sections */
-        .recent-section .card-header {
-            background: #f8f9fa;
-            border-bottom: 1px solid #e9ecef;
+        .bg-gradient-users {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
 
-        .recent-section .card-body {
-            padding: 1rem;
+        .bg-gradient-orders {
+            background: linear-gradient(135deg, #2b5876 0%, #4e4376 100%);
         }
 
-        .recent-section .table-borderless td {
-            border: none;
+        .bg-gradient-revenue {
+            background: linear-gradient(135deg, #00b09b 0%, #96c93d 100%);
         }
 
-        .recent-section .avatar {
-            font-size: 1.2rem;
-            line-height: 1;
+        .bg-gradient-pending {
+            background: linear-gradient(135deg, #ff5858 0%, #f09819 100%);
         }
+
+        .icon-circle {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .bg-white-10 {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .flatpickr-input {
+            background-color: #fff !important;
+            border-color: #dee2e6 !important;
+        }
+
+        .list-group-item {
+            transition: background-color 0.2s ease;
+        }
+
+        .avatar {
+            width: 45px;
+            height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+        }
+
+        .rating {
+            font-size: 0.9rem;
+        }
+
+        /* Category Section Styles */
+        .bg-light-warning {
+            background-color: rgba(255, 193, 7, 0.15);
+        }
+
+        .text-warning {
+            color: #ffc107;
+        }
+
+        .btn-outline-warning {
+            border-color: #ffc107;
+            color: #ffc107;
+        }
+
+            .btn-outline-warning:hover {
+                background-color: #ffc107;
+                color: #000;
+            }
+
+        .card {
+            transition: box-shadow 0.3s ease;
+        }
+
+            .card:hover {
+                box-shadow: 0 .5rem 1rem rgba(0,0,0,.15) !important;
+            }
     </style>
+}
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Initialize date picker
+            flatpickr('.flatpickr', {
+                mode: "range",
+                dateFormat: "Y-m-d",
+                defaultDate: "today"
+            });
+
+            // Equal card heights
+            const cards = document.querySelectorAll('.card');
+            let maxHeight = 0;
+
+            cards.forEach(card => {
+                const height = card.offsetHeight;
+                if (height > maxHeight) maxHeight = height;
+            });
+
+            cards.forEach(card => {
+                card.style.minHeight = `${maxHeight}px`;
+            });
+        });
+    </script>
 }

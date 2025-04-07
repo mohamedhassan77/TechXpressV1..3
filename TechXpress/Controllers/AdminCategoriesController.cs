@@ -1,15 +1,14 @@
-﻿using AutoMapper;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.Extensions.Logging;
-using System;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using TechXpress_domain.DTOs;
+using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
+using TechXpress.Models;
 using TechXpress_domain.Entities;
 using TechXpress_domain.Interfaces.Services;
-using TechXpress.Models;
 
 namespace TechXpress.Controllers
 {
@@ -20,37 +19,18 @@ namespace TechXpress.Controllers
         private readonly IMapper _mapper;
         private readonly ILogger<AdminCategoriesController> _logger;
 
-        public AdminCategoriesController(
-            ICategoryService categoryService,
-            IMapper mapper,
-            ILogger<AdminCategoriesController> logger)
+        public AdminCategoriesController(ICategoryService categoryService, IMapper mapper, ILogger<AdminCategoriesController> logger)
         {
             _categoryService = categoryService;
             _mapper = mapper;
             _logger = logger;
         }
 
-        // Helper method to retrieve the admin token from session.
-        private string GetAccessToken()
-        {
-            var token = HttpContext.Session.GetString("AdminToken");
-            if (string.IsNullOrEmpty(token))
-            {
-                _logger.LogWarning("No admin token found in session.");
-            }
-            return token;
-        }
-
+        // GET: /AdminCategories/Index
         public async Task<IActionResult> Index()
         {
             try
             {
-                // (Optional) If your category service requires token forwarding,
-                // you can retrieve it using GetAccessToken() here.
-                var token = GetAccessToken();
-                // For example, if your service had a SetToken method:
-                // _categoryService.SetToken(token);
-
                 var categories = await _categoryService.GetAllCategoriesAsync(1, 100, "name_asc");
                 var model = categories.Select(c => _mapper.Map<CategoryViewModel>(c)).ToList();
                 return View(model);
@@ -63,12 +43,14 @@ namespace TechXpress.Controllers
             }
         }
 
+        // GET: /AdminCategories/Create
         [HttpGet]
         public IActionResult Create()
         {
             return View(new CategoryViewModel());
         }
 
+        // POST: /AdminCategories/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(CategoryViewModel model)
@@ -93,6 +75,7 @@ namespace TechXpress.Controllers
             }
         }
 
+        // GET: /AdminCategories/Edit/{id}
         [HttpGet]
         public async Task<IActionResult> Edit(int id)
         {
@@ -114,6 +97,7 @@ namespace TechXpress.Controllers
             }
         }
 
+        // POST: /AdminCategories/Edit/{id}
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(CategoryViewModel model)
@@ -138,6 +122,7 @@ namespace TechXpress.Controllers
             }
         }
 
+        // POST: /AdminCategories/Delete/{id}
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)

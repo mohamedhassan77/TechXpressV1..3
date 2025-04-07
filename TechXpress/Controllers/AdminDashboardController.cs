@@ -1,12 +1,13 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using System.Net.Http;
+﻿using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
-using TechXpress.Models;
-using Microsoft.Extensions.Configuration;
 using AutoMapper;
-using System.Collections.Generic;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
+using TechXpress.Models;
 using TechXpress_domain.DTOs;
+using System.Collections.Generic;
 
 namespace TechXpress.Controllers
 {
@@ -27,28 +28,19 @@ namespace TechXpress.Controllers
         public async Task<IActionResult> Index()
         {
             var client = _httpClientFactory.CreateClient("AdminApiClient");
-
-            // Retrieve token from session (or wherever you store it)
             var token = HttpContext.Session.GetString("AdminToken");
-
-            // If token is not found, redirect to login.
             if (string.IsNullOrEmpty(token))
             {
                 TempData["ErrorMessage"] = "No token found. Please log in as admin.";
                 return RedirectToAction("Login", "Account");
             }
-            else
-            {
-                // Attach the token to the API request header.
-                client.DefaultRequestHeaders.Authorization =
-                    new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
-            }
+            client.DefaultRequestHeaders.Authorization =
+                new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
 
             var response = await client.GetAsync("api/admin/dashboard");
             if (response.IsSuccessStatusCode)
             {
                 var dashboardData = await response.Content.ReadFromJsonAsync<DashboardData>();
-
                 var viewModel = new AdminDashboardViewModel
                 {
                     TotalUsers = dashboardData.TotalUsers,

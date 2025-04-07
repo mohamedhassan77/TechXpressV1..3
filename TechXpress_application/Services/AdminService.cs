@@ -25,13 +25,28 @@ namespace TechXpress_application.Services
             if (updatedProfile == null)
                 throw new ArgumentNullException(nameof(updatedProfile));
 
-            // Retrieve the existing profile asynchronously
             var existingProfile = await _userProfileService.GetUserProfileByIdAsync(updatedProfile.ApplicationUserId);
             if (existingProfile == null)
                 throw new KeyNotFoundException($"UserProfile for user {updatedProfile.ApplicationUserId} not found.");
 
-            // Call the service update method with the userId and updated profile.
-            await _userProfileService.UpdateUserProfileAsync(updatedProfile.ApplicationUserId, updatedProfile);
+            existingProfile.PhoneNumber = updatedProfile.PhoneNumber;
+            existingProfile.DateOfBirth = updatedProfile.DateOfBirth;
+            existingProfile.UpdatedAt = DateTime.UtcNow;
+            existingProfile.Addresses = updatedProfile.Addresses;
+            existingProfile.Gender = updatedProfile.Gender;
+
+            if (existingProfile.ApplicationUser != null)
+            {
+                existingProfile.ApplicationUser.PhoneNumber = updatedProfile.PhoneNumber;
+                existingProfile.ApplicationUser.Addresses = updatedProfile.Addresses;
+            }
+
+            await _userProfileService.UpdateUserProfileAsync(updatedProfile.ApplicationUserId, existingProfile);
+        }
+
+        public async Task<UserProfile?> GetUserProfileByIdAsync(string id)
+        {
+            return await _userProfileService.GetUserProfileByIdAsync(id);
         }
 
         public async Task<IEnumerable<UserProfile>> GetAllUsersAsync()
@@ -45,13 +60,31 @@ namespace TechXpress_application.Services
         public async Task<bool> DeleteUserProfileAsync(string userId)
         {
             _logger.LogDebug("Deleting user profile with ID: {UserId}", userId);
+
+            var user = await _userProfileService.GetUserProfileByIdAsync(userId);
+            if (user == null)
+            {
+                _logger.LogWarning("User profile with ID {UserId} not found.", userId);
+                return false;
+            }
+
             await _userProfileService.DeleteUserProfileAsync(userId);
+            _logger.LogInformation("User profile with ID {UserId} deleted successfully.", userId);
+
             return true;
         }
 
         public async Task<bool> BlockUserAsync(string userId)
         {
             _logger.LogDebug("Blocking user with ID: {UserId}", userId);
+
+            var user = await _userProfileService.GetUserProfileByIdAsync(userId);
+            if (user == null)
+            {
+                _logger.LogWarning("Attempted to block non-existent user ID: {UserId}", userId);
+                return false;
+            }
+
             return await _userProfileService.BlockUserAsync(userId);
         }
 
@@ -65,8 +98,31 @@ namespace TechXpress_application.Services
 
         public async Task<Order?> GetOrderByIdAsync(int orderId)
         {
-            _logger.LogDebug("Getting order by ID: {OrderId}", orderId);
-            return await _orderService.GetOrderByIdAsync(orderId);
+            try
+            {
+                _logger.LogDebug("Getting order by ID: {OrderId}", orderId);
+                var order = await _orderService.GetOrderByIdAsync(orderId);
+
+                if (order == null)
+                {
+                    _logger.LogWarning("Order with ID {OrderId} not found.", orderId);
+                }
+
+                return order;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving order with ID {OrderId}", orderId);
+                throw;
+            }
+        }
+
+        public async Task AddUserProfileAsync(UserProfile userProfile)
+        {
+            if (userProfile == null)
+                throw new ArgumentNullException(nameof(userProfile));
+
+            await _userProfileService.AddUserProfileAsync(userProfile);
         }
     }
 }

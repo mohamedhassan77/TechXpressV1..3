@@ -68,12 +68,16 @@ namespace TechXpress_application.Mappings
             // -----------------------------
             // Order Mappings
             // -----------------------------
-                 CreateMap<Order, OrderDto>()
-                .ForMember(dest => dest.orderId, opt => opt.MapFrom(src => src.Id))
-                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()))
-                .ForMember(dest => dest.ItemsCount, opt => opt.MapFrom(src => src.OrderItems != null ? src.OrderItems.Count : 0))
-                .ForMember(dest => dest.OrderDate, opt => opt.MapFrom(src => src.OrderDate))
-                .ForMember(dest => dest.TotalPrice, opt => opt.MapFrom(src => src.TotalPrice));
+            CreateMap<Order, OrderDto>()
+           .ForMember(dest => dest.orderId, opt => opt.MapFrom(src => src.Id))
+           .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()))
+           .ForMember(dest => dest.ItemsCount, opt => opt.MapFrom(src => src.OrderItems != null ? src.OrderItems.Count : 0))
+           .ForMember(dest => dest.OrderDate, opt => opt.MapFrom(src => src.OrderDate))
+           .ForMember(dest => dest.TotalPrice, opt => opt.MapFrom(src => src.TotalPrice))
+           .ForMember(dest => dest.PaymentMethod, opt => opt.MapFrom(src => src.PaymentMethod))
+           .ForMember(dest => dest.OrderNumber, opt => opt.MapFrom(src => src.OrderNumber))
+           .ForMember(dest => dest.ItemsCount, opt => opt.MapFrom(src => src.OrderItems.Count))
+           .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.ApplicationUser.Id));
         }
     }
 }

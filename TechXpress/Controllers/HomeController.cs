@@ -50,12 +50,12 @@ namespace TechXpress.Controllers
                     SKU = p.SKU,
                     Specifications = p.Specifications,
                     OldPrice = p.OldPrice,
-                     ProductImages = (p.ProductImages != null && p.ProductImages.Any())
+                    ProductImages = (p.ProductImages != null && p.ProductImages.Any())
                         ? p.ProductImages.Select(pi => pi.ImageUrl).ToList()
                         : new List<string> { p.ImageUrl },
                     AverageRating = (p.Reviews.Any()) ? p.Reviews.Average(r => r.Rating) : 0,
                     ReviewCount = p.Reviews?.Count() ?? 0,
-                 }).ToList();
+                }).ToList();
 
                 // Get categories for navigation.
                 var categories = await _categoryService.GetAllCategoriesAsync(1, 20, "name_asc");
@@ -67,8 +67,8 @@ namespace TechXpress.Controllers
                     ImageUrl = c.ImageUrl,
                     CreatedAt = c.CreatedAt,
                     UpdatedAt = c.UpdatedAt
-                    
-                    
+
+
 
                 }).ToList();
 
@@ -83,14 +83,22 @@ namespace TechXpress.Controllers
                     FeaturedProductsTotalPages = (int)Math.Ceiling((double)featuredProducts.ToList().Count / pageSize)
                 };
 
-                 ViewData["Categories"] = categoryViewModels;
-                 return View(viewModel);
+                ViewData["Categories"] = categoryViewModels;
+                return View(viewModel);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error loading Home page");
                 return View("Error");
             }
+        }
+
+
+
+        public async Task<IActionResult> Privacy()
+        {
+
+            return View();
         }
     }
 }

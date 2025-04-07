@@ -97,8 +97,9 @@ builder.Services.AddSession(options =>
 // Register a named HttpClient for admin API calls, using the BaseUrl from configuration.
 builder.Services.AddHttpClient("AdminApiClient", client =>
 {
-    client.BaseAddress = new Uri(builder.Configuration["ApiSettings:BaseUrl"]); // Ensure this value is set correctly in appsettings.json (e.g., "https://localhost:7276/")
+    client.BaseAddress = new Uri(builder.Configuration["ApiSettings:BaseUrl"]); 
 });
+
 
 // Add HTTP context accessor (required for session access in controllers)
 builder.Services.AddHttpContextAccessor();
